@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Library Management System{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <span class="brand">📚 LibraryMS</span>
+    <div class="nav-links" id="navLinks">
+      <a href="/">Dashboard</a>
+      <a href="/books">Books</a>
+      <a href="/borrows">My Borrows</a>
+      <a href="#" id="logoutBtn" style="display:none;">Logout</a>
+      <a href="/login" id="loginLink">Login</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 Library Management System</p>
+  </footer>
+
+  <script src="/static/js/main.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}My Borrows — LibraryMS{% endblock %}
+
+{% block content %}
+<h1>My Borrows</h1>
+<div id="alertBox" class="alert" style="display:none;"></div>
+
+<table class="table" id="borrowsTable">
+  <thead>
+    <tr>
+      <th>ID</th><th>Book</th><th>Borrowed</th><th>Due</th>
+      <th>Returned</th><th>Status</th><th>Fine</th><th>Action</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+<div class="pagination" id="paginationControls"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const token = localStorage.getItem('access_token');
+if (!token) window.location.href = '/login';
+
+function showAlert(msg, type = 'error') {
+  const box = document.getElementById('alertBox');
+  box.textContent = msg; box.className = `alert alert-${type}`;
+  box.style.display = 'block';
+  setTimeout(() => box.style.display = 'none', 4000);
+}
+
+function fmtDate(iso) { return iso ? iso.split('T')[0] : '—'; }
+
+async function loadBorrows(page = 1) {
+  const res = await fetch(`/api/borrows/my?page=${page}&per_page=10`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const data = await res.json();
+  if (!res.ok) { showAlert(data.message); return; }
+
+  const tbody = document.querySelector('#borrowsTable tbody');
+  tbody.innerHTML = '';
+  data.data.forEach(r => {
+    const fineText = r.fine
+      ? `$${r.fine.amount.toFixed(2)} ${r.fine.is_paid ? '(paid)' : '(unpaid)'}`
+      : '—';
+    const actionBtn = r.status === 'borrowed'
+      ? `<button class="btn btn-sm btn-primary" onclick="returnBook(${r.id})">Return</button>`
+      : '—';
+    const tr = document.createElement('tr');
+    const statusClass = r.status === 'overdue' ? 'status-overdue' :
+                        r.status === 'returned' ? 'status-returned' : 'status-borrowed';
+    tr.innerHTML = `<td>${r.id}</td><td>${r.book_title}</td><td>${fmtDate(r.borrow_date)}</td>
+      <td>${fmtDate(r.due_date)}</td><td>${fmtDate(r.return_date)}</td>
+      <td><span class="badge ${statusClass}">${r.status}</span></td>
+      <td>${fineText}</td><td>${actionBtn}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  const meta = data.meta;
+  const ctrl = document.getElementById('paginationControls');
+  ctrl.innerHTML = '';
+  if (meta.has_prev) ctrl.innerHTML += `<button class="btn btn-sm" onclick="loadBorrows(${meta.page-1})">‹ Prev</button> `;
+  ctrl.innerHTML += `<span>Page ${meta.page} / ${meta.total_pages}</span>`;
+  if (meta.has_next) ctrl.innerHTML += ` <button class="btn btn-sm" onclick="loadBorrows(${meta.page+1})">Next ›</button>`;
+}
+
+async function returnBook(borrowId) {
+  if (!confirm('Return this book?')) return;
+  const res = await fetch(`/api/borrows/${borrowId}/return`, {
+    method: 'PATCH', headers: { Authorization: `Bearer ${token}` }
+  });
+  const data = await res.json();
+  if (res.ok) {
+    const fine = data.data.fine;
+    const msg = fine && fine.amount > 0
+      ? `Returned! Fine: $${fine.amount.toFixed(2)} for ${fine.overdue_days} overdue day(s).`
+      : 'Book returned successfully.';
+    showAlert(msg, fine ? 'warning' : 'success');
+    loadBorrows();
+  } else showAlert(data.message);
+}
+
+loadBorrows();
+</script>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Books — LibraryMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Book Catalogue</h1>
+  <button class="btn btn-primary" id="addBookBtn" style="display:none;">+ Add Book</button>
+</div>
+
+<div class="search-bar">
+  <input type="text" id="searchInput" placeholder="Search by title or author…" />
+  <input type="text" id="categoryInput" placeholder="Category filter" />
+  <button class="btn btn-secondary" id="searchBtn">Search</button>
+</div>
+
+<div id="alertBox" class="alert" style="display:none;"></div>
+
+<table class="table" id="booksTable">
+  <thead>
+    <tr>
+      <th>ID</th><th>Title</th><th>Author</th><th>Category</th>
+      <th>Available</th><th>Total</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div class="pagination" id="paginationControls"></div>
+
+<!-- Add/Edit modal -->
+<div class="modal" id="bookModal" style="display:none;">
+  <div class="modal-content">
+    <span class="modal-close" id="modalClose">&times;</span>
+    <h2 id="modalTitle">Add Book</h2>
+    <form id="bookForm">
+      <input type="hidden" id="bookId" />
+      <div class="form-group"><label>Title</label>
+        <input type="text" id="bTitle" required /></div>
+      <div class="form-group"><label>Author</label>
+        <input type="text" id="bAuthor" required /></div>
+      <div class="form-group"><label>ISBN</label>
+        <input type="text" id="bIsbn" /></div>
+      <div class="form-group"><label>Category</label>
+        <input type="text" id="bCategory" /></div>
+      <div class="form-group"><label>Total Quantity</label>
+        <input type="number" id="bQty" min="1" value="1" /></div>
+      <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const token = localStorage.getItem('access_token');
+if (!token) window.location.href = '/login';
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+const isAdmin = ['admin','librarian'].includes(user.role);
+if (isAdmin) document.getElementById('addBookBtn').style.display = 'inline-block';
+
+let currentPage = 1;
+
+function showAlert(msg, type = 'error') {
+  const box = document.getElementById('alertBox');
+  box.textContent = msg; box.className = `alert alert-${type}`;
+  box.style.display = 'block';
+  setTimeout(() => box.style.display = 'none', 4000);
+}
+
+async function loadBooks(page = 1) {
+  const q = document.getElementById('searchInput').value;
+  const cat = document.getElementById('categoryInput').value;
+  const res = await fetch(
+    `/api/books/?q=${encodeURIComponent(q)}&category=${encodeURIComponent(cat)}&page=${page}&per_page=10`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  const data = await res.json();
+  if (!res.ok) { showAlert(data.message); return; }
+
+  const tbody = document.querySelector('#booksTable tbody');
+  tbody.innerHTML = '';
+  data.data.forEach(b => {
+    const actions = isAdmin
+      ? `<button class="btn btn-sm" onclick="editBook(${b.id})">Edit</button>
+         <button class="btn btn-sm btn-danger" onclick="deleteBook(${b.id})">Delete</button>`
+      : `<button class="btn btn-sm btn-primary" onclick="borrowBook(${b.id})" ${b.is_available ? '' : 'disabled'}>
+           ${b.is_available ? 'Borrow' : 'Unavailable'}</button>`;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${b.id}</td><td>${b.title}</td><td>${b.author}</td>
+      <td>${b.category || '—'}</td><td>${b.available_quantity}</td><td>${b.total_quantity}</td>
+      <td>${actions}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Pagination
+  const meta = data.meta;
+  const ctrl = document.getElementById('paginationControls');
+  ctrl.innerHTML = '';
+  if (meta.has_prev) ctrl.innerHTML += `<button class="btn btn-sm" onclick="loadBooks(${meta.page-1})">‹ Prev</button> `;
+  ctrl.innerHTML += `<span>Page ${meta.page} / ${meta.total_pages}</span>`;
+  if (meta.has_next) ctrl.innerHTML += ` <button class="btn btn-sm" onclick="loadBooks(${meta.page+1})">Next ›</button>`;
+}
+
+document.getElementById('searchBtn').addEventListener('click', () => loadBooks(1));
+loadBooks();
+
+// Borrow
+async function borrowBook(bookId) {
+  const res = await fetch('/api/borrows/', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ book_id: bookId })
+  });
+  const data = await res.json();
+  if (res.ok) { showAlert('Book borrowed! Due: ' + data.data.due_date.split('T')[0], 'success'); loadBooks(); }
+  else showAlert(data.message);
+}
+
+// Delete
+async function deleteBook(bookId) {
+  if (!confirm('Delete this book?')) return;
+  const res = await fetch(`/api/books/${bookId}`, {
+    method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
+  });
+  const data = await res.json();
+  if (res.ok) { showAlert('Deleted.', 'success'); loadBooks(); }
+  else showAlert(data.message);
+}
+
+// Modal helpers
+function openModal(title) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('bookModal').style.display = 'flex';
+}
+document.getElementById('modalClose').addEventListener('click', () => {
+  document.getElementById('bookModal').style.display = 'none';
+});
+document.getElementById('addBookBtn').addEventListener('click', () => {
+  document.getElementById('bookId').value = '';
+  document.getElementById('bookForm').reset();
+  openModal('Add Book');
+});
+
+function editBook(id) {
+  fetch(`/api/books/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+    .then(r => r.json()).then(data => {
+      const b = data.data;
+      document.getElementById('bookId').value   = b.id;
+      document.getElementById('bTitle').value   = b.title;
+      document.getElementById('bAuthor').value  = b.author;
+      document.getElementById('bIsbn').value    = b.isbn || '';
+      document.getElementById('bCategory').value= b.category || '';
+      document.getElementById('bQty').value     = b.total_quantity;
+      openModal('Edit Book');
+    });
+}
+
+document.getElementById('bookForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const id = document.getElementById('bookId').value;
+  const payload = {
+    title: document.getElementById('bTitle').value,
+    author: document.getElementById('bAuthor').value,
+    isbn: document.getElementById('bIsbn').value || null,
+    category: document.getElementById('bCategory').value || null,
+    total_quantity: parseInt(document.getElementById('bQty').value)
+  };
+  const url = id ? `/api/books/${id}` : '/api/books/';
+  const method = id ? 'PUT' : 'POST';
+  const res = await fetch(url, {
+    method, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (res.ok) {
+    document.getElementById('bookModal').style.display = 'none';
+    showAlert(id ? 'Book updated.' : 'Book added.', 'success');
+    loadBooks();
+  } else showAlert(data.message);
+});
+</script>
+{% endblock %}
