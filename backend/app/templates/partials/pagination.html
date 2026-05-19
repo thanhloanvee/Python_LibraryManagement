@@ -1,0 +1,53 @@
+{% if total > page_size %}
+{% set total_pages = ((total - 1) // page_size) + 1 %}
+{% set prev_page = page - 1 %}
+{% set next_page = page + 1 %}
+
+<div class="flex items-center justify-between px-1 py-3">
+  <p class="text-sm text-gray-600">
+    Showing <span class="font-medium">{{ (page - 1) * page_size + 1 }}</span>–<span class="font-medium">{{ [page * page_size, total] | min }}</span>
+    of <span class="font-medium">{{ total }}</span> results
+  </p>
+
+  <div class="flex items-center gap-1">
+    {% if page > 1 %}
+    <a href="?{{ current_query }}&page={{ prev_page }}"
+      class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </a>
+    {% else %}
+    <span class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-sm text-gray-300 cursor-not-allowed">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </span>
+    {% endif %}
+
+    {% for p in range([1, page - 2] | max, [total_pages + 1, page + 3] | min) %}
+    {% if p == page %}
+    <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-brand-600 text-sm font-medium text-white">{{ p }}</span>
+    {% else %}
+    <a href="?{{ current_query }}&page={{ p }}"
+      class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 transition-colors">{{ p }}</a>
+    {% endif %}
+    {% endfor %}
+
+    {% if page < total_pages %}
+    <a href="?{{ current_query }}&page={{ next_page }}"
+      class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </a>
+    {% else %}
+    <span class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-sm text-gray-300 cursor-not-allowed">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </span>
+    {% endif %}
+  </div>
+</div>
+{% endif %}

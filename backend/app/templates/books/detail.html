@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-2 text-sm text-gray-500">
+  <a href="/" class="hover:text-gray-700">Home</a>
+  <span>/</span>
+  <a href="/books" class="hover:text-gray-700">Books</a>
+  <span>/</span>
+  <span class="text-gray-900 font-medium truncate max-w-xs">{{ book.title }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+  <div class="flex flex-col gap-8 lg:flex-row lg:gap-12">
+
+    <!-- Cover + actions -->
+    <div class="lg:w-64 shrink-0">
+      <div class="aspect-[3/4] w-full overflow-hidden rounded-xl bg-gray-100 shadow-md">
+        {% if book.cover_image %}
+        <img src="{{ book.cover_image }}" alt="{{ book.title }}" class="h-full w-full object-cover" />
+        {% else %}
+        <div class="flex h-full w-full items-center justify-center">
+          <svg class="h-24 w-24 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13..." />
+          </svg>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Availability badge -->
+      <div class="mt-4 text-center">
+        {% if book.is_available %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+          <span class="h-2 w-2 rounded-full bg-green-500"></span>
+          {{ book.available_quantity }} of {{ book.quantity }} available
+        </span>
+        {% else %}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-800">
+          <span class="h-2 w-2 rounded-full bg-red-500"></span>
+          Not Available
+        </span>
+        {% endif %}
+      </div>
+
+      <!-- Action buttons -->
+      <div class="mt-4 space-y-2">
+        {% if current_user %}
+          {% if current_user.role in ['librarian', 'admin'] %}
+          <a href="/admin/borrowings/issue?book_id={{ book.id }}"
+            class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 transition-colors">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Issue Book
+          </a>
+          {% elif has_active_borrow %}
+          <div class="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-500 cursor-not-allowed">
+            Already Borrowed
+          </div>
+          <form method="post" action="/reader/borrowings/{{ has_active_borrow }}/renew">
+            <button type="submit"
+              class="flex w-full items-center justify-center gap-2 rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-semibold text-brand-600 hover:bg-brand-50 transition-colors">
+              Renew Borrowing
+            </button>
+          </form>
+          {% endif %}
+        {% else %}
+        <a href="/login?next=/books/{{ book.id }}"
+          class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 transition-colors">
+          Login to Borrow
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Book details -->
+    <div class="flex-1 min-w-0">
+      <div>
+        {% if book.category %}
+        <span class="inline-block rounded-full bg-brand-100 px-3 py-0.5 text-xs font-medium text-brand-700 mb-3">
+          {{ book.category.name }}
+        </span>
+        {% endif %}
+        <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">{{ book.title }}</h1>
+        <p class="mt-1 text-lg text-gray-600">by {{ book.author }}</p>
+      </div>
+
+      <!-- Metadata grid -->
+      <dl class="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
+        {% if book.isbn %}
+        <div>
+          <dt class="text-gray-500 font-medium">ISBN</dt>
+          <dd class="text-gray-900 font-mono">{{ book.isbn }}</dd>
+        </div>
+        {% endif %}
+        {% if book.publisher %}
+        <div>
+          <dt class="text-gray-500 font-medium">Publisher</dt>
+          <dd class="text-gray-900">{{ book.publisher }}</dd>
+        </div>
+        {% endif %}
+        {% if book.publication_year %}
+        <div>
+          <dt class="text-gray-500 font-medium">Year</dt>
+          <dd class="text-gray-900">{{ book.publication_year }}</dd>
+        </div>
+        {% endif %}
+        <div>
+          <dt class="text-gray-500 font-medium">Language</dt>
+          <dd class="text-gray-900">{{ 'Vietnamese' if book.language == 'vi' else 'English' }}</dd>
+        </div>
+        <div>
+          <dt class="text-gray-500 font-medium">Status</dt>
+          <dd>
+            <span class="capitalize inline-block rounded-full px-2 py-0.5 text-xs font-medium
+              {% if book.status == 'available' %}bg-green-100 text-green-700
+              {% elif book.status == 'damaged' %}bg-amber-100 text-amber-700
+              {% else %}bg-red-100 text-red-700{% endif %}">
+              {{ book.status }}
+            </span>
+          </dd>
+        </div>
+        {% if avg_rating %}
+        <div>
+          <dt class="text-gray-500 font-medium">Rating</dt>
+          <dd class="flex items-center gap-1">
+            <span class="text-amber-400">★</span>
+            <span class="text-gray-900 font-medium">{{ "%.1f"|format(avg_rating) }}</span>
+            <span class="text-gray-400 text-xs">({{ reviews|length }} reviews)</span>
+          </dd>
+        </div>
+        {% endif %}
+      </dl>
+
+      <!-- Description -->
+      {% if book.description %}
+      <div class="mt-6">
+        <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Description</h3>
+        <p class="text-gray-600 leading-relaxed">{{ book.description }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Reviews section -->
+      <div class="mt-8 border-t border-gray-100 pt-6">
+        <h3 class="text-base font-semibold text-gray-900 mb-4">
+          Reviews
+          {% if reviews %}
+          <span class="ml-2 text-sm font-normal text-gray-400">({{ reviews|length }})</span>
+          {% endif %}
+        </h3>
+
+        <!-- Add review form -->
+        {% if current_user and can_review and not already_reviewed %}
+        <form method="post" action="/api/v1/reviews"
+          class="mb-6 rounded-xl bg-gray-50 border border-gray-200 p-4 space-y-3">
+          <input type="hidden" name="book_id" value="{{ book.id }}" />
+          <div class="flex items-center gap-2" x-data="{ rating: 5 }">
+            <span class="text-sm font-medium text-gray-700">Rating:</span>
+            <div class="flex gap-1">
+              {% for i in range(1, 6) %}
+              <label>
+                <input type="radio" name="rating" value="{{ i }}" class="sr-only" x-model="rating" />
+                <svg @click="rating = {{ i }}"
+                  :class="rating >= {{ i }} ? 'text-amber-400' : 'text-gray-300'"
+                  class="h-6 w-6 cursor-pointer transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          <textarea name="comment" rows="2" placeholder="Share your thoughts…"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition resize-none"></textarea>
+          <button type="submit"
+            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors">
+            Submit Review
+          </button>
+        </form>
+        {% endif %}
+
+        <!-- Review list -->
+        {% if reviews %}
+        <div class="space-y-4">
+          {% for review in reviews %}
+          <div class="rounded-xl bg-white border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700 uppercase">
+                  {{ review.user.full_name[:2] if review.user else '??' }}
+                </span>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">{{ review.user.full_name if review.user else 'Anonymous' }}</p>
+                  <p class="text-xs text-gray-400">{{ review.created_at.strftime('%d %b %Y') }}</p>
+                </div>
+              </div>
+              <div class="flex text-amber-400">
+                {% for i in range(review.rating) %}<span>★</span>{% endfor %}
+                {% for i in range(5 - review.rating) %}<span class="text-gray-200">★</span>{% endfor %}
+              </div>
+            </div>
+            {% if review.comment %}
+            <p class="mt-2 text-sm text-gray-600">{{ review.comment }}</p>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-400 text-center py-6">No reviews yet. Be the first to review!</p>
+        {% endif %}
+      </div>
+
+    </div>{# end book details #}
+  </div>{# end flex #}
+</div>
+{% endblock %}

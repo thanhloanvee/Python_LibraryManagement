@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}403 Forbidden{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center py-20 text-center">
+  <div class="flex h-24 w-24 items-center justify-center rounded-full bg-red-100 mb-6">
+    <svg class="h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+    </svg>
+  </div>
+  <h1 class="text-6xl font-black text-gray-200 mb-2">403</h1>
+  <h2 class="text-xl font-bold text-gray-800 mb-2">Access Denied</h2>
+  <p class="text-gray-500 max-w-sm">You don't have permission to view this page.</p>
+  <a href="/"
+    class="mt-8 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-700 transition-colors">
+    Go Home
+  </a>
+</div>
+{% endblock %}

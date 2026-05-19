@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Borrowing History{% endblock %}
+
+{% block breadcrumb %}
+<h1 class="text-lg font-semibold text-gray-800">Borrowing History</h1>
+{% endblock %}
+
+{% block content %}
+<div class="overflow-hidden rounded-xl bg-white border border-gray-100 shadow-sm">
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-100 text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Book</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Borrowed</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Returned</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Fine</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        {% for b in borrowings %}
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="px-4 py-3">
+            <a href="/books/{{ b.book_id }}" class="font-medium text-gray-900 hover:text-brand-600 line-clamp-1">
+              {{ b.book.title if b.book else '—' }}
+            </a>
+            <p class="text-xs text-gray-400">{{ b.book.author if b.book else '' }}</p>
+          </td>
+          <td class="px-4 py-3 text-gray-600">{{ b.borrow_date.strftime('%d/%m/%Y') }}</td>
+          <td class="px-4 py-3 text-gray-600">
+            {{ b.return_date.strftime('%d/%m/%Y') if b.return_date else '—' }}
+          </td>
+          <td class="px-4 py-3">
+            <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize
+              {% if b.status == 'returned' %}bg-green-100 text-green-700
+              {% elif b.status == 'borrowed' %}bg-amber-100 text-amber-700
+              {% else %}bg-red-100 text-red-700{% endif %}">
+              {{ b.status }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            {% if b.fine_amount and b.fine_amount > 0 %}
+            <span class="{% if b.fine_paid %}text-gray-400 line-through{% else %}text-red-600 font-medium{% endif %}">
+              {{ "{:,.0f}".format(b.fine_amount) }}đ
+            </span>
+            {% if b.fine_paid %}
+            <span class="ml-1 text-xs text-green-600">PAID</span>
+            {% endif %}
+            {% else %}
+            <span class="text-gray-300">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-400">No borrowing history yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% set current_query = request.url.query | replace('&page=' + page|string, '') | replace('page=' + page|string, '') | trim('&') %}
+  <div class="px-4 border-t border-gray-100">
+    {% include "partials/pagination.html" %}
+  </div>
+</div>
+{% endblock %}

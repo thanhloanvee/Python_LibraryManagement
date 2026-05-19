@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}My Books{% endblock %}
+
+{% block breadcrumb %}
+<h1 class="text-lg font-semibold text-gray-800">My Current Books</h1>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-5">
+
+  {% if borrowings %}
+  <div class="overflow-hidden rounded-xl bg-white border border-gray-100 shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-100 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Book</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Borrowed</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Due Date</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Renewals</th>
+            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          {% for b in borrowings %}
+          {% set overdue = b.is_overdue %}
+          <tr class="hover:bg-gray-50 transition-colors {% if overdue %}bg-red-50/40{% endif %}">
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-3">
+                {% if b.book and b.book.cover_image %}
+                <img src="{{ b.book.cover_image }}" alt="" class="h-10 w-8 rounded object-cover shrink-0" />
+                {% endif %}
+                <div class="min-w-0">
+                  <a href="/books/{{ b.book_id }}" class="font-medium text-gray-900 hover:text-brand-600 line-clamp-1">
+                    {{ b.book.title if b.book else '—' }}
+                  </a>
+                  <p class="text-xs text-gray-400 truncate">{{ b.book.author if b.book else '' }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-gray-600">{{ b.borrow_date.strftime('%d/%m/%Y') }}</td>
+            <td class="px-4 py-3">
+              <span class="{% if overdue %}text-red-600 font-semibold{% else %}text-gray-700{% endif %}">
+                {{ b.due_date.strftime('%d/%m/%Y') if b.due_date else '—' }}
+              </span>
+              {% if overdue %}
+              <span class="block text-xs text-red-500">{{ b.days_overdue }} day{{ 's' if b.days_overdue != 1 else '' }} overdue</span>
+              {% elif b.days_until_due is not none and b.days_until_due <= 3 %}
+              <span class="block text-xs text-amber-500">{{ b.days_until_due }} day{{ 's' if b.days_until_due != 1 else '' }} left</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-3 text-gray-600">
+              {{ b.renewed_count }} / 2
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex items-center justify-end gap-2">
+                {% if b.renewed_count < 2 and not overdue %}
+                <form method="post" action="/reader/borrowings/{{ b.id }}/renew">
+                  <button type="submit"
+                    class="rounded-md px-2 py-1 text-xs font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors">
+                    Renew
+                  </button>
+                </form>
+                {% elif b.renewed_count >= 2 %}
+                <span class="text-xs text-gray-400 italic">Max renewals</span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% set current_query = request.url.query | replace('&page=' + page|string, '') | replace('page=' + page|string, '') | trim('&') %}
+    <div class="px-4 border-t border-gray-100">
+      {% include "partials/pagination.html" %}
+    </div>
+  </div>
+  {% else %}
+  <div class="rounded-xl bg-white border border-gray-100 p-12 text-center text-gray-400">
+    <svg class="mx-auto mb-4 h-14 w-14 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13..." />
+    </svg>
+    <p class="font-medium">You don't have any active borrowings.</p>
+    <a href="/books" class="mt-3 inline-block text-sm text-brand-600 hover:text-brand-700 font-medium">Browse Books →</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

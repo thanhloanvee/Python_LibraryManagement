@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Issue Book{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-2 text-sm text-gray-500">
+  <a href="/admin/borrowings" class="hover:text-gray-700">Borrowings</a>
+  <span>/</span>
+  <span class="text-gray-900 font-medium">Issue Book</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+  <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 sm:p-8">
+    <h2 class="text-xl font-bold text-gray-900 mb-6">Issue Book to Reader</h2>
+
+    {% if error %}
+    <div class="mb-5 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="/admin/borrowings/issue" class="space-y-5">
+
+      <!-- Reader ID -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Reader User ID <span class="text-red-500">*</span>
+        </label>
+        <input name="user_id" type="number" min="1" required
+          placeholder="Enter reader's user ID"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition" />
+        <p class="mt-1 text-xs text-gray-400">
+          Find user IDs on the <a href="/admin/users" class="text-brand-600 hover:underline">Users page</a>.
+        </p>
+      </div>
+
+      <!-- Book -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Book ID <span class="text-red-500">*</span>
+        </label>
+        {% if preselected_book %}
+        <div class="mb-2 rounded-lg bg-brand-50 border border-brand-200 p-3 flex items-center gap-3">
+          {% if preselected_book.cover_image %}
+          <img src="{{ preselected_book.cover_image }}" alt="" class="h-12 w-9 rounded object-cover" />
+          {% endif %}
+          <div>
+            <p class="font-medium text-brand-900">{{ preselected_book.title }}</p>
+            <p class="text-xs text-brand-600">{{ preselected_book.author }} · {{ preselected_book.available_quantity }} available</p>
+          </div>
+        </div>
+        <input type="hidden" name="book_id" value="{{ preselected_book.id }}" />
+        <a href="/admin/borrowings/issue" class="text-xs text-brand-600 hover:underline">Change book</a>
+        {% else %}
+        <input name="book_id" type="number" min="1" required
+          placeholder="Enter book ID"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition" />
+        <p class="mt-1 text-xs text-gray-400">
+          Find book IDs on the <a href="/admin/books" class="text-brand-600 hover:underline">Books page</a>,
+          or click "Issue Book" from the book detail page.
+        </p>
+        {% endif %}
+      </div>
+
+      <!-- Due date -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Due Date <span class="text-red-500">*</span></label>
+        <input name="due_date" type="date" required value="{{ due_default }}"
+          min="{{ due_default }}"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition" />
+      </div>
+
+      <!-- Librarian notes -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
+        <textarea name="librarian_notes" rows="2" placeholder="Any notes for this borrowing…"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition resize-none"></textarea>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit"
+          class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Issue Book
+        </button>
+        <a href="/admin/borrowings"
+          class="inline-flex items-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+          Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
