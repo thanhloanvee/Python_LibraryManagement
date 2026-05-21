@@ -1,7 +1,8 @@
 """Public site routes: home, book browsing/detail."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi.responses import RedirectResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,11 +10,12 @@ from app.db.session import get_db
 from app.models.book import Book, BookStatus
 from app.models.category import Category
 from app.schemas.book import BookFilter
+from app.schemas.review import ReviewCreate
 from app.services.book import BookService
 from app.services.category import CategoryService
 from app.services.review import ReviewService
-from app.web.dependencies import get_optional_web_user
-from app.web.templating import render
+from app.web.dependencies import get_optional_web_user, require_reader
+from app.web.templating import render, set_flash
 
 router = APIRouter(tags=["Web Site"])
 
@@ -58,20 +60,19 @@ async def home(
 async def books_list(
     request: Request,
     search: str = "",
-    category_id: int | None = None,
-    status: str | None = None,
+    category_id: str | None = None,
     language: str | None = None,
     page: int = 1,
     db: AsyncSession = Depends(get_db),
     user=Depends(get_optional_web_user),
 ):
     """Public book browsing."""
-    from app.models.book import BookStatus as BS, BookLanguage
+    from app.models.book import BookLanguage
 
+    cat_id: int | None = int(category_id) if category_id else None
     filters = BookFilter(
         search=search or None,
-        category_id=category_id,
-        status=BS(status) if status else None,
+        category_id=cat_id,
         language=BookLanguage(language) if language else None,
     )
     books, total = await BookService(db).list_books(filters, page=page, page_size=12)
@@ -85,8 +86,7 @@ async def books_list(
         "categories": categories,
         "filters": {
             "search": search,
-            "category_id": category_id,
-            "status": status,
+            "category_id": cat_id,
             "language": language,
         },
     }
@@ -95,6 +95,27 @@ async def books_list(
     if request.headers.get("HX-Request"):
         return render("partials/book_grid.html", ctx, request)
     return render("books/index.html", ctx, request)
+
+
+@router.post("/books/{book_id}/review")
+async def submit_review(
+    book_id: int,
+    request: Request,
+    rating: int = Form(...),
+    comment: str = Form(""),
+    db: AsyncSession = Depends(get_db),
+    user=Depends(require_reader),
+):
+    """Handle review form submission from the book detail page."""
+    try:
+        data = ReviewCreate(book_id=book_id, rating=rating, comment=comment or None)
+        await ReviewService(db).create_review(data, user.id)
+        response = RedirectResponse(url=f"/books/{book_id}", status_code=303)
+        set_flash(response, "Review submitted successfully!", "success")
+    except HTTPException as exc:
+        response = RedirectResponse(url=f"/books/{book_id}", status_code=303)
+        set_flash(response, exc.detail, "error")
+    return response
 
 
 @router.get("/books/{book_id}")

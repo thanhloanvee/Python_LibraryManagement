@@ -37,6 +37,7 @@ class BookService:
             isbn=filters.isbn,
             category_id=filters.category_id,
             status=filters.status,
+            language=filters.language,
             search=filters.search,
             offset=offset,
             limit=page_size,

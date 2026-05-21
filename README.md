@@ -148,7 +148,6 @@ source .venv/bin/activate
 ### 2. Install dependencies
 
 ```bash
-cd backend
 pip install -r requirements.txt
 ```
 
@@ -156,8 +155,8 @@ pip install -r requirements.txt
 
 ```bash
 # Copy the example to source/.env  (one level above backend/)
-copy backend\.env.example .env      # Windows
-cp  backend/.env.example  .env      # Linux/macOS
+copy .env.example .env      # Windows
+cp  .env.example  .env      # Linux/macOS
 ```
 
 Then open `.env` and set at minimum:
@@ -215,9 +214,10 @@ python seed.py
 | Role | Username | Password |
 |---|---|---|
 | Admin | `admin` | `Admin@123456` |
-| Librarian | `librarian1` | `Librarian@123` |
-| Reader | `reader1` | `Reader@123456` |
-| Reader | `reader2` | `Reader@123456` |
+| Librarian | `librarian1` | `Lib@123456` |
+| Librarian | `librarian2` | `Lib@123456` |
+| Reader | `reader1` | `Reader@123` |
+| Reader | `reader2` | `Reader@123` |
 
 ---
 

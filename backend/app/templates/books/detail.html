@@ -119,7 +119,7 @@
               {% if book.status == 'available' %}bg-green-100 text-green-700
               {% elif book.status == 'damaged' %}bg-amber-100 text-amber-700
               {% else %}bg-red-100 text-red-700{% endif %}">
-              {{ book.status }}
+              {{ book.status.value }}
             </span>
           </dd>
         </div>
@@ -154,7 +154,7 @@
 
         <!-- Add review form -->
         {% if current_user and can_review and not already_reviewed %}
-        <form method="post" action="/api/v1/reviews"
+        <form method="post" action="/books/{{ book.id }}/review"
           class="mb-6 rounded-xl bg-gray-50 border border-gray-200 p-4 space-y-3">
           <input type="hidden" name="book_id" value="{{ book.id }}" />
           <div class="flex items-center gap-2" x-data="{ rating: 5 }">

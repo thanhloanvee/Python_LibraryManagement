@@ -35,6 +35,7 @@ async def dashboard(
             "active_readers": active_readers,
             "monthly_stats": monthly,
             "current_year": current_year,
+            "today_year": datetime.date.today().year,
         },
         request,
     )

@@ -20,14 +20,21 @@ async def users_index(
     request: Request,
     search: str = "",
     role: str | None = None,
-    status: int | None = None,
+    status: str | None = None,
     page: int = 1,
     db: AsyncSession = Depends(get_db),
     _=Depends(require_admin),
 ):
+    status_val: UserStatus | None = None
+    if status is not None and status != "":
+        try:
+            status_val = UserStatus(int(status))
+        except (ValueError, KeyError):
+            status_val = None
+
     users, total = await UserService(db).list_users(
         role=UserRole(role) if role else None,
-        status=UserStatus(status) if status is not None else None,
+        status=status_val,
         search=search or None,
         page=page,
         page_size=20,

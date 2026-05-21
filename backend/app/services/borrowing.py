@@ -49,6 +49,7 @@ class BorrowingService:
             book_id=filters.book_id,
             status=filters.status,
             overdue_only=filters.overdue_only,
+            active_only=filters.active_only,
             offset=offset,
             limit=page_size,
         )

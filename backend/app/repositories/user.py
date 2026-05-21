@@ -3,10 +3,11 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User, UserRole, UserStatus
+from app.utils import normalize_vi
 
 
 class UserRepository:
@@ -50,10 +51,13 @@ class UserRepository:
             count_query = count_query.where(User.status == status)
         if search:
             like = f"%{search}%"
-            condition = (
-                User.username.ilike(like)
-                | User.full_name.ilike(like)
-                | User.email.ilike(like)
+            norm_like = f"%{normalize_vi(search)}%"
+            condition = or_(
+                User.username.ilike(like),
+                User.full_name.ilike(like),
+                User.email.ilike(like),
+                func.normalize_vi(User.username).like(norm_like),
+                func.normalize_vi(User.full_name).like(norm_like),
             )
             query = query.where(condition)
             count_query = count_query.where(condition)

@@ -84,3 +84,4 @@ class BorrowingFilter(BaseModel):
     user_id: Optional[int] = None
     book_id: Optional[int] = None
     overdue_only: bool = False
+    active_only: bool = False  # matches BORROWED + OVERDUE

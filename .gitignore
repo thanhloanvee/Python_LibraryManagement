@@ -54,3 +54,6 @@ tests/_support/_generated
 .env
 .env.local
 __pycache__/
+.playwright-mcp/
+.github/
+*.log

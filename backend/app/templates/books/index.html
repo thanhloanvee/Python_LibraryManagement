@@ -13,7 +13,9 @@
 <div class="flex flex-col gap-6">
 
   <!-- Search & filter bar -->
-  <div class="flex flex-wrap items-start gap-3 rounded-xl bg-white border border-gray-100 shadow-sm p-4">
+  <form id="filter-form" method="get" action="/books"
+    class="flex flex-wrap items-start gap-3 rounded-xl bg-white border border-gray-100 shadow-sm p-4">
+
     <!-- Live search input -->
     <div class="flex-1 min-w-[200px]">
       <label class="sr-only" for="search">Search</label>
@@ -35,45 +37,32 @@
       </div>
     </div>
 
-    <!-- Filters -->
-    <form id="filter-form" method="get" action="/books" class="flex flex-wrap gap-2">
-      <input type="hidden" name="search" value="{{ filters.search or '' }}" />
+    <!-- Category filter -->
+    <select name="category_id" onchange="this.form.submit()"
+      class="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-brand-500 focus:outline-none">
+      <option value="">All Categories</option>
+      {% for cat in categories %}
+      <option value="{{ cat.id }}" {% if filters.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+      {% endfor %}
+    </select>
 
-      <select name="category_id"
-        hx-get="/books" hx-trigger="change" hx-target="#book-grid" hx-include="#filter-form"
-        onchange="this.form.submit()"
-        class="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-brand-500 focus:outline-none">
-        <option value="">All Categories</option>
-        {% for cat in categories %}
-        <option value="{{ cat.id }}" {% if filters.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
-        {% endfor %}
-      </select>
+    <!-- Language filter -->
+    <select name="language" onchange="this.form.submit()"
+      class="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-brand-500 focus:outline-none">
+      <option value="">All Languages</option>
+      <option value="vi" {% if filters.language == 'vi' %}selected{% endif %}>Tiếng Việt</option>
+      <option value="en" {% if filters.language == 'en' %}selected{% endif %}>English</option>
+    </select>
 
-      <select name="status" onchange="this.form.submit()"
-        class="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-brand-500 focus:outline-none">
-        <option value="">All Status</option>
-        <option value="available" {% if filters.status == 'available' %}selected{% endif %}>Available</option>
-        <option value="damaged" {% if filters.status == 'damaged' %}selected{% endif %}>Damaged</option>
-        <option value="lost" {% if filters.status == 'lost' %}selected{% endif %}>Lost</option>
-      </select>
-
-      <select name="language" onchange="this.form.submit()"
-        class="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-brand-500 focus:outline-none">
-        <option value="">All Languages</option>
-        <option value="vi" {% if filters.language == 'vi' %}selected{% endif %}>Vietnamese</option>
-        <option value="en" {% if filters.language == 'en' %}selected{% endif %}>English</option>
-      </select>
-
-      {% if filters.search or filters.category_id or filters.status or filters.language %}
-      <a href="/books" class="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-        Clear
-      </a>
-      {% endif %}
-    </form>
-  </div>
+    {% if filters.search or filters.category_id or filters.language %}
+    <a href="/books" class="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      Clear
+    </a>
+    {% endif %}
+  </form>
 
   <!-- Book grid (replaced by HTMX on filter change) -->
   <div id="book-grid-outer">

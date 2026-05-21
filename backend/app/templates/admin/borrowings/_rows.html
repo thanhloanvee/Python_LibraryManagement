@@ -1,6 +1,6 @@
 <!-- HTMX partial: borrowing table rows -->
 {% for b in borrowings %}
-{% set overdue = b.status == 'borrowed' and b.due_date and b.due_date < now %}
+{% set overdue = b.status.value == 'overdue' or (b.status.value == 'borrowed' and b.due_date and b.due_date < now) %}
 <tr class="hover:bg-gray-50 transition-colors {% if overdue %}bg-red-50/50{% endif %}">
   <td class="px-4 py-3 font-mono text-gray-400 text-xs">#{{ b.id }}</td>
   <td class="px-4 py-3">
@@ -14,21 +14,16 @@
   </td>
   <td class="px-4 py-3 text-gray-600">
     {% if b.due_date %}
-    <span class="{% if overdue %}text-red-600 font-semibold{% endif %}">
-      {{ b.due_date.strftime('%d/%m/%Y') }}
-    </span>
-    {% if overdue %}
-    <span class="ml-1 text-xs text-red-500 font-medium">OVERDUE</span>
-    {% endif %}
+    <span>{{ b.due_date.strftime('%d/%m/%Y') }}</span>
     {% else %}—{% endif %}
   </td>
   <td class="px-4 py-3">
     <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize
-      {% if b.status == 'borrowed' and overdue %}bg-red-100 text-red-700
-      {% elif b.status == 'borrowed' %}bg-amber-100 text-amber-700
-      {% elif b.status == 'returned' %}bg-green-100 text-green-700
+      {% if b.status.value == 'overdue' %}bg-red-100 text-red-700
+      {% elif b.status.value == 'borrowed' %}bg-amber-100 text-amber-700
+      {% elif b.status.value == 'returned' %}bg-green-100 text-green-700
       {% else %}bg-gray-100 text-gray-700{% endif %}">
-      {{ b.status }}
+      {{ b.status.value }}
     </span>
   </td>
   <td class="px-4 py-3">
@@ -47,7 +42,7 @@
         class="rounded-md px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
         View
       </a>
-      {% if b.status == 'borrowed' %}
+      {% if b.status.value in ('borrowed', 'overdue') %}
       <a href="/admin/borrowings/{{ b.id }}/return"
         class="rounded-md px-2 py-1 text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 transition-colors">
         Return

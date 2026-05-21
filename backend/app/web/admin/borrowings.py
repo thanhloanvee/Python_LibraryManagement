@@ -57,6 +57,61 @@ async def borrowings_index(
     return render("admin/borrowings/index.html", ctx, request)
 
 
+@router.get("/admin/borrowings/search-users")
+async def search_users(
+    q: str = "",
+    db: AsyncSession = Depends(get_db),
+    _=Depends(require_librarian),
+):
+    """HTMX: return a small HTML fragment listing matching readers."""
+    from fastapi.responses import HTMLResponse
+    from app.models.user import UserRole, UserStatus
+    if not q or len(q) < 1:
+        return HTMLResponse("")
+    users, _ = await UserService(db).list_users(search=q, page=1, page_size=8)
+    # Only active readers/librarians (not admins, not inactive)
+    users = [u for u in users if u.status == UserStatus.ACTIVE and u.role != UserRole.ADMIN]
+    if not users:
+        return HTMLResponse('<p class="px-3 py-2 text-sm text-gray-400">No users found.</p>')
+    items = "".join(
+        f'<button type="button" '
+        f'onclick="selectUser({u.id}, \'{u.username} — {u.full_name.replace(chr(39), "")}\', this)" '
+        f'class="w-full text-left px-3 py-2 text-sm hover:bg-brand-50 transition-colors flex justify-between items-center gap-2">'
+        f'<span><span class="font-medium">{u.username}</span> &mdash; {u.full_name}</span>'
+        f'<span class="text-xs text-gray-400"># {u.id}</span>'
+        f'</button>'
+        for u in users
+    )
+    return HTMLResponse(items)
+
+
+@router.get("/admin/borrowings/search-books")
+async def search_books(
+    q: str = "",
+    db: AsyncSession = Depends(get_db),
+    _=Depends(require_librarian),
+):
+    """HTMX: return a small HTML fragment listing matching available books."""
+    from fastapi.responses import HTMLResponse
+    from app.schemas.book import BookFilter
+    if not q or len(q) < 1:
+        return HTMLResponse("")
+    books, _ = await BookService(db).list_books(BookFilter(search=q), page=1, page_size=8)
+    books = [b for b in books if b.available_quantity > 0]
+    if not books:
+        return HTMLResponse('<p class="px-3 py-2 text-sm text-gray-400">No available books found.</p>')
+    items = "".join(
+        f'<button type="button" '
+        f'onclick="selectBook({b.id}, \'{b.title.replace(chr(39), "")}\', \'{b.author.replace(chr(39), "")}\', {b.available_quantity}, this)" '
+        f'class="w-full text-left px-3 py-2 text-sm hover:bg-brand-50 transition-colors flex justify-between items-center gap-2">'
+        f'<span><span class="font-medium">{b.title}</span> &mdash; {b.author}</span>'
+        f'<span class="text-xs text-gray-400">{b.available_quantity} avail.</span>'
+        f'</button>'
+        for b in books
+    )
+    return HTMLResponse(items)
+
+
 @router.get("/admin/borrowings/issue")
 async def issue_form(
     request: Request,
@@ -95,7 +150,7 @@ async def issue_submit(
             due_date=datetime.datetime.combine(due, datetime.time.min),
             librarian_notes=librarian_notes or None,
         )
-        borrowing = await BorrowingService(db).issue_book(payload, current_user.id)
+        borrowing = await BorrowingService(db).issue_book(payload)
         resp = RedirectResponse(url="/admin/borrowings", status_code=302)
         set_flash(resp, f"Book issued — borrowing #{borrowing.id}.", "success")
         return resp

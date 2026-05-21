@@ -62,6 +62,7 @@ class BorrowingRepository:
         book_id: Optional[int] = None,
         status: Optional[BorrowingStatus] = None,
         overdue_only: bool = False,
+        active_only: bool = False,
         offset: int = 0,
         limit: int = 20,
     ) -> Tuple[List[Borrowing], int]:
@@ -78,6 +79,12 @@ class BorrowingRepository:
             filters.append(Borrowing.book_id == book_id)
         if status is not None:
             filters.append(Borrowing.status == status)
+        if active_only:
+            filters.append(
+                Borrowing.status.in_(
+                    [BorrowingStatus.BORROWED, BorrowingStatus.OVERDUE]
+                )
+            )
         if overdue_only:
             filters.append(
                 or_(

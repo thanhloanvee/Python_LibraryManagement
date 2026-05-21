@@ -40,8 +40,8 @@
     <select name="status" onchange="this.form.submit()"
       class="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-brand-500 focus:outline-none">
       <option value="">All Status</option>
-      <option value="10" {% if filters.status == 10 %}selected{% endif %}>Active</option>
-      <option value="0"  {% if filters.status == 0  %}selected{% endif %}>Inactive</option>
+      <option value="10" {% if filters.status|string == '10' %}selected{% endif %}>Active</option>
+      <option value="0"  {% if filters.status|string == '0'  %}selected{% endif %}>Inactive</option>
     </select>
     {% if filters.search or filters.role or filters.status is not none %}
     <a href="/admin/users"

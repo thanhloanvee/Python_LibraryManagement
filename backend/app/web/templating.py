@@ -15,11 +15,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 def _tojson_filter(value) -> str:
-    """Safe JSON serialiser for Jinja2 (handles date/datetime/Enum)."""
+    """Safe JSON serialiser for Jinja2 (handles date/datetime/Enum/Pydantic)."""
     def default(obj):
-        if isinstance(obj, (datetime.date, datetime.datetime)):
+        if isinstance(obj, datetime.datetime):
             return obj.isoformat()
-        if hasattr(obj, "value"):   # Enum
+        if isinstance(obj, datetime.date):
+            return obj.isoformat()
+        if hasattr(obj, "model_dump"):  # Pydantic v2
+            return obj.model_dump()
+        if hasattr(obj, "value"):  # Enum
             return obj.value
         raise TypeError(f"Not serialisable: {type(obj)}")
     return json.dumps(value, default=default)
@@ -64,7 +68,7 @@ def render(
     context = {
         "flash": flash,
         "current_user": getattr(request.state, "user", None),
-        "now": datetime.datetime.utcnow(),
+        "now": datetime.date.today(),
         **ctx,
     }
     # Starlette ≥ 0.38: TemplateResponse(request, name, context=..., status_code=...)

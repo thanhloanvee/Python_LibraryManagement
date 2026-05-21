@@ -7,8 +7,9 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.book import Book, BookStatus
+from app.models.book import Book, BookLanguage, BookStatus
 from app.models.borrowing import Borrowing, BorrowingStatus
+from app.utils import normalize_vi
 
 
 class BookRepository:
@@ -37,6 +38,7 @@ class BookRepository:
         isbn: Optional[str] = None,
         category_id: Optional[int] = None,
         status: Optional[BookStatus] = None,
+        language: Optional[BookLanguage] = None,
         search: Optional[str] = None,
         offset: int = 0,
         limit: int = 20,
@@ -60,12 +62,18 @@ class BookRepository:
         if status is not None:
             query = query.where(Book.status == status)
             count_query = count_query.where(Book.status == status)
+        if language is not None:
+            query = query.where(Book.language == language)
+            count_query = count_query.where(Book.language == language)
         if search:
             like = f"%{search}%"
+            norm_like = f"%{normalize_vi(search)}%"
             condition = or_(
                 Book.title.ilike(like),
                 Book.author.ilike(like),
                 Book.isbn.ilike(like),
+                func.normalize_vi(Book.title).like(norm_like),
+                func.normalize_vi(Book.author).like(norm_like),
             )
             query = query.where(condition)
             count_query = count_query.where(condition)

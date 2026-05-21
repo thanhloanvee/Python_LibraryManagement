@@ -102,7 +102,7 @@
           <div class="mt-1 space-y-1">
             <a href="/admin/borrowings"
               class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
-                {% if request.url.path.startswith('/admin/borrowings') %}bg-brand-700 text-white{% endif %}">
+                {% if request.url.path.startswith('/admin/borrowings') and request.url.path != '/admin/borrowings/issue' %}bg-brand-700 text-white{% endif %}">
               <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -110,7 +110,8 @@
               Borrowings
             </a>
             <a href="/admin/borrowings/issue"
-              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors">
+              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+                {% if request.url.path == '/admin/borrowings/issue' %}bg-brand-700 text-white{% endif %}">
               <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -180,7 +181,7 @@
           </span>
           <div class="min-w-0 flex-1 text-left">
             <p class="truncate font-medium">{{ current_user.full_name }}</p>
-            <p class="truncate text-xs text-brand-400">{{ current_user.role }}</p>
+            <p class="truncate text-xs text-brand-400">{{ current_user.role.value }}</p>
           </div>
           <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />

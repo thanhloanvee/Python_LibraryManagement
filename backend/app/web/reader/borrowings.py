@@ -6,7 +6,6 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.models.borrowing import BorrowingStatus
 from app.schemas.borrowing import BorrowingFilter
 from app.services.borrowing import BorrowingService
 from app.web.dependencies import require_reader
@@ -24,7 +23,7 @@ async def my_books(
 ):
     """Active/current borrowings for the logged-in reader."""
     borrowings, total = await BorrowingService(db).list_borrowings(
-        BorrowingFilter(user_id=user.id, status=BorrowingStatus.BORROWED),
+        BorrowingFilter(user_id=user.id, active_only=True),
         page=page,
         page_size=10,
     )
