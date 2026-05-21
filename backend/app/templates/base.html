@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Library{% endblock %} — LMS</title>
+
+  <!-- TailwindCSS (CDN Play — JIT in browser) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#eff6ff', 100:'#dbeafe', 500:'#3b82f6', 600:'#2563eb', 700:'#1d4ed8', 800:'#1e40af', 900:'#1e3a8a' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@1.9.12" crossorigin="anonymous"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ request.app.url_path_for('static', path='css/app.css') }}" />
+
+  {% block head %}{% endblock %}
+</head>
+<body class="h-full bg-gray-50 font-sans antialiased" hx-boost="false" x-data="{}">
+
+<!-- ================================================================
+     SIDEBAR + MAIN LAYOUT
+     ================================================================ -->
+<div class="flex h-full" x-data="{ sidebarOpen: window.innerWidth >= 1024 }">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────── -->
+  <aside
+    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+    class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-brand-900 transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0 lg:flex"
+  >
+    <!-- Logo -->
+    <div class="flex h-16 shrink-0 items-center px-6 border-b border-brand-800">
+      <a href="/" class="flex items-center gap-2">
+        <svg class="h-8 w-8 text-brand-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <span class="text-lg font-bold text-white tracking-tight">LMS</span>
+      </a>
+    </div>
+
+    <!-- Nav links -->
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+
+      <!-- Public / always visible -->
+      <a href="/books"
+        class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+          {% if request.url.path.startswith('/books') %}bg-brand-700 text-white{% endif %}">
+        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+        </svg>
+        Browse Books
+      </a>
+
+      {% if current_user %}
+
+        <!-- Reader section -->
+        {% if current_user.role in ['reader', 'librarian', 'admin'] %}
+        <div class="pt-3">
+          <p class="px-3 text-xs font-semibold uppercase tracking-wider text-brand-400">My Library</p>
+          <div class="mt-1 space-y-1">
+            <a href="/reader/my-books"
+              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+                {% if request.url.path == '/reader/my-books' %}bg-brand-700 text-white{% endif %}">
+              <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+              My Books
+            </a>
+            <a href="/reader/history"
+              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+                {% if request.url.path == '/reader/history' %}bg-brand-700 text-white{% endif %}">
+              <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              History
+            </a>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Librarian / Admin section -->
+        {% if current_user.role in ['librarian', 'admin'] %}
+        <div class="pt-3">
+          <p class="px-3 text-xs font-semibold uppercase tracking-wider text-brand-400">Librarian</p>
+          <div class="mt-1 space-y-1">
+            <a href="/admin/borrowings"
+              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+                {% if request.url.path.startswith('/admin/borrowings') and request.url.path != '/admin/borrowings/issue' %}bg-brand-700 text-white{% endif %}">
+              <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+              Borrowings
+            </a>
+            <a href="/admin/borrowings/issue"
+              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+                {% if request.url.path == '/admin/borrowings/issue' %}bg-brand-700 text-white{% endif %}">
+              <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Issue Book
+            </a>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Admin section -->
+        {% if current_user.role == 'admin' %}
+        <div class="pt-3">
+          <p class="px-3 text-xs font-semibold uppercase tracking-wider text-brand-400">Admin</p>
+          <div class="mt-1 space-y-1">
+            <a href="/admin/dashboard"
+              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+                {% if request.url.path == '/admin/dashboard' %}bg-brand-700 text-white{% endif %}">
+              <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              Dashboard
+            </a>
+            <a href="/admin/books"
+              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+                {% if request.url.path.startswith('/admin/books') %}bg-brand-700 text-white{% endif %}">
+              <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              Books
+            </a>
+            <a href="/admin/categories"
+              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+                {% if request.url.path.startswith('/admin/categories') %}bg-brand-700 text-white{% endif %}">
+              <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+              Categories
+            </a>
+            <a href="/admin/users"
+              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+                {% if request.url.path.startswith('/admin/users') %}bg-brand-700 text-white{% endif %}">
+              <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              Users
+            </a>
+          </div>
+        </div>
+        {% endif %}
+
+      {% endif %}{# end if current_user #}
+    </nav>
+
+    <!-- User info at bottom -->
+    <div class="shrink-0 border-t border-brand-800 p-4">
+      {% if current_user %}
+      <div x-data="{ open: false }" class="relative">
+        <button @click="open = !open"
+          class="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm text-brand-100 hover:bg-brand-800 hover:text-white transition-colors">
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white uppercase">
+            {{ current_user.full_name[:2] }}
+          </span>
+          <div class="min-w-0 flex-1 text-left">
+            <p class="truncate font-medium">{{ current_user.full_name }}</p>
+            <p class="truncate text-xs text-brand-400">{{ current_user.role.value }}</p>
+          </div>
+          <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <!-- Dropdown -->
+        <div x-show="open" @click.outside="open=false" x-cloak
+          class="absolute bottom-full left-0 mb-2 w-full rounded-xl bg-white shadow-xl ring-1 ring-black/5">
+          <a href="/reader/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-t-xl">Profile</a>
+          <a href="/reader/change-password" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Change Password</a>
+          <form method="post" action="/logout">
+            <button type="submit"
+              class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-xl">
+              Log out
+            </button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <a href="/login"
+        class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-500 transition-colors">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+        </svg>
+        Login
+      </a>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div x-show="sidebarOpen" @click="sidebarOpen=false"
+    class="fixed inset-0 z-30 bg-black/50 lg:hidden" x-cloak></div>
+
+  <!-- ── Main column ──────────────────────────────────────────────── -->
+  <div class="flex flex-1 flex-col min-w-0 overflow-hidden">
+
+    <!-- Top navbar -->
+    <header class="flex h-16 shrink-0 items-center gap-4 border-b border-gray-200 bg-white px-4 sm:px-6 shadow-sm">
+      <!-- Hamburger -->
+      <button @click="sidebarOpen = !sidebarOpen"
+        class="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 lg:hidden">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      <!-- Breadcrumb / page title -->
+      <div class="flex-1 min-w-0">
+        {% block breadcrumb %}{% endblock %}
+      </div>
+
+      <!-- Right side actions -->
+      <div class="flex items-center gap-3">
+        {% if current_user and current_user.role in ['librarian', 'admin'] %}
+        <a href="/admin/borrowings/issue"
+          class="hidden sm:flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Issue Book
+        </a>
+        {% endif %}
+      </div>
+    </header>
+
+    <!-- Flash messages -->
+    {% include "partials/flash.html" %}
+
+    <!-- Page content -->
+    <main class="flex-1 overflow-y-auto">
+      <div class="px-4 py-6 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+  </div>{# end main column #}
+
+</div>{# end flex h-full #}
+
+<!-- HTMX indicator (global loading bar) -->
+<div id="htmx-indicator"
+  class="fixed top-0 left-0 right-0 z-50 h-1 bg-brand-500 opacity-0 transition-opacity duration-200"
+  style="htmx-on:htmx:configRequest{this.style.opacity=1};htmx-on:htmx:afterRequest{this.style.opacity=0}">
+</div>
+
+<script src="{{ request.app.url_path_for('static', path='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

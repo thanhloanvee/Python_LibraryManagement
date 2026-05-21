@@ -1,0 +1,50 @@
+<!-- HTMX partial: user table rows -->
+{% for user in users %}
+<tr class="hover:bg-gray-50 transition-colors">
+  <td class="px-4 py-3">
+    <div class="flex items-center gap-2">
+      <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700 uppercase shrink-0">
+        {{ user.full_name[:2] }}
+      </span>
+      <div>
+        <p class="font-medium text-gray-900">{{ user.full_name }}</p>
+        <p class="text-xs text-gray-400">@{{ user.username }}</p>
+      </div>
+    </div>
+  </td>
+  <td class="px-4 py-3 text-gray-600">{{ user.email }}</td>
+  <td class="px-4 py-3">
+    <form method="post" action="/admin/users/{{ user.id }}/change-role" class="inline">
+      <select name="role" onchange="this.form.submit()"
+        class="rounded-md border border-gray-200 py-1 pl-2 pr-6 text-xs focus:outline-none focus:border-brand-500">
+        <option value="reader"     {% if user.role == 'reader'     %}selected{% endif %}>Reader</option>
+        <option value="librarian"  {% if user.role == 'librarian'  %}selected{% endif %}>Librarian</option>
+        <option value="admin"      {% if user.role == 'admin'      %}selected{% endif %}>Admin</option>
+      </select>
+    </form>
+  </td>
+  <td class="px-4 py-3">
+    <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium
+      {% if user.status == 10 %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+      {{ 'Active' if user.status == 10 else 'Inactive' }}
+    </span>
+  </td>
+  <td class="px-4 py-3 text-gray-400 text-xs">{{ user.created_at.strftime('%d/%m/%Y') }}</td>
+  <td class="px-4 py-3">
+    <div class="flex items-center justify-end">
+      <form method="post" action="/admin/users/{{ user.id }}/toggle-status">
+        <button type="submit"
+          class="rounded-md px-2 py-1 text-xs font-medium transition-colors
+            {% if user.status == 10 %}text-amber-600 bg-amber-50 hover:bg-amber-100
+            {% else %}text-green-600 bg-green-50 hover:bg-green-100{% endif %}">
+          {{ 'Deactivate' if user.status == 10 else 'Activate' }}
+        </button>
+      </form>
+    </div>
+  </td>
+</tr>
+{% else %}
+<tr>
+  <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">No users found.</td>
+</tr>
+{% endfor %}

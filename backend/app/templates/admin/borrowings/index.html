@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Borrowings{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-2 text-sm text-gray-500">
+  <a href="/admin/dashboard" class="hover:text-gray-700">Admin</a>
+  <span>/</span>
+  <span class="text-gray-900 font-medium">Borrowings</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-5">
+
+  <!-- Header -->
+  <div>
+    <h2 class="text-xl font-bold text-gray-900">Borrowings</h2>
+    <p class="text-sm text-gray-500">{{ total }} record{{ 's' if total != 1 else '' }}</p>
+  </div>
+
+  <!-- Filters -->
+  <form method="get" action="/admin/borrowings"
+    class="flex flex-wrap items-start gap-3 rounded-xl bg-white border border-gray-100 shadow-sm p-4">
+    <select name="status" onchange="this.form.submit()"
+      class="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-brand-500 focus:outline-none">
+      <option value="">All Status</option>
+      {% for s in statuses %}
+      <option value="{{ s.value }}" {% if filters.status == s.value %}selected{% endif %}>{{ s.value|capitalize }}</option>
+      {% endfor %}
+    </select>
+    <label class="inline-flex items-center gap-2 cursor-pointer">
+      <input type="checkbox" name="overdue_only" value="true" onchange="this.form.submit()"
+        {% if filters.overdue_only %}checked{% endif %}
+        class="rounded border-gray-300 text-brand-600 focus:ring-brand-500" />
+      <span class="text-sm text-gray-700">Overdue only</span>
+    </label>
+    {% if filters.status or filters.overdue_only %}
+    <a href="/admin/borrowings"
+      class="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50">
+      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      Clear
+    </a>
+    {% endif %}
+  </form>
+
+  <!-- Table -->
+  <div class="overflow-hidden rounded-xl bg-white border border-gray-100 shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-100 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">#</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Reader</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Book</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Due</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Fine</th>
+            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="borrowings-table-body" class="divide-y divide-gray-50">
+          {% include "admin/borrowings/_rows.html" %}
+        </tbody>
+      </table>
+    </div>
+    {% set current_query = request.url.query | replace('&page=' + page|string, '') | replace('page=' + page|string, '') | trim('&') %}
+    <div class="px-4 border-t border-gray-100">
+      {% include "partials/pagination.html" %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

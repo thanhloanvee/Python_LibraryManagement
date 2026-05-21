@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Borrowing #{{ borrowing.id }}{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-2 text-sm text-gray-500">
+  <a href="/admin/borrowings" class="hover:text-gray-700">Borrowings</a>
+  <span>/</span>
+  <span class="text-gray-900 font-medium">#{{ borrowing.id }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 sm:p-8">
+    <div class="flex items-center gap-3 mb-6">
+      <a href="/admin/borrowings" class="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white p-2 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </a>
+      <div class="flex-1 flex items-start justify-between gap-4">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Borrowing #{{ borrowing.id }}</h2>
+        <span class="inline-block mt-1 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize
+          {% if borrowing.status.value == 'borrowed' %}bg-amber-100 text-amber-700
+          {% elif borrowing.status.value == 'returned' %}bg-green-100 text-green-700
+          {% else %}bg-red-100 text-red-700{% endif %}">
+          {{ borrowing.status.value }}
+        </span>
+      </div>
+      {% if borrowing.status.value in ('borrowed', 'overdue') %}
+      <a href="/admin/borrowings/{{ borrowing.id }}/return"
+        class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-colors">
+        Return Book
+      </a>
+      {% endif %}
+      </div>
+    </div>
+
+    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
+      <div>
+        <dt class="text-gray-500 font-medium">Reader</dt>
+        <dd class="text-gray-900 font-semibold">{{ borrowing.user.full_name if borrowing.user else '—' }}</dd>
+        <dd class="text-gray-400 text-xs">@{{ borrowing.user.username if borrowing.user else '' }}</dd>
+      </div>
+      <div>
+        <dt class="text-gray-500 font-medium">Book</dt>
+        <dd>
+          <a href="/books/{{ borrowing.book_id }}" class="text-brand-700 font-semibold hover:underline">
+            {{ borrowing.book.title if borrowing.book else '—' }}
+          </a>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-500 font-medium">Borrow Date</dt>
+        <dd class="text-gray-900">{{ borrowing.borrow_date.strftime('%d/%m/%Y') }}</dd>
+      </div>
+      <div>
+        <dt class="text-gray-500 font-medium">Due Date</dt>
+        <dd class="{% if borrowing.is_overdue %}text-red-600 font-semibold{% else %}text-gray-900{% endif %}">
+          {{ borrowing.due_date.strftime('%d/%m/%Y') if borrowing.due_date else '—' }}
+        </dd>
+      </div>
+      {% if borrowing.return_date %}
+      <div>
+        <dt class="text-gray-500 font-medium">Returned</dt>
+        <dd class="text-gray-900">{{ borrowing.return_date.strftime('%d/%m/%Y') }}</dd>
+      </div>
+      {% endif %}
+      <div>
+        <dt class="text-gray-500 font-medium">Renewals</dt>
+        <dd class="text-gray-900">{{ borrowing.renewed_count }} / 2</dd>
+      </div>
+      {% if borrowing.fine_amount %}
+      <div>
+        <dt class="text-gray-500 font-medium">Fine</dt>
+        <dd class="flex items-center gap-2">
+          <span class="text-red-600 font-semibold">{{ "{:,.0f}".format(borrowing.fine_amount) }}đ</span>
+          {% if borrowing.fine_paid or borrowing.status.value == 'returned' %}
+          <span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">PAID</span>
+          {% else %}
+          <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">UNPAID</span>
+          {% endif %}
+        </dd>
+      </div>
+      {% endif %}
+      {% if borrowing.book_condition %}
+      <div>
+        <dt class="text-gray-500 font-medium">Book Condition</dt>
+        <dd class="capitalize text-gray-900">{{ borrowing.book_condition.value if borrowing.book_condition else '' }}</dd>
+      </div>
+      {% endif %}
+      {% if borrowing.librarian_notes %}
+      <div class="sm:col-span-2">
+        <dt class="text-gray-500 font-medium">Notes</dt>
+        <dd class="text-gray-900">{{ borrowing.librarian_notes }}</dd>
+      </div>
+      {% endif %}
+    </dl>
+  </div>
+</div>
+{% endblock %}

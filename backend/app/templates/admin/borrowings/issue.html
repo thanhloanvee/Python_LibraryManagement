@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% block title %}Issue Book{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-2 text-sm text-gray-500">
+  <a href="/admin/borrowings" class="hover:text-gray-700">Borrowings</a>
+  <span>/</span>
+  <span class="text-gray-900 font-medium">Issue Book</span>
+</nav>
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+  <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 sm:p-8">
+    <h2 class="text-xl font-bold text-gray-900 mb-6">Issue Book to Reader</h2>
+
+    {% if error %}
+    <div class="mb-5 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="/admin/borrowings/issue" class="space-y-5" onsubmit="return validateIssueForm()">
+
+      <!-- Hidden real values submitted -->
+      <input type="hidden" id="user_id" name="user_id" value="" />
+      <input type="hidden" id="book_id"  name="book_id"  value="{% if preselected_book %}{{ preselected_book.id }}{% endif %}" />
+
+      <!-- ── Reader search ── -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Reader <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <input id="user_search" type="text" autocomplete="off"
+            placeholder="Type username or full name…"
+            hx-get="/admin/borrowings/search-users"
+            hx-trigger="keyup changed delay:300ms"
+            hx-target="#user-results"
+            hx-include="[name='user_search_q']"
+            oninput="document.getElementById('user_id').value=''; this.nextElementSibling.nextElementSibling.classList.remove('hidden')"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition" />
+          <!-- HTMX picks up this param -->
+          <input type="hidden" name="q" id="user_search_q" />
+          <!-- Dropdown results -->
+          <div id="user-results"
+            class="hidden absolute z-20 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg divide-y divide-gray-100 max-h-52 overflow-y-auto"></div>
+        </div>
+        <!-- Selected user badge -->
+        <div id="user-badge" class="hidden mt-2 flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-800">
+          <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span id="user-badge-text"></span>
+          <button type="button" onclick="clearUser()"
+            class="ml-auto text-green-600 hover:text-green-800">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Book search / preselected ── -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Book <span class="text-red-500">*</span>
+        </label>
+
+        {% if preselected_book %}
+        <!-- Book was preselected from the book detail page -->
+        <div class="rounded-lg bg-brand-50 border border-brand-200 p-3 flex items-center gap-3">
+          {% if preselected_book.cover_image %}
+          <img src="{{ preselected_book.cover_image }}" alt="" class="h-12 w-9 rounded object-cover" />
+          {% endif %}
+          <div>
+            <p class="font-medium text-brand-900">{{ preselected_book.title }}</p>
+            <p class="text-xs text-brand-600">{{ preselected_book.author }} · {{ preselected_book.available_quantity }} available</p>
+          </div>
+          <a href="/admin/borrowings/issue" class="ml-auto text-xs text-brand-600 hover:underline whitespace-nowrap">Change</a>
+        </div>
+
+        {% else %}
+        <!-- Book typeahead search -->
+        <div class="relative">
+          <input id="book_search" type="text" autocomplete="off"
+            placeholder="Type title or author…"
+            hx-get="/admin/borrowings/search-books"
+            hx-trigger="keyup changed delay:300ms"
+            hx-target="#book-results"
+            oninput="document.getElementById('book_id').value=''; document.getElementById('book-badge').classList.add('hidden'); document.getElementById('book-results').classList.remove('hidden')"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition" />
+          <input type="hidden" name="q" id="book_search_q" />
+          <div id="book-results"
+            class="hidden absolute z-20 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg divide-y divide-gray-100 max-h-52 overflow-y-auto"></div>
+        </div>
+        <!-- Selected book badge -->
+        <div id="book-badge" class="hidden mt-2 flex items-center gap-2 rounded-lg bg-brand-50 border border-brand-200 px-3 py-2 text-sm text-brand-800">
+          <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <span id="book-badge-text"></span>
+          <button type="button" onclick="clearBook()"
+            class="ml-auto text-brand-600 hover:text-brand-800">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Due date -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Due Date <span class="text-red-500">*</span></label>
+        <input id="due_date_hidden" name="due_date" type="text" required
+          value="{{ due_default }}"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition" />
+      </div>
+
+      <!-- Librarian notes -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
+        <textarea name="librarian_notes" rows="2" placeholder="Any notes for this borrowing…"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition resize-none"></textarea>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit"
+          class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Issue Book
+        </button>
+        <a href="/admin/borrowings"
+          class="inline-flex items-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+          Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+// ── HTMX: sync the visible input value into the hidden q param before request ──
+document.addEventListener('htmx:configRequest', function(evt) {
+  const el = evt.detail.elt;
+  if (el.id === 'user_search') {
+    evt.detail.parameters['q'] = el.value;
+  } else if (el.id === 'book_search') {
+    evt.detail.parameters['q'] = el.value;
+  }
+});
+
+// ── Show dropdown after HTMX swap ──
+document.addEventListener('htmx:afterSwap', function(evt) {
+  const id = evt.detail.target.id;
+  if (id === 'user-results' || id === 'book-results') {
+    evt.detail.target.classList.remove('hidden');
+  }
+});
+
+// ── Close dropdowns when clicking outside ──
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#user_search') && !e.target.closest('#user-results')) {
+    const el = document.getElementById('user-results');
+    if (el) el.classList.add('hidden');
+  }
+  if (!e.target.closest('#book_search') && !e.target.closest('#book-results')) {
+    const el = document.getElementById('book-results');
+    if (el) el.classList.add('hidden');
+  }
+});
+
+// ── User selection ──
+function selectUser(id, label, btn) {
+  document.getElementById('user_id').value = id;
+  document.getElementById('user_search').value = '';
+  document.getElementById('user-results').classList.add('hidden');
+  document.getElementById('user-badge-text').textContent = label;
+  document.getElementById('user-badge').classList.remove('hidden');
+}
+function clearUser() {
+  document.getElementById('user_id').value = '';
+  document.getElementById('user-badge').classList.add('hidden');
+  document.getElementById('user-results').innerHTML = '';
+}
+
+// ── Book selection ──
+function selectBook(id, title, author, avail, btn) {
+  document.getElementById('book_id').value = id;
+  document.getElementById('book_search').value = '';
+  document.getElementById('book-results').classList.add('hidden');
+  document.getElementById('book-badge-text').textContent = title + ' — ' + author + ' (' + avail + ' available)';
+  document.getElementById('book-badge').classList.remove('hidden');
+}
+function clearBook() {
+  document.getElementById('book_id').value = '';
+  document.getElementById('book-badge').classList.add('hidden');
+  document.getElementById('book-results').innerHTML = '';
+}
+
+// ── Flatpickr date picker (dd/mm/yyyy display, yyyy-mm-dd submitted) ──
+flatpickr('#due_date_hidden', {
+  dateFormat: 'Y-m-d',
+  altInput: true,
+  altFormat: 'd/m/Y',
+  minDate: '{{ due_default }}',
+  defaultDate: '{{ due_default }}',
+  disableMobile: false,
+});
+
+// ── Validate before submit ──
+function validateIssueForm() {
+  const uid = document.getElementById('user_id').value;
+  const bid = document.getElementById('book_id').value;
+  if (!uid) { alert('Vui lòng chọn độc giả.'); return false; }
+  if (!bid) { alert('Vui lòng chọn sách.'); return false; }
+  const due = document.getElementById('due_date_hidden').value;
+  if (!due) { alert('Vui lòng chọn ngày hết hạn.'); return false; }
+  return true;
+}
+</script>
+{% endblock %}

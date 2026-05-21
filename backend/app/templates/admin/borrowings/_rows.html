@@ -1,0 +1,58 @@
+<!-- HTMX partial: borrowing table rows -->
+{% for b in borrowings %}
+{% set overdue = b.status.value == 'overdue' or (b.status.value == 'borrowed' and b.due_date and b.due_date < now) %}
+<tr class="hover:bg-gray-50 transition-colors {% if overdue %}bg-red-50/50{% endif %}">
+  <td class="px-4 py-3 font-mono text-gray-400 text-xs">#{{ b.id }}</td>
+  <td class="px-4 py-3">
+    <p class="font-medium text-gray-900">{{ b.user.full_name if b.user else '—' }}</p>
+    <p class="text-xs text-gray-400">{{ b.user.username if b.user else '' }}</p>
+  </td>
+  <td class="px-4 py-3">
+    <a href="/books/{{ b.book_id }}" class="font-medium text-gray-900 hover:text-brand-600 transition-colors line-clamp-1">
+      {{ b.book.title if b.book else '—' }}
+    </a>
+  </td>
+  <td class="px-4 py-3 text-gray-600">
+    {% if b.due_date %}
+    <span>{{ b.due_date.strftime('%d/%m/%Y') }}</span>
+    {% else %}—{% endif %}
+  </td>
+  <td class="px-4 py-3">
+    <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize
+      {% if b.status.value == 'overdue' %}bg-red-100 text-red-700
+      {% elif b.status.value == 'borrowed' %}bg-amber-100 text-amber-700
+      {% elif b.status.value == 'returned' %}bg-green-100 text-green-700
+      {% else %}bg-gray-100 text-gray-700{% endif %}">
+      {{ b.status.value }}
+    </span>
+  </td>
+  <td class="px-4 py-3">
+    {% if b.fine_amount and b.fine_amount > 0 %}
+    <span class="text-red-600 font-medium">{{ "{:,.0f}".format(b.fine_amount) }}đ</span>
+    {% if b.fine_paid %}
+    <span class="ml-1 text-xs text-green-600 font-medium">PAID</span>
+    {% endif %}
+    {% else %}
+    <span class="text-gray-300">—</span>
+    {% endif %}
+  </td>
+  <td class="px-4 py-3">
+    <div class="flex items-center justify-end gap-2">
+      <a href="/admin/borrowings/{{ b.id }}"
+        class="rounded-md px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+        View
+      </a>
+      {% if b.status.value in ('borrowed', 'overdue') %}
+      <a href="/admin/borrowings/{{ b.id }}/return"
+        class="rounded-md px-2 py-1 text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 transition-colors">
+        Return
+      </a>
+      {% endif %}
+    </div>
+  </td>
+</tr>
+{% else %}
+<tr>
+  <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-400">No borrowings found.</td>
+</tr>
+{% endfor %}
