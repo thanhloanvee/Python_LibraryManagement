@@ -57,3 +57,5 @@ __pycache__/
 .playwright-mcp/
 .github/
 *.log
+*env/
+uploads/
