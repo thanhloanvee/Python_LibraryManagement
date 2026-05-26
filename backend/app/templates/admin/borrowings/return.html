@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Return Book{% endblock %}
+{% block title %}Trả sách{% endblock %}
 
 {% block breadcrumb %}
 <nav class="flex items-center gap-2 text-sm text-gray-500">
-  <a href="/admin/borrowings" class="hover:text-gray-700">Borrowings</a>
+  <a href="/admin/borrowings" class="hover:text-gray-700">Phiếu mượn</a>
   <span>/</span>
-  <span class="text-gray-900 font-medium">Return #{{ borrowing.id }}</span>
+  <span class="text-gray-900 font-medium">Trả sách #{{ borrowing.id }}</span>
 </nav>
 {% endblock %}
 
 {% block content %}
 <div class="max-w-xl mx-auto">
   <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 sm:p-8">
-    <h2 class="text-xl font-bold text-gray-900 mb-6">Process Book Return</h2>
+    <h2 class="text-xl font-bold text-gray-900 mb-6">Xử lý trả sách</h2>
 
     {% if error %}
     <div class="mb-5 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800">{{ error }}</div>
@@ -21,31 +21,31 @@
     <!-- Borrowing summary -->
     <div class="mb-6 rounded-xl bg-gray-50 border border-gray-200 p-4 space-y-2 text-sm">
       <div class="flex justify-between">
-        <span class="text-gray-500">Borrowing ID</span>
+        <span class="text-gray-500">Mã phiếu mượn</span>
         <span class="font-medium text-gray-900">#{{ borrowing.id }}</span>
       </div>
       <div class="flex justify-between">
-        <span class="text-gray-500">Reader</span>
+        <span class="text-gray-500">Độc giả</span>
         <span class="font-medium text-gray-900">{{ borrowing.user.full_name if borrowing.user else '—' }}</span>
       </div>
       <div class="flex justify-between">
-        <span class="text-gray-500">Book</span>
+        <span class="text-gray-500">Sách</span>
         <span class="font-medium text-gray-900">{{ borrowing.book.title if borrowing.book else '—' }}</span>
       </div>
       <div class="flex justify-between">
-        <span class="text-gray-500">Borrowed</span>
+        <span class="text-gray-500">Ngày mượn</span>
         <span class="font-medium text-gray-900">{{ borrowing.borrow_date.strftime('%d/%m/%Y') }}</span>
       </div>
       <div class="flex justify-between">
-        <span class="text-gray-500">Due date</span>
+        <span class="text-gray-500">Hạn trả</span>
         <span class="font-medium {% if borrowing.is_overdue %}text-red-600{% else %}text-gray-900{% endif %}">
           {{ borrowing.due_date.strftime('%d/%m/%Y') if borrowing.due_date else '—' }}
-          {% if borrowing.is_overdue %} <span class="text-xs">({{ borrowing.days_overdue }}d overdue)</span>{% endif %}
+          {% if borrowing.is_overdue %} <span class="text-xs">({{ borrowing.days_overdue }} ngày quá hạn)</span>{% endif %}
         </span>
       </div>
       {% if borrowing.is_overdue %}
       <div class="flex justify-between pt-1 border-t border-gray-200">
-        <span class="text-red-500 font-medium">Estimated fine</span>
+        <span class="text-red-500 font-medium">Tiền phạt dự kiến</span>
         <span class="font-bold text-red-600">{{ "{:,.0f}".format(borrowing.days_overdue * 5000) }}đ</span>
       </div>
       {% endif %}
@@ -54,9 +54,9 @@
     <form method="post" action="/admin/borrowings/{{ borrowing.id }}/return" class="space-y-5">
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Book Condition <span class="text-red-500">*</span></label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tình trạng sách <span class="text-red-500">*</span></label>
         <div class="grid grid-cols-2 gap-2 sm:grid-cols-4" x-data="{ selected: 'good' }">
-          {% for cond in [('good', 'Good', 'green'), ('fair', 'Fair', 'amber'), ('poor', 'Poor', 'orange'), ('damaged', 'Damaged', 'red')] %}
+          {% for cond in [('good', 'Tốt', 'green'), ('fair', 'Trung bình', 'amber'), ('poor', 'Kém', 'orange'), ('Hư hỏng', 'Hư hỏng', 'red')] %}
           <label class="relative cursor-pointer">
             <input type="radio" name="book_condition" value="{{ cond[0] }}"
               x-model="selected"
@@ -73,10 +73,10 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
         <textarea name="librarian_notes" rows="2"
           class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition resize-none"
-          placeholder="Optional notes about the return…">{{ borrowing.librarian_notes or '' }}</textarea>
+          placeholder="Ghi chú tùy chọn về việc trả sách…">{{ borrowing.librarian_notes or '' }}</textarea>
       </div>
 
       <div class="flex gap-3 pt-2">
@@ -85,11 +85,11 @@
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
-          Confirm Return
+          Xác nhận trả sách
         </button>
         <a href="/admin/borrowings"
           class="inline-flex items-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-          Cancel
+          Hủy
         </a>
       </div>
 

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Borrowing History{% endblock %}
+{% block title %}Lịch sử mượn sách{% endblock %}
 
 {% block breadcrumb %}
-<h1 class="text-lg font-semibold text-gray-800">Borrowing History</h1>
+<h1 class="text-lg font-semibold text-gray-800">Lịch sử mượn sách</h1>
 {% endblock %}
 
 {% block content %}
@@ -11,11 +11,11 @@
     <table class="min-w-full divide-y divide-gray-100 text-sm">
       <thead class="bg-gray-50">
         <tr>
-          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Book</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Borrowed</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Returned</th>
-          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
-          <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Fine</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Sách</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Ngày mượn</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Ngày trả</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Trạng thái</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Tiền phạt</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-50">
@@ -36,7 +36,8 @@
               {% if b.status == 'returned' %}bg-green-100 text-green-700
               {% elif b.status == 'borrowed' %}bg-amber-100 text-amber-700
               {% else %}bg-red-100 text-red-700{% endif %}">
-              {{ b.status }}
+              {% set _status_vi = {'borrowed': 'Đang mượn', 'returned': 'Đã trả', 'overdue': 'Quá hạn'} %}
+              {{ _status_vi.get(b.status, b.status) }}
             </span>
           </td>
           <td class="px-4 py-3 text-right">
@@ -45,7 +46,7 @@
               {{ "{:,.0f}".format(b.fine_amount) }}đ
             </span>
             {% if b.fine_paid %}
-            <span class="ml-1 text-xs text-green-600">PAID</span>
+            <span class="ml-1 text-xs text-green-600">ĐÃ THANH TOÁN</span>
             {% endif %}
             {% else %}
             <span class="text-gray-300">—</span>
@@ -54,7 +55,7 @@
         </tr>
         {% else %}
         <tr>
-          <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-400">No borrowing history yet.</td>
+          <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-400">Chưa có lịch sử mượn sách.</td>
         </tr>
         {% endfor %}
       </tbody>

@@ -19,7 +19,7 @@ from app.web.templating import render, set_flash
 
 router = APIRouter()
 
-UPLOAD_DIR = Path(__file__).resolve().parents[3] / "static" / "uploads"
+UPLOAD_DIR = Path(__file__).resolve().parents[2] / "static" / "uploads"
 
 
 def _form_to_book_dict(
@@ -36,7 +36,7 @@ def _form_to_book_dict(
         dest = UPLOAD_DIR / safe_name
         with open(dest, "wb") as f:
             shutil.copyfileobj(cover_file.file, f)
-        cover_image = f"/static/uploads/{safe_name}"
+        cover_image = f"static/uploads/{safe_name}"
 
     return {
         "title": title,
@@ -58,15 +58,16 @@ def _form_to_book_dict(
 async def books_index(
     request: Request,
     search: str = "",
-    category_id: int | None = None,
+    category_id: str | None = None,
     status: str | None = None,
     page: int = 1,
     db: AsyncSession = Depends(get_db),
     _=Depends(require_librarian),
 ):
+    cat_id = int(category_id) if category_id else None
     filters = BookFilter(
         search=search or None,
-        category_id=category_id,
+        category_id=cat_id,
         status=BookStatus(status) if status else None,
     )
     books, total = await BookService(db).list_books(filters, page=page, page_size=20)
@@ -78,7 +79,7 @@ async def books_index(
         "page": page,
         "page_size": 20,
         "categories": categories,
-        "filters": {"search": search, "category_id": category_id, "status": status},
+        "filters": {"search": search, "category_id": cat_id, "status": status},
     }
     if request.headers.get("HX-Request"):
         return render("admin/books/_rows.html", ctx, request)
@@ -129,7 +130,7 @@ async def book_create(
         data["available_quantity"] = quantity
         await BookService(db).create_book(BookCreate(**data))
         resp = RedirectResponse(url="/admin/books", status_code=302)
-        set_flash(resp, f"Book '{title}' created successfully.", "success")
+        set_flash(resp, f"Sách '{title}' đã được tạo thành công.", "success")
         return resp
     except Exception as exc:
         categories, _ = await CategoryService(db).list_categories()
@@ -197,7 +198,7 @@ async def book_update(
         del data["available_quantity"]  # don't override manually
         await svc.update_book(book_id, BookUpdate(**data))
         resp = RedirectResponse(url="/admin/books", status_code=302)
-        set_flash(resp, f"Book '{title}' updated.", "success")
+        set_flash(resp, f"Sách '{title}' đã được cập nhật.", "success")
         return resp
     except Exception as exc:
         book = await BookService(db).get_or_404(book_id)
@@ -227,7 +228,7 @@ async def book_delete(
         title = book.title
         await BookService(db).delete_book(book_id)
         resp = RedirectResponse(url="/admin/books", status_code=302)
-        set_flash(resp, f"Book '{title}' deleted.", "success")
+        set_flash(resp, f"Sách '{title}' đã được xóa.", "success")
         return resp
     except Exception as exc:
         resp = RedirectResponse(url="/admin/books", status_code=302)

@@ -20,9 +20,9 @@ from app.db.base import Base
 
 
 class BookStatus(str, enum.Enum):
-    AVAILABLE = "available"
-    DAMAGED = "damaged"
-    LOST = "lost"
+    AVAILABLE = "Có sẵn"
+    DAMAGED = "Hư hỏng"
+    LOST = "Mất"
 
 
 class BookLanguage(str, enum.Enum):

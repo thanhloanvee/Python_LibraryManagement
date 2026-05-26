@@ -40,7 +40,7 @@ async def category_create(
             CategoryCreate(name=name, description=description or None)
         )
         resp = RedirectResponse(url="/admin/categories", status_code=302)
-        set_flash(resp, f"Category '{name}' created.", "success")
+        set_flash(resp, f"Thể loại '{name}' đã được tạo.", "success")
         return resp
     except Exception as exc:
         resp = RedirectResponse(url="/admin/categories", status_code=302)
@@ -62,7 +62,7 @@ async def category_update(
             CategoryUpdate(name=name, description=description or None),
         )
         resp = RedirectResponse(url="/admin/categories", status_code=302)
-        set_flash(resp, f"Category '{name}' updated.", "success")
+        set_flash(resp, f"Thể loại '{name}' đã được cập nhật.", "success")
         return resp
     except Exception as exc:
         resp = RedirectResponse(url="/admin/categories", status_code=302)
@@ -81,7 +81,7 @@ async def category_delete(
         name = cat.name
         await CategoryService(db).delete_category(category_id)
         resp = RedirectResponse(url="/admin/categories", status_code=302)
-        set_flash(resp, f"Category '{name}' deleted.", "success")
+        set_flash(resp, f"Thể loại '{name}' đã được xóa.", "success")
         return resp
     except Exception as exc:
         resp = RedirectResponse(url="/admin/categories", status_code=302)

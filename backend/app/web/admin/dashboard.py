@@ -26,6 +26,7 @@ async def dashboard(
     popular = await svc.get_popular_books(limit=5)
     active_readers = await svc.get_active_readers(limit=5)
     monthly = await svc.get_monthly_stats(year=current_year)
+    book_inventory = await svc.get_book_inventory()
 
     return render(
         "admin/dashboard.html",
@@ -36,6 +37,7 @@ async def dashboard(
             "monthly_stats": monthly,
             "current_year": current_year,
             "today_year": datetime.date.today().year,
+            "book_inventory": book_inventory,
         },
         request,
     )

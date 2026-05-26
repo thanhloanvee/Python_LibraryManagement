@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Issue Book{% endblock %}
+{% block title %}Cấp phát sách{% endblock %}
 
 {% block breadcrumb %}
 <nav class="flex items-center gap-2 text-sm text-gray-500">
-  <a href="/admin/borrowings" class="hover:text-gray-700">Borrowings</a>
+  <a href="/admin/borrowings" class="hover:text-gray-700">Phiếu mượn</a>
   <span>/</span>
-  <span class="text-gray-900 font-medium">Issue Book</span>
+  <span class="text-gray-900 font-medium">Cấp phát sách</span>
 </nav>
 {% endblock %}
 
@@ -17,7 +17,7 @@
 {% block content %}
 <div class="max-w-xl mx-auto">
   <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 sm:p-8">
-    <h2 class="text-xl font-bold text-gray-900 mb-6">Issue Book to Reader</h2>
+    <h2 class="text-xl font-bold text-gray-900 mb-6">Cấp phát sách cho độc giả</h2>
 
     {% if error %}
     <div class="mb-5 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800">{{ error }}</div>
@@ -32,11 +32,11 @@
       <!-- ── Reader search ── -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">
-          Reader <span class="text-red-500">*</span>
+          Độc giả <span class="text-red-500">*</span>
         </label>
         <div class="relative">
           <input id="user_search" type="text" autocomplete="off"
-            placeholder="Type username or full name…"
+            placeholder="Nhập tên đăng nhập hoặc họ tên…"
             hx-get="/admin/borrowings/search-users"
             hx-trigger="keyup changed delay:300ms"
             hx-target="#user-results"
@@ -67,27 +67,27 @@
       <!-- ── Book search / preselected ── -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">
-          Book <span class="text-red-500">*</span>
+          Sách <span class="text-red-500">*</span>
         </label>
 
         {% if preselected_book %}
         <!-- Book was preselected from the book detail page -->
         <div class="rounded-lg bg-brand-50 border border-brand-200 p-3 flex items-center gap-3">
           {% if preselected_book.cover_image %}
-          <img src="{{ preselected_book.cover_image }}" alt="" class="h-12 w-9 rounded object-cover" />
+          <img src="/{{ preselected_book.cover_image }}" alt="" class="h-12 w-9 rounded object-cover" />
           {% endif %}
           <div>
             <p class="font-medium text-brand-900">{{ preselected_book.title }}</p>
-            <p class="text-xs text-brand-600">{{ preselected_book.author }} · {{ preselected_book.available_quantity }} available</p>
+            <p class="text-xs text-brand-600">{{ preselected_book.author }} · {{ preselected_book.available_quantity }} có sẵn</p>
           </div>
-          <a href="/admin/borrowings/issue" class="ml-auto text-xs text-brand-600 hover:underline whitespace-nowrap">Change</a>
+          <a href="/admin/borrowings/issue" class="ml-auto text-xs text-brand-600 hover:underline whitespace-nowrap">Thay đổi</a>
         </div>
 
         {% else %}
         <!-- Book typeahead search -->
         <div class="relative">
           <input id="book_search" type="text" autocomplete="off"
-            placeholder="Type title or author…"
+            placeholder="Nhập tên sách hoặc tác giả…"
             hx-get="/admin/borrowings/search-books"
             hx-trigger="keyup changed delay:300ms"
             hx-target="#book-results"
@@ -115,7 +115,7 @@
 
       <!-- Due date -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Due Date <span class="text-red-500">*</span></label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Hạn trả <span class="text-red-500">*</span></label>
         <input id="due_date_hidden" name="due_date" type="text" required
           value="{{ due_default }}"
           class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition" />
@@ -123,8 +123,8 @@
 
       <!-- Librarian notes -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
-        <textarea name="librarian_notes" rows="2" placeholder="Any notes for this borrowing…"
+        <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú (tùy chọn)</label>
+        <textarea name="librarian_notes" rows="2" placeholder="Ghi chú cho lần mượn này…"
           class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition resize-none"></textarea>
       </div>
 
@@ -134,11 +134,11 @@
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          Issue Book
+          Cấp phát sách
         </button>
         <a href="/admin/borrowings"
           class="inline-flex items-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-          Cancel
+          Hủy
         </a>
       </div>
 
@@ -196,7 +196,7 @@ function selectBook(id, title, author, avail, btn) {
   document.getElementById('book_id').value = id;
   document.getElementById('book_search').value = '';
   document.getElementById('book-results').classList.add('hidden');
-  document.getElementById('book-badge-text').textContent = title + ' — ' + author + ' (' + avail + ' available)';
+  document.getElementById('book-badge-text').textContent = title + ' — ' + author + ' (' + avail + ' có sẵn)';
   document.getElementById('book-badge').classList.remove('hidden');
 }
 function clearBook() {

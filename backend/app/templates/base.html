@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Library{% endblock %} — LMS</title>
+  <title>{% block title %}Thư viện{% endblock %} — LMS</title>
 
   <!-- TailwindCSS (CDN Play — JIT in browser) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -63,7 +63,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
         </svg>
-        Browse Books
+        Duyệt sách
       </a>
 
       {% if current_user %}
@@ -71,7 +71,7 @@
         <!-- Reader section -->
         {% if current_user.role in ['reader', 'librarian', 'admin'] %}
         <div class="pt-3">
-          <p class="px-3 text-xs font-semibold uppercase tracking-wider text-brand-400">My Library</p>
+          <p class="px-3 text-xs font-semibold uppercase tracking-wider text-brand-400">Thư viện của tôi</p>
           <div class="mt-1 space-y-1">
             <a href="/reader/my-books"
               class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
@@ -80,7 +80,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
-              My Books
+              Sách của tôi
             </a>
             <a href="/reader/history"
               class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
@@ -89,7 +89,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              History
+              Lịch sử
             </a>
           </div>
         </div>
@@ -98,7 +98,7 @@
         <!-- Librarian / Admin section -->
         {% if current_user.role in ['librarian', 'admin'] %}
         <div class="pt-3">
-          <p class="px-3 text-xs font-semibold uppercase tracking-wider text-brand-400">Librarian</p>
+          <p class="px-3 text-xs font-semibold uppercase tracking-wider text-brand-400">Thủ thư</p>
           <div class="mt-1 space-y-1">
             <a href="/admin/borrowings"
               class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
@@ -107,7 +107,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
-              Borrowings
+              Phiếu mượn
             </a>
             <a href="/admin/borrowings/issue"
               class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
@@ -116,7 +116,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              Issue Book
+              Cấp phát sách
             </a>
           </div>
         </div>
@@ -125,7 +125,7 @@
         <!-- Admin section -->
         {% if current_user.role == 'admin' %}
         <div class="pt-3">
-          <p class="px-3 text-xs font-semibold uppercase tracking-wider text-brand-400">Admin</p>
+          <p class="px-3 text-xs font-semibold uppercase tracking-wider text-brand-400">Quản trị</p>
           <div class="mt-1 space-y-1">
             <a href="/admin/dashboard"
               class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
@@ -134,7 +134,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              Dashboard
+              Bảng điều khiển
             </a>
             <a href="/admin/books"
               class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
@@ -143,7 +143,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
-              Books
+              Sách
             </a>
             <a href="/admin/categories"
               class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
@@ -152,7 +152,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
-              Categories
+              Thể loại
             </a>
             <a href="/admin/users"
               class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
@@ -161,7 +161,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
-              Users
+              Người dùng
             </a>
           </div>
         </div>
@@ -181,7 +181,7 @@
           </span>
           <div class="min-w-0 flex-1 text-left">
             <p class="truncate font-medium">{{ current_user.full_name }}</p>
-            <p class="truncate text-xs text-brand-400">{{ current_user.role.value }}</p>
+            <p class="truncate text-xs text-brand-400">{% set _role_vi = {'reader': 'Độc giả', 'librarian': 'Thủ thư', 'admin': 'Quản trị'} %}{{ _role_vi.get(current_user.role.value, current_user.role.value) }}</p>
           </div>
           <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -191,12 +191,12 @@
         <!-- Dropdown -->
         <div x-show="open" @click.outside="open=false" x-cloak
           class="absolute bottom-full left-0 mb-2 w-full rounded-xl bg-white shadow-xl ring-1 ring-black/5">
-          <a href="/reader/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-t-xl">Profile</a>
-          <a href="/reader/change-password" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Change Password</a>
+          <a href="/reader/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-t-xl">Hồ sơ</a>
+          <a href="/reader/change-password" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Đổi mật khẩu</a>
           <form method="post" action="/logout">
             <button type="submit"
               class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-xl">
-              Log out
+              Đăng xuất
             </button>
           </form>
         </div>
@@ -208,7 +208,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
         </svg>
-        Login
+        Đăng nhập
       </a>
       {% endif %}
     </div>
@@ -244,7 +244,7 @@
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          Issue Book
+          Cấp phát sách
         </a>
         {% endif %}
       </div>

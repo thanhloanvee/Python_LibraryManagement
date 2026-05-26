@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Manage Books{% endblock %}
+{% block title %}Quản lý sách{% endblock %}
 
 {% block breadcrumb %}
 <nav class="flex items-center gap-2 text-sm text-gray-500">
-  <a href="/admin/dashboard" class="hover:text-gray-700">Admin</a>
+  <a href="/admin/dashboard" class="hover:text-gray-700">Quản trị</a>
   <span>/</span>
-  <span class="text-gray-900 font-medium">Books</span>
+  <span class="text-gray-900 font-medium">Sách</span>
 </nav>
 {% endblock %}
 
@@ -15,15 +15,15 @@
   <!-- Header bar -->
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div>
-      <h2 class="text-xl font-bold text-gray-900">Books</h2>
-      <p class="text-sm text-gray-500">{{ total }} book{{ 's' if total != 1 else '' }} total</p>
+      <h2 class="text-xl font-bold text-gray-900">Sách</h2>
+      <p class="text-sm text-gray-500">{{ total }} sách tổng cộng</p>
     </div>
     <a href="/admin/books/new"
       class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 transition-colors shadow-sm">
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
       </svg>
-      Add Book
+      Thêm sách
     </a>
   </div>
 
@@ -35,24 +35,24 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
       </svg>
       <input name="search" type="text" value="{{ filters.search or '' }}"
-        placeholder="Title, author, ISBN…"
+        placeholder="Tên sách, tác giả, ISBN…"
         hx-get="/admin/books" hx-trigger="keyup changed delay:400ms"
         hx-target="#book-table-body" hx-include="closest form"
         class="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition" />
     </div>
     <select name="category_id" onchange="this.form.submit()"
       class="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-brand-500 focus:outline-none">
-      <option value="">All Categories</option>
+      <option value="">Tất cả thể loại</option>
       {% for cat in categories %}
       <option value="{{ cat.id }}" {% if filters.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
       {% endfor %}
     </select>
     <select name="status" onchange="this.form.submit()"
       class="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-brand-500 focus:outline-none">
-      <option value="">All Status</option>
-      <option value="available" {% if filters.status == 'available' %}selected{% endif %}>Available</option>
-      <option value="damaged"   {% if filters.status == 'damaged'   %}selected{% endif %}>Damaged</option>
-      <option value="lost"      {% if filters.status == 'lost'      %}selected{% endif %}>Lost</option>
+      <option value="">Tất cả trạng thái</option>
+      <option value="Có sẵn" {% if filters.status == 'Có sẵn' %}selected{% endif %}>Có sẵn</option>
+      <option value="Hư hỏng"   {% if filters.status == 'Hư hỏng'   %}selected{% endif %}>Hư hỏng</option>
+      <option value="Mất"      {% if filters.status == 'Mất'      %}selected{% endif %}>Thất lạc</option>
     </select>
     {% if filters.search or filters.category_id or filters.status %}
     <a href="/admin/books"
@@ -60,7 +60,7 @@
       <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
       </svg>
-      Clear
+      Xóa
     </a>
     {% endif %}
   </form>
@@ -71,11 +71,11 @@
       <table class="min-w-full divide-y divide-gray-100 text-sm">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Book</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Category</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
-            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Qty</th>
-            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Sách</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Thể loại</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Trạng thái</th>
+            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">SL</th>
+            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Thao tác</th>
           </tr>
         </thead>
         <tbody id="book-table-body" class="divide-y divide-gray-50">

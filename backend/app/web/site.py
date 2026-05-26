@@ -111,7 +111,7 @@ async def submit_review(
         data = ReviewCreate(book_id=book_id, rating=rating, comment=comment or None)
         await ReviewService(db).create_review(data, user.id)
         response = RedirectResponse(url=f"/books/{book_id}", status_code=303)
-        set_flash(response, "Review submitted successfully!", "success")
+        set_flash(response, "Đánh giá đã được gửi thành công!", "success")
     except HTTPException as exc:
         response = RedirectResponse(url=f"/books/{book_id}", status_code=303)
         set_flash(response, exc.detail, "error")

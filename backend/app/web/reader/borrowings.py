@@ -71,7 +71,7 @@ async def renew_borrowing(
         resp = RedirectResponse(url="/reader/my-books", status_code=302)
         set_flash(
             resp,
-            f"Borrowing renewed — new due date: {updated.due_date.strftime('%d/%m/%Y')}.",
+            f"Đã gia hạn — hạn trả mới là: {updated.due_date.strftime('%d/%m/%Y')}.",
             "success",
         )
         return resp

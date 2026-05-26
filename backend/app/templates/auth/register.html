@@ -1,9 +1,9 @@
 {% extends "auth/base.html" %}
-{% block title %}Register{% endblock %}
-{% block subtitle %}Create your reader account{% endblock %}
+{% block title %}Đăng ký{% endblock %}
+{% block subtitle %}Tạo tài khoản độc giả{% endblock %}
 
 {% block content %}
-<h2 class="text-xl font-bold text-gray-900 mb-6">Create an account</h2>
+<h2 class="text-xl font-bold text-gray-900 mb-6">Tạo tài khoản</h2>
 
 {% if errors and errors.general %}
 <div class="mb-4 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800">
@@ -14,7 +14,7 @@
 <form method="post" action="/register" class="space-y-4">
 
   <div>
-    <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">Full name <span class="text-red-500">*</span></label>
+    <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">Họ và tên <span class="text-red-500">*</span></label>
     <input id="full_name" name="full_name" type="text" required autocomplete="name"
       value="{{ form.full_name if form else '' }}"
       class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm
@@ -24,7 +24,7 @@
 
   <div class="grid grid-cols-2 gap-3">
     <div>
-      <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username <span class="text-red-500">*</span></label>
+      <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập <span class="text-red-500">*</span></label>
       <input id="username" name="username" type="text" required autocomplete="username"
         value="{{ form.username if form else '' }}"
         pattern="^[a-zA-Z0-9_]+"
@@ -33,7 +33,7 @@
         placeholder="john_doe" />
     </div>
     <div>
-      <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+      <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
       <input id="phone" name="phone" type="tel"
         value="{{ form.phone if form else '' }}"
         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm
@@ -52,13 +52,13 @@
   </div>
 
   <div>
-    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
+    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu <span class="text-red-500">*</span></label>
     <div class="relative" x-data="{ show: false }">
       <input id="password" name="password" :type="show ? 'text' : 'password'" required
         minlength="8"
         class="w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 text-sm shadow-sm
                focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition"
-        placeholder="At least 8 characters" />
+        placeholder="Ít nhất 8 ký tự" />
       <button type="button" @click="show = !show"
         class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600">
         <svg x-show="!show" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -70,18 +70,18 @@
         </svg>
       </button>
     </div>
-    <p class="mt-1 text-xs text-gray-500">Minimum 8 characters.</p>
+    <p class="mt-1 text-xs text-gray-500">Tối thiểu 8 ký tự.</p>
   </div>
 
   <button type="submit"
     class="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white
            hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition">
-    Create account
+    Tạo tài khoản
   </button>
 </form>
 
 <p class="mt-6 text-center text-sm text-gray-500">
-  Already have an account?
-  <a href="/login" class="font-medium text-brand-600 hover:text-brand-700">Sign in</a>
+  Đã có tài khoản?
+  <a href="/login" class="font-medium text-brand-600 hover:text-brand-700">Đăng nhập</a>
 </p>
 {% endblock %}

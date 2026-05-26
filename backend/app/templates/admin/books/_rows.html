@@ -4,7 +4,7 @@
   <td class="px-4 py-3">
     <div class="flex items-center gap-3">
       {% if book.cover_image %}
-      <img src="{{ book.cover_image }}" alt="" class="h-10 w-8 rounded object-cover shrink-0" />
+      <img src="/{{ book.cover_image }}" alt="" class="h-10 w-8 rounded object-cover shrink-0" />
       {% else %}
       <div class="h-10 w-8 rounded bg-gray-100 shrink-0 flex items-center justify-center">
         <svg class="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -22,10 +22,10 @@
   <td class="px-4 py-3 text-gray-600">{{ book.category.name if book.category else '—' }}</td>
   <td class="px-4 py-3">
     <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize
-      {% if book.status == 'available' %}bg-green-100 text-green-700
-      {% elif book.status == 'damaged' %}bg-amber-100 text-amber-700
+      {% if book.status.value == 'Có sẵn' %}bg-green-100 text-green-700
+      {% elif book.status.value == 'Hư hỏng' %}bg-amber-100 text-amber-700
       {% else %}bg-red-100 text-red-700{% endif %}">
-      {{ book.status }}
+      {{ book.status.value }}
     </span>
   </td>
   <td class="px-4 py-3 text-right">
@@ -36,13 +36,13 @@
     <div class="flex items-center justify-end gap-2">
       <a href="/admin/books/{{ book.id }}/edit"
         class="rounded-md px-2 py-1 text-xs font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors">
-        Edit
+        Chỉnh sửa
       </a>
       <form method="post" action="/admin/books/{{ book.id }}/delete"
-        onsubmit="return confirm('Delete \'{{ book.title }}\' — this cannot be undone.')">
+        onsubmit="return confirm('Xóa \'' + '{{ book.title }}' + '\' — hành động này không thể hoàn tác.')">
         <button type="submit"
           class="rounded-md px-2 py-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors">
-          Delete
+          Xóa
         </button>
       </form>
     </div>
@@ -50,6 +50,6 @@
 </tr>
 {% else %}
 <tr>
-  <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-400">No books found.</td>
+  <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-400">Không tìm thấy sách.</td>
 </tr>
 {% endfor %}

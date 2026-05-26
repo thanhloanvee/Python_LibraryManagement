@@ -67,8 +67,8 @@ async def toggle_user_status(
     )
     await svc.admin_update_user(user_id, UserAdminUpdate(status=new_status))
     resp = RedirectResponse(url="/admin/users", status_code=302)
-    label = "activated" if new_status == UserStatus.ACTIVE else "deactivated"
-    set_flash(resp, f"User '{user.username}' {label}.", "success")
+    label = "đã kích hoạt" if new_status == UserStatus.ACTIVE else "đã vô hiệu hóa"
+    set_flash(resp, f"Tài khoản '{user.username}' {label}.", "success")
     return resp
 
 
@@ -83,5 +83,5 @@ async def change_user_role(
     user = await svc.get_or_404(user_id)
     await svc.admin_update_user(user_id, UserAdminUpdate(role=UserRole(role)))
     resp = RedirectResponse(url="/admin/users", status_code=302)
-    set_flash(resp, f"Role updated for '{user.username}'.", "success")
+    set_flash(resp, f"Vai trò của '{user.username}' đã được cập nhật.", "success")
     return resp

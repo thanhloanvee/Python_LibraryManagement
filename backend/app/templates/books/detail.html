@@ -3,9 +3,9 @@
 
 {% block breadcrumb %}
 <nav class="flex items-center gap-2 text-sm text-gray-500">
-  <a href="/" class="hover:text-gray-700">Home</a>
+  <a href="/" class="hover:text-gray-700">Trang chủ</a>
   <span>/</span>
-  <a href="/books" class="hover:text-gray-700">Books</a>
+  <a href="/books" class="hover:text-gray-700">Sách</a>
   <span>/</span>
   <span class="text-gray-900 font-medium truncate max-w-xs">{{ book.title }}</span>
 </nav>
@@ -19,7 +19,7 @@
     <div class="lg:w-64 shrink-0">
       <div class="aspect-[3/4] w-full overflow-hidden rounded-xl bg-gray-100 shadow-md">
         {% if book.cover_image %}
-        <img src="{{ book.cover_image }}" alt="{{ book.title }}" class="h-full w-full object-cover" />
+        <img src="/{{ book.cover_image }}" alt="{{ book.title }}" class="h-full w-full object-cover" />
         {% else %}
         <div class="flex h-full w-full items-center justify-center">
           <svg class="h-24 w-24 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -35,12 +35,12 @@
         {% if book.is_available %}
         <span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
           <span class="h-2 w-2 rounded-full bg-green-500"></span>
-          {{ book.available_quantity }} of {{ book.quantity }} available
+          {{ book.available_quantity }} trong {{ book.quantity }} có sẵn
         </span>
         {% else %}
         <span class="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-800">
           <span class="h-2 w-2 rounded-full bg-red-500"></span>
-          Not Available
+          Không có sẵn
         </span>
         {% endif %}
       </div>
@@ -54,23 +54,23 @@
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Issue Book
+            Mượn sách
           </a>
           {% elif has_active_borrow %}
           <div class="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-500 cursor-not-allowed">
-            Already Borrowed
+            Đã được mượn
           </div>
           <form method="post" action="/reader/borrowings/{{ has_active_borrow }}/renew">
             <button type="submit"
               class="flex w-full items-center justify-center gap-2 rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-semibold text-brand-600 hover:bg-brand-50 transition-colors">
-              Renew Borrowing
+              Gia hạn mượn
             </button>
           </form>
           {% endif %}
         {% else %}
         <a href="/login?next=/books/{{ book.id }}"
           class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 transition-colors">
-          Login to Borrow
+          Đăng nhập để mượn
         </a>
         {% endif %}
       </div>
@@ -85,7 +85,7 @@
         </span>
         {% endif %}
         <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">{{ book.title }}</h1>
-        <p class="mt-1 text-lg text-gray-600">by {{ book.author }}</p>
+        <p class="mt-1 text-lg text-gray-600">bởi {{ book.author }}</p>
       </div>
 
       <!-- Metadata grid -->
@@ -98,26 +98,26 @@
         {% endif %}
         {% if book.publisher %}
         <div>
-          <dt class="text-gray-500 font-medium">Publisher</dt>
+          <dt class="text-gray-500 font-medium">Nhà xuất bản</dt>
           <dd class="text-gray-900">{{ book.publisher }}</dd>
         </div>
         {% endif %}
         {% if book.publication_year %}
         <div>
-          <dt class="text-gray-500 font-medium">Year</dt>
+          <dt class="text-gray-500 font-medium">Năm</dt>
           <dd class="text-gray-900">{{ book.publication_year }}</dd>
         </div>
         {% endif %}
         <div>
-          <dt class="text-gray-500 font-medium">Language</dt>
-          <dd class="text-gray-900">{{ 'Vietnamese' if book.language == 'vi' else 'English' }}</dd>
+          <dt class="text-gray-500 font-medium">Ngôn ngữ</dt>
+          <dd class="text-gray-900">{{ 'Tiếng Việt' if book.language == 'vi' else 'Tiếng Anh' }}</dd>
         </div>
         <div>
-          <dt class="text-gray-500 font-medium">Status</dt>
+          <dt class="text-gray-500 font-medium">Trạng thái</dt>
           <dd>
             <span class="capitalize inline-block rounded-full px-2 py-0.5 text-xs font-medium
-              {% if book.status == 'available' %}bg-green-100 text-green-700
-              {% elif book.status == 'damaged' %}bg-amber-100 text-amber-700
+              {% if book.status == 'Có sẵn' %}bg-green-100 text-green-700
+              {% elif book.status == 'Hư hỏng' %}bg-amber-100 text-amber-700
               {% else %}bg-red-100 text-red-700{% endif %}">
               {{ book.status.value }}
             </span>
@@ -125,11 +125,11 @@
         </div>
         {% if avg_rating %}
         <div>
-          <dt class="text-gray-500 font-medium">Rating</dt>
+          <dt class="text-gray-500 font-medium">Đánh giá</dt>
           <dd class="flex items-center gap-1">
             <span class="text-amber-400">★</span>
             <span class="text-gray-900 font-medium">{{ "%.1f"|format(avg_rating) }}</span>
-            <span class="text-gray-400 text-xs">({{ reviews|length }} reviews)</span>
+            <span class="text-gray-400 text-xs">({{ reviews|length }} lượt đánh giá)</span>
           </dd>
         </div>
         {% endif %}
@@ -138,7 +138,7 @@
       <!-- Description -->
       {% if book.description %}
       <div class="mt-6">
-        <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Description</h3>
+        <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Mô tả</h3>
         <p class="text-gray-600 leading-relaxed">{{ book.description }}</p>
       </div>
       {% endif %}
@@ -146,7 +146,7 @@
       <!-- Reviews section -->
       <div class="mt-8 border-t border-gray-100 pt-6">
         <h3 class="text-base font-semibold text-gray-900 mb-4">
-          Reviews
+          Đánh giá
           {% if reviews %}
           <span class="ml-2 text-sm font-normal text-gray-400">({{ reviews|length }})</span>
           {% endif %}
@@ -158,7 +158,7 @@
           class="mb-6 rounded-xl bg-gray-50 border border-gray-200 p-4 space-y-3">
           <input type="hidden" name="book_id" value="{{ book.id }}" />
           <div class="flex items-center gap-2" x-data="{ rating: 5 }">
-            <span class="text-sm font-medium text-gray-700">Rating:</span>
+            <span class="text-sm font-medium text-gray-700">Đánh giá:</span>
             <div class="flex gap-1">
               {% for i in range(1, 6) %}
               <label>
@@ -172,11 +172,11 @@
               {% endfor %}
             </div>
           </div>
-          <textarea name="comment" rows="2" placeholder="Share your thoughts…"
+          <textarea name="comment" rows="2" placeholder="Chia sẻ suy nghĩ của bạn…"
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none transition resize-none"></textarea>
           <button type="submit"
             class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors">
-            Submit Review
+            Gửi đánh giá
           </button>
         </form>
         {% endif %}
@@ -192,7 +192,7 @@
                   {{ review.user.full_name[:2] if review.user else '??' }}
                 </span>
                 <div>
-                  <p class="text-sm font-medium text-gray-900">{{ review.user.full_name if review.user else 'Anonymous' }}</p>
+                  <p class="text-sm font-medium text-gray-900">{{ review.user.full_name if review.user else 'Ẩn danh' }}</p>
                   <p class="text-xs text-gray-400">{{ review.created_at.strftime('%d %b %Y') }}</p>
                 </div>
               </div>
@@ -208,7 +208,7 @@
           {% endfor %}
         </div>
         {% else %}
-        <p class="text-sm text-gray-400 text-center py-6">No reviews yet. Be the first to review!</p>
+        <p class="text-sm text-gray-400 text-center py-6">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!</p>
         {% endif %}
       </div>
 

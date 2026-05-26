@@ -10,6 +10,7 @@ from app.models.review import Review
 from app.models.user import User, UserRole, UserStatus
 from app.schemas.dashboard import (
     ActiveReader,
+    BookInventoryItem,
     DashboardStats,
     MonthlyBorrowingStat,
     PopularBook,
@@ -24,6 +25,10 @@ class DashboardService:
         """Aggregate KPIs for the admin dashboard."""
         total_books = (
             await self._db.execute(select(func.count(Book.id)))
+        ).scalar_one()
+
+        total_quantity = (
+            await self._db.execute(select(func.coalesce(func.sum(Book.quantity), 0)))
         ).scalar_one()
 
         total_users = (
@@ -73,6 +78,7 @@ class DashboardService:
 
         return DashboardStats(
             total_books=total_books,
+            total_quantity=int(total_quantity),
             total_users=total_users,
             total_borrowings=total_borrowings,
             active_borrowings=active_borrowings,
@@ -80,6 +86,31 @@ class DashboardService:
             total_fine_collected=float(fine_collected),
             total_fine_outstanding=float(fine_outstanding),
         )
+
+    async def get_book_inventory(self) -> list[BookInventoryItem]:
+        """All books with their total and available quantity, low-stock first."""
+        rows = (
+            await self._db.execute(
+                select(
+                    Book.id,
+                    Book.title,
+                    Book.author,
+                    Book.quantity,
+                    Book.available_quantity,
+                )
+                .order_by(Book.available_quantity.asc(), Book.title.asc())
+            )
+        ).all()
+        return [
+            BookInventoryItem(
+                id=row.id,
+                title=row.title,
+                author=row.author,
+                quantity=row.quantity,
+                available_quantity=row.available_quantity,
+            )
+            for row in rows
+        ]
 
     async def get_popular_books(self, limit: int = 10) -> list[PopularBook]:
         """Top N books by borrow count."""

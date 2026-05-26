@@ -5,7 +5,7 @@
   <!-- Cover image -->
   <div class="aspect-[3/4] bg-gray-100 overflow-hidden relative">
     {% if book.cover_image %}
-    <img src="{{ book.cover_image }}" alt="{{ book.title }}"
+    <img src="/{{ book.cover_image }}" alt="{{ book.title }}"
       class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
     {% else %}
     <div class="flex h-full w-full items-center justify-center">
@@ -19,11 +19,11 @@
     <!-- Available badge -->
     {% if book.is_available %}
     <span class="absolute top-2 right-2 rounded-full bg-green-500 px-2 py-0.5 text-xs font-medium text-white shadow">
-      Available
+      Có sẵn
     </span>
     {% else %}
     <span class="absolute top-2 right-2 rounded-full bg-gray-400 px-2 py-0.5 text-xs font-medium text-white shadow">
-      Unavailable
+      Không có sẵn
     </span>
     {% endif %}
   </div>

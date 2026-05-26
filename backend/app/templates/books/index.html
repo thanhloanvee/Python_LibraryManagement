@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Browse Books{% endblock %}
+{% block title %}Duyệt sách{% endblock %}
 
 {% block breadcrumb %}
 <nav class="flex items-center gap-2 text-sm text-gray-500">
-  <a href="/" class="hover:text-gray-700">Home</a>
+  <a href="/" class="hover:text-gray-700">Trang chủ</a>
   <span>/</span>
-  <span class="text-gray-900 font-medium">Books</span>
+  <span class="text-gray-900 font-medium">Sách</span>
 </nav>
 {% endblock %}
 
@@ -18,7 +18,7 @@
 
     <!-- Live search input -->
     <div class="flex-1 min-w-[200px]">
-      <label class="sr-only" for="search">Search</label>
+      <label class="sr-only" for="search">Tìm kiếm</label>
       <div class="relative">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
           fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -26,7 +26,7 @@
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input id="search" type="text" name="search" value="{{ filters.search or '' }}"
-          placeholder="Search by title, author, ISBN…"
+          placeholder="Tìm theo tên sách, tác giả, ISBN…"
           hx-get="/books"
           hx-trigger="keyup changed delay:400ms"
           hx-target="#book-grid"
@@ -40,7 +40,7 @@
     <!-- Category filter -->
     <select name="category_id" onchange="this.form.submit()"
       class="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-brand-500 focus:outline-none">
-      <option value="">All Categories</option>
+      <option value="">Tất cả thể loại</option>
       {% for cat in categories %}
       <option value="{{ cat.id }}" {% if filters.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
       {% endfor %}
@@ -49,9 +49,9 @@
     <!-- Language filter -->
     <select name="language" onchange="this.form.submit()"
       class="rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-brand-500 focus:outline-none">
-      <option value="">All Languages</option>
+      <option value="">Tất cả ngôn ngữ</option>
       <option value="vi" {% if filters.language == 'vi' %}selected{% endif %}>Tiếng Việt</option>
-      <option value="en" {% if filters.language == 'en' %}selected{% endif %}>English</option>
+      <option value="en" {% if filters.language == 'en' %}selected{% endif %}>Tiếng Anh</option>
     </select>
 
     {% if filters.search or filters.category_id or filters.language %}
@@ -59,7 +59,7 @@
       <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
       </svg>
-      Clear
+      Xóa
     </a>
     {% endif %}
   </form>
