@@ -1,109 +1,192 @@
-# DEFENSE_NOTES.md — Library Management System
+# DEFENSE_NOTES.md — Hệ Thống Quản Lý Thư Viện
 ## Phase 3 Part A: Project Limitation Review
 
-> Tài liệu này tổng hợp các hạn chế thực tế của hệ thống, các cải tiến tiềm năng,
-> và những điểm không nên nhấn mạnh quá mức trong buổi bảo vệ.
+> Tài liệu này tổng hợp các hạn chế thực tế của hệ thống nhìn từ implementation,
+> các cải tiến tiềm năng, và những điểm không nên nhấn mạnh quá mức trong buổi bảo vệ.
 
 ---
 
 ## 1. Project Limitations
 
-### Hạn chế kỹ thuật
+Các hạn chế dưới đây đều quan sát trực tiếp từ codebase — không phỏng đoán.
 
-| # | Hạn chế | Biểu hiện trong code | Ảnh hưởng |
-|---|---|---|---|
-| 1 | **SQLite không phù hợp cho production** | `database_url = "sqlite+aiosqlite:///./library.db"` — single file, không hỗ trợ concurrent writes | Tốt cho học thuật, sẽ gặp bottleneck khi có nhiều user đồng thời |
-| 2 | **Không có background job tự động** | `sync_overdue_statuses()` chỉ chạy khi Admin kích hoạt thủ công hoặc gọi qua API | Trạng thái OVERDUE không cập nhật tự động theo thời gian thực; cron job chưa được tích hợp vào app |
-| 3 | **Refresh token không được lưu trữ/revoke** | `create_refresh_token()` chỉ ký JWT, không lưu vào DB → không thể invalidate khi logout | Refresh token bị lộ vẫn có thể dùng trong 7 ngày (hết hạn theo `refresh_token_expire_days`) |
-| 4 | **TailwindCSS qua CDN Play (JIT)** | Template dùng CDN: `https://cdn.tailwindcss.com` — runtime compilation | Không tối ưu cho production; tải thêm vài trăm KB JS cho mỗi lần load trang |
-| 5 | **Ảnh bìa lưu trực tiếp trên server** | `app/static/uploads/` — đặt tên file theo ISBN | Không dùng cloud storage; mất file khi redeploy nếu không mount volume |
-| 6 | **Không có rate limiting** | Không có giới hạn số lần gọi API | Endpoint `/api/v1/auth/login` và `/api/v1/auth/register` có thể bị brute-force |
-| 7 | **Tự động tạo bảng thay vì chạy migration** | `main.py`: chỉ `create_all` trong môi trường `development`/`testing` | Migration Alembic (001_initial_schema.py) tồn tại nhưng không phải quy trình chính để khởi tạo DB trong dev |
-| 8 | **Không có audit trail** | Không có bảng `audit_log` hay middleware ghi lại ai thay đổi gì | Không thể truy vết lịch sử chỉnh sửa dữ liệu quan trọng (ai tạo/xóa sách, ai thay đổi role) |
+### 1.1 Hạn chế kỹ thuật
 
-### Hạn chế nghiệp vụ
+#### Token không có revoke list
+**File:** `app/web/auth.py:123–128`, `app/services/auth.py`
 
-| # | Hạn chế | Giải thích |
-|---|---|---|
-| 1 | **Reader không tự mượn sách** | Flow mượn sách bắt buộc phải qua Librarian (`/admin/borrowings/issue`); Reader không có form tự nộp yêu cầu |
-| 2 | **Không có reservation / đặt giữ sách** | Khi sách hết bản (`available_quantity = 0`), Reader không có cơ chế đặt chỗ trong hàng đợi |
-| 3 | **Thanh toán tiền phạt offline** | `fine_paid` chỉ là boolean — thủ thư click "đánh dấu đã thanh toán"; không tích hợp payment gateway |
-| 4 | **Không có thông báo tự động** | Không gửi email/SMS nhắc nhở hạn trả, cảnh báo sách quá hạn, hay xác nhận mượn/trả |
-| 5 | **Phạt chỉ tính theo ngày** | `fine_amount = days_overdue × 5,000 VND` — đơn giản, không phân biệt weekend/ngày lễ hay mức phạt lũy tiến |
-| 6 | **Không quản lý nhiều chi nhánh** | Hệ thống thiết kế cho một thư viện đơn lẻ; không có khái niệm branch/location cho sách |
+Khi người dùng logout, server chỉ xóa cookie phía client (`delete_cookie`). Token JWT vẫn hợp lệ cho đến khi hết hạn (mặc định 60 phút). Không có blacklist hay revocation mechanism. Nếu token bị lộ sau khi logout, nó vẫn dùng được trong khoảng thời gian còn lại.
 
-### Hạn chế về test coverage
+#### Upload ảnh bìa dùng blocking I/O
+**File:** `app/web/admin/books.py:33–39`
 
-| # | Hạn chế | Chi tiết |
-|---|---|---|
-| 1 | **Test coverage hạn chế** | Chỉ có 18 test cases — tập trung vào auth, books, borrowings; không có tests cho dashboard, reviews, categories, web UI |
-| 2 | **Không có test cho Web UI** | Toàn bộ Jinja2 templates (`/web/*` routes) không được cover bởi tests tự động |
-| 3 | **Không test sync_overdue** | Business logic quan trọng `sync_overdue_statuses()` chưa có test case |
+```python
+with open(dest, "wb") as f:
+    shutil.copyfileobj(cover_file.file, f)
+```
+
+File được ghi bằng synchronous I/O (`shutil.copyfileobj`) bên trong async route, không dùng `aiofiles` mặc dù `aiofiles` đã có trong dependencies. Điều này block event loop trong thời gian ghi file — ảnh hưởng hiệu năng khi có nhiều upload đồng thời.
+
+#### Sync Overdue hoàn toàn thủ công
+**File:** `app/api/v1/borrowings.py:200–215`, `app/services/borrowing.py:203–218`
+
+Endpoint `/api/v1/borrowings/sync-overdue` cần được gọi thủ công (Admin bấm nút hoặc curl). Hệ thống không có cron job hay scheduler tự động. Comment trong code ghi "Can be called by a scheduled background task" nhưng không có implementation.
+
+#### Không có rate limiting
+Không có middleware hay dependency rate limiting cho bất kỳ endpoint nào. Endpoint `POST /auth/login`, `POST /auth/register` có thể bị tấn công brute-force mà không bị giới hạn.
+
+#### SQLite concurrency
+Database engine là SQLite với `check_same_thread=False`. SQLite chỉ hỗ trợ một writer tại một thời điểm (WAL mode không được bật). Với nhiều concurrent write request (issue book, return), có thể xảy ra locking delay. Phù hợp đồ án, không phù hợp production quy mô lớn.
+
+#### Cover image không validate loại file
+**File:** `app/web/admin/books.py:34`
+
+Chỉ lấy extension từ tên file upload (`Path(cover_file.filename).suffix.lower()`) mà không kiểm tra MIME type thực sự. Có thể upload file không phải ảnh với extension giả.
+
+---
+
+### 1.2 Hạn chế tính năng
+
+#### Không có hệ thống thông báo (Notification)
+Không có email/SMS notification. Reader không nhận được cảnh báo khi:
+- Sắp đến hạn trả sách (ví dụ: 3 ngày trước due_date)
+- Sách đã trở thành OVERDUE
+- Phiếu mượn được tạo thành công
+
+#### Không có tính năng đặt trước / danh sách chờ
+Không có reservation hay waiting list. Khi sách hết `available_quantity`, reader không thể đặt trước. Thủ thư phải thông báo ngoài hệ thống.
+
+#### Không có quản lý nhiều bản sao (Copy management)
+Hệ thống theo dõi `quantity` và `available_quantity` ở cấp độ đầu sách, không theo cấp độ từng bản vật lý. Không thể phân biệt bản nào đang ở tay reader nào khi một đầu sách có nhiều bản.
+
+#### Không tích hợp barcode / QR
+Cấp phát và trả sách hoàn toàn bằng tìm kiếm thủ công. Không có tích hợp máy quét mã vạch hay QR code.
+
+#### Không có export báo cáo
+Dashboard chỉ hiển thị số liệu trực quan. Không có tính năng export PDF, Excel, CSV cho bất kỳ báo cáo hay danh sách nào.
+
+#### Không có quản lý tài chính chi tiết
+Phí phạt chỉ gồm `fine_amount` (VND) và `fine_paid` (boolean). Không có lịch sử giao dịch thanh toán, không theo dõi người thu tiền, không có ngày thu tiền.
+
+#### Không có reset mật khẩu qua email
+Chỉ có chức năng đổi mật khẩu khi biết mật khẩu cũ (`change_password`). Không có flow "quên mật khẩu" / gửi link reset qua email.
+
+#### Ảnh bìa lưu local disk
+`UPLOAD_DIR` là thư mục `static/uploads/` trên server. Không có CDN, không có backup. Nếu server reset, ảnh bìa mất.
+
+---
+
+### 1.3 Phạm vi test
+
+Có **17 test case** trải qua 3 file:
+- `test_auth.py` — 7 tests: đăng ký, đăng nhập, JWT, phân quyền
+- `test_books.py` — 6 tests: CRUD sách, phân quyền admin
+- `test_borrowings.py` — 4 tests: issue/return, unavailable, RBAC reader, max renewals
+
+**Chưa có test cho:**
+- Web UI routes (chỉ test REST API)
+- Review service
+- Dashboard aggregation
+- Edge cases của phí phạt (fine calculation)
+- Sync overdue batch
+- File upload
 
 ---
 
 ## 2. Potential Improvements
 
-### Cải tiến kỹ thuật ngắn hạn (dễ thực hiện)
+Các cải tiến có thể thực hiện trong phạm vi đồ án hoặc giai đoạn tiếp theo.
 
-| Cải tiến | Hướng thực hiện |
-|---|---|
-| **Chuyển sang PostgreSQL** | Thay `sqlite+aiosqlite` bằng `postgresql+asyncpg`; cấu hình qua biến môi trường `DATABASE_URL` |
-| **Tự động sync overdue** | Tích hợp `APScheduler` hoặc `FastAPI-Scheduler` để chạy `sync_overdue_statuses()` hằng đêm (ví dụ: 0:00 AM) |
-| **Rate limiting** | Thêm `slowapi` (giới hạn request/phút trên endpoint auth) |
-| **Refresh token blacklist** | Lưu `refresh_token` vào bảng `user_tokens` với trường `revoked`; xóa khi logout |
-| **Build TailwindCSS** | Chuyển từ CDN sang `tailwindcss` CLI để generate file CSS tối ưu |
-| **Cloud storage cho ảnh** | Tích hợp S3-compatible storage (AWS S3, Cloudflare R2, MinIO) thay vì local `uploads/` |
+### 2.1 Kỹ thuật ngắn hạn
 
-### Cải tiến nghiệp vụ trung hạn
+| Cải tiến | Mô tả | Độ phức tạp |
+|---|---|---|
+| **Async file upload** | Thay `shutil.copyfileobj` bằng `await aiofiles.open()` để không block event loop | Thấp |
+| **Token blacklist đơn giản** | Lưu jti (JWT ID) vào Redis hoặc bảng DB khi logout, check khi xác thực | Trung bình |
+| **APScheduler cho sync overdue** | Thêm `apscheduler` vào lifespan, chạy `sync_overdue_statuses()` mỗi giờ tự động | Thấp |
+| **Rate limiting** | Thêm `slowapi` cho các endpoint auth để giới hạn request | Thấp |
+| **File upload MIME validation** | Dùng `python-magic` để validate MIME type thực thay vì chỉ dựa extension | Thấp |
+| **Mở rộng test coverage** | Thêm test cho review, dashboard, file upload, fine calculation edge cases | Trung bình |
 
-| Cải tiến | Hướng thực hiện |
-|---|---|
-| **Hệ thống đặt giữ sách** | Thêm bảng `reservations` — reader đặt chỗ khi sách hết; tự động thông báo khi sách được trả |
-| **Self-service borrowing request** | Reader tạo `BorrowingRequest`; Librarian approve/reject qua dashboard |
-| **Email notifications** | Tích hợp `FastAPI-Mail` / SendGrid — gửi email xác nhận mượn, nhắc hạn trả 3 ngày trước |
-| **Audit log** | Thêm `AuditLog` model ghi lại `(user_id, action, entity, entity_id, timestamp)` cho các thao tác quan trọng |
-| **Phân trang trên Dashboard** | Hiện tại top sách/readers hard-code 5-10 items; thêm option chọn date range |
+### 2.2 Tính năng trung hạn
+
+| Cải tiến | Mô tả | Độ phức tạp |
+|---|---|---|
+| **Email notification** | Tích hợp `fastapi-mail` + SMTP, gửi nhắc hạn trả trước 3 ngày | Trung bình |
+| **Đặt trước sách** | Thêm bảng `reservations` — reader đặt trước khi sách hết, hệ thống thông báo khi có sẵn | Trung bình |
+| **Export báo cáo** | Dùng `openpyxl` (Excel) hoặc `reportlab` (PDF) cho dashboard và danh sách phiếu | Trung bình |
+| **Password reset qua email** | Flow quên mật khẩu: gửi link có token 1 giờ, reset qua link | Trung bình |
+| **Fine payment history** | Thêm bảng `fine_payments` lưu lịch sử thu phạt (ai thu, khi nào, bao nhiêu) | Trung bình |
 
 ---
 
 ## 3. Future Enhancements
 
-### Hướng phát triển dài hạn
+Các cải tiến cho phiên bản tương lai nếu hệ thống được phát triển thêm.
 
-| # | Enhancement | Mô tả |
-|---|---|---|
-| 1 | **Ứng dụng di động** | Tận dụng REST API hiện có (`/api/v1/`) để xây dựng app iOS/Android bằng React Native hoặc Flutter |
-| 2 | **Hệ thống đề xuất sách** | Recommendation engine dựa trên lịch sử mượn và thể loại yêu thích của reader |
-| 3 | **Tích hợp barcode/QR** | Scanner barcode ISBN khi mượn/trả để tăng tốc quy trình tại quầy |
-| 4 | **Multi-branch support** | Mở rộng hệ thống quản lý nhiều chi nhánh thư viện, chuyển sách liên chi nhánh |
-| 5 | **Thanh toán online** | Tích hợp VNPay / MoMo để reader thanh toán tiền phạt trực tuyến |
-| 6 | **Reporting nâng cao** | Export báo cáo Excel/PDF; thống kê theo thể loại, mùa vụ, xu hướng đọc sách |
-| 7 | **Containerization** | Đóng gói bằng Docker + Docker Compose; deploy lên cloud (Railway, Render, VPS) |
-| 8 | **Full-text search nâng cao** | Tích hợp Elasticsearch hoặc Meilisearch để tìm kiếm nội dung sách, tìm kiếm mờ (fuzzy search) |
+### 3.1 Nâng cấp hạ tầng
+
+- **Chuyển sang PostgreSQL** — thay SQLite để hỗ trợ concurrent writes, full-text search tốt hơn, partitioning
+- **Containerization** — Docker + docker-compose để chuẩn hoá môi trường deployment
+- **CI/CD pipeline** — GitHub Actions chạy pytest tự động trên mỗi PR
+- **Separate static file storage** — S3 hoặc MinIO cho ảnh bìa sách, tránh mất file
+
+### 3.2 Mở rộng tính năng
+
+- **Mobile-friendly UI** — hiện tại responsive nhưng chưa tối ưu cho mobile nhỏ
+- **Barcode scanner integration** — Quagga.js hoặc ZXing để quét ISBN từ camera trình duyệt
+- **Multi-branch support** — mở rộng hệ thống cho thư viện có nhiều chi nhánh
+- **Digital content** — liên kết sách với file PDF/EPUB (ebook lending)
+- **Fine amnesty / waiver** — Admin có thể miễn giảm phí phạt một phần
+- **Bulk import** — Import danh sách sách từ CSV/Excel thay vì nhập từng cuốn
+
+### 3.3 Bảo mật nâng cao
+
+- **Two-factor authentication (2FA)** — TOTP (Google Authenticator) cho tài khoản Admin/Librarian
+- **Audit log** — Ghi lại mọi thao tác nhạy cảm (thay đổi role, xóa user, xóa sách) kèm actor và timestamp
+- **CAPTCHA** — Thêm CAPTCHA vào form đăng ký và đăng nhập để chống bot
 
 ---
 
 ## 4. Topics That Should NOT Be Overemphasized During Presentation
 
-### Tránh nhấn mạnh quá mức những điểm sau
+Các điểm nên trình bày ngắn gọn hoặc không chủ động đề cập để tránh tạo ấn tượng tiêu cực không cần thiết.
+
+### 4.1 Không chủ động đề cập
 
 | Chủ đề | Lý do |
 |---|---|
-| **SQLite trong production** | Đây là dự án học thuật — SQLite là lựa chọn hợp lý cho scope này. Không cần xin lỗi về SQLite; thay vào đó hãy trình bày rõ "phù hợp với quy mô thư viện nhỏ và môi trường học tập" |
-| **Thiếu email notifications** | Đây là tính năng phụ, không ảnh hưởng đến core business flow. Mention như "future enhancement" là đủ |
-| **Test coverage thấp** | Nếu hỏi, hãy trình bày những gì đã test (happy path, RBAC, business rules); không cần liệt kê những gì chưa test trừ khi bị hỏi cụ thể |
-| **TailwindCSS CDN** | Chi tiết kỹ thuật này không có giá trị trình bày; nếu hỏi về performance thì mới đề cập |
-| **Không có barcode scanner** | Tính năng tiện lợi nhưng không phải core requirement của đề tài quản lý thư viện |
-| **Refresh token không có blacklist** | Chi tiết security nâng cao, nằm ngoài scope đề tài học thuật; chỉ đề cập nếu bị hỏi sâu về security |
-| **Sync overdue thủ công** | Hãy trình bày là "có thể tích hợp cron job trong tương lai" thay vì nói đây là lỗ hổng |
+| **Blocking file upload** | Lỗi kỹ thuật nhỏ trong async context — khó nhận ra nếu không đo benchmark, không ảnh hưởng đến chức năng |
+| **Thiếu rate limiting** | Đây là concern của production deployment, không phải đồ án học thuật |
+| **SQLite concurrency limit** | Hệ thống hoạt động hoàn toàn đúng trong bối cảnh thư viện quy mô nhỏ/vừa |
+| **Token không revoke ngay lập tức** | Đây là tradeoff thiết kế JWT stateless được chấp nhận rộng rãi, không phải lỗi |
+| **Test coverage chưa 100%** | 17 test case cover các happy path và business-critical paths — đủ cho đồ án |
 
-### Điểm mạnh nên chủ động nhấn mạnh thay thế
+### 4.2 Nếu bị hỏi — trả lời tự tin
 
-| Thay vì nói về... | Hãy nhấn mạnh... |
-|---|---|
-| SQLite → chậm | FastAPI async → xử lý concurrent requests tốt |
-| Thiếu email | HTMX live search → UX mượt mà, không reload trang |
-| Test ít | Business rules được enforce chặt chẽ (5 validation checks khi mượn sách) |
-| Không có reservation | Hệ thống kiểm tra `available_quantity` real-time tránh double-booking |
-| Không có mobile app | REST API sẵn sàng — có thể tích hợp mobile sau |
+**Q: "Tại sao dùng SQLite thay vì PostgreSQL?"**
+> SQLite phù hợp với phạm vi đồ án — không cần cài đặt server riêng, dễ setup và demo. Nếu triển khai thực tế với nhiều người dùng đồng thời, sẽ migrate sang PostgreSQL mà không cần thay đổi code (chỉ đổi `DATABASE_URL`).
+
+**Q: "Token có bị lộ sau khi logout không?"**
+> Logout xóa cookie phía client, token hết hiệu lực sau 60 phút. Đây là tradeoff của JWT stateless — ưu điểm là không cần server-side session store. Giải pháp cải tiến là thêm token blacklist với Redis, sẽ implement trong phiên bản tiếp theo.
+
+**Q: "Sách quá hạn có tự động cập nhật không?"**
+> Hiện tại Admin kích hoạt thủ công hoặc gọi API endpoint. Hệ thống đã thiết kế sẵn `sync_overdue_statuses()` — bước tiếp theo là thêm APScheduler để chạy định kỳ tự động, code đã sẵn sàng.
+
+**Q: "Không có test cho Web UI?"**
+> Integration tests cover toàn bộ REST API endpoints qua httpx. Web UI routes dùng cùng Service layer đã được test — không bị duplicate logic. Test UI end-to-end (Selenium/Playwright) là bước cải tiến tiếp theo.
+
+**Q: "Tại sao không có email thông báo?"**
+> Email notification đòi hỏi SMTP server, xử lý async queue — vượt phạm vi đồ án. Kiến trúc hiện tại (Service layer tách biệt) cho phép thêm email service mà không ảnh hưởng business logic hiện có.
+
+### 4.3 Điểm mạnh nên nhấn mạnh thay thế
+
+Khi hội đồng hỏi về hạn chế, sau khi thừa nhận ngắn gọn, chuyển sang điểm mạnh:
+
+- **Kiến trúc phân tầng rõ ràng** — dễ mở rộng, dễ test từng layer độc lập
+- **Business rules được enforce ở đúng layer** — Service layer, không phải ở controller hay DB trigger
+- **Dual authentication** — JWT Bearer cho API, httponly cookie cho Web — cả hai được implement đúng
+- **RBAC 3 cấp** — enforce ở cả API Dependency lẫn Web route, không thể bypass
+- **Tự động tính phí phạt** — logic gọn trong model method `calculate_fine()`, không hardcode
+- **REST API với Swagger UI** — production-ready API documentation tự động từ Pydantic schema
+- **Database integrity** — RESTRICT FK ngăn xóa sách/user có phiếu mượn, UNIQUE constraint ngăn duplicate review

@@ -1,724 +1,625 @@
-# DESIGN_DOC.md — Library Management System
-## Presentation Design Context
+# DESIGN_DOC.md — Presentation Design Context
+## Hệ Thống Quản Lý Thư Viện (Library Management System)
 
-> Tài liệu này được tạo cho mục đích trình bày (PowerPoint / Gamma / Canva AI).
-> Tập trung vào hiểu biết nghiệp vụ, giới thiệu công nghệ và tổng quan hệ thống.
+> Tài liệu này được thiết kế để làm nguồn ngữ cảnh chính cho các công cụ tạo slide AI (Gamma, Canva AI, Beautiful.ai, PowerPoint Copilot).
+> Tập trung vào: hiểu nghiệp vụ · giới thiệu công nghệ · tổng quan hệ thống.
 
 ---
 
 ## 1. Project Introduction
 
-**Tên dự án:** Library Management System (LMS)
+**Tên đề tài:** Hệ Thống Quản Lý Thư Viện Trực Tuyến
 
 **Một câu mô tả:**
-> Hệ thống quản lý thư viện trực tuyến, số hoá toàn bộ quy trình từ tra cứu sách, mượn/trả, đến theo dõi tồn kho và thống kê hoạt động.
+Ứng dụng web full-stack bằng Python giúp thư viện số hoá toàn bộ quy trình mượn/trả sách, quản lý kho sách theo thời gian thực và cung cấp thống kê hoạt động cho ban quản lý.
 
-**Bối cảnh ra đời:**
-Hệ thống được xây dựng lại từ nền tảng PHP/Yii2 cũ sang Python/FastAPI hiện đại — một dự án tái cấu trúc (rewrite) hoàn toàn, giữ nguyên nghiệp vụ nhưng nâng cấp toàn bộ công nghệ.
+**Bối cảnh:**
+Thư viện truyền thống vận hành bằng sổ sách giấy — gây khó khăn trong kiểm soát tồn kho, theo dõi sách quá hạn và tổng hợp báo cáo. Hệ thống này thay thế hoàn toàn quy trình thủ công đó bằng một nền tảng web hiện đại, bất đồng bộ, có REST API và giao diện thân thiện.
 
-**Điểm nổi bật:**
-- Vừa là ứng dụng Web hoàn chỉnh (giao diện HTML đầy đủ)
-- Vừa là REST API có thể tích hợp với bất kỳ frontend nào
-- Giao diện phản hồi nhanh nhờ HTMX — không cần reload trang khi tìm kiếm
-- Tự động hóa tính phí phạt, theo dõi tồn kho theo thời gian thực
+**Phạm vi:**
+- Quản lý kho sách (thêm, sửa, xóa, upload ảnh bìa, phân loại)
+- Lưu thông sách (mượn, trả, gia hạn, phí phạt tự động)
+- Phân quyền 3 vai trò (Reader · Librarian · Admin)
+- Dashboard thống kê trực quan (biểu đồ, KPI, top sách/người dùng)
+- REST API đầy đủ với tài liệu tự động (Swagger UI)
 
 ---
 
 ## 2. System Objectives
 
-### Mục tiêu chính
+### Mục tiêu chức năng
 
-| # | Mục tiêu | Giải pháp trong hệ thống |
+| # | Mục tiêu | Kết quả cụ thể |
 |---|---|---|
-| 1 | Số hoá phiếu mượn/trả | Module Borrowing với đầy đủ trạng thái: borrowed → returned / overdue |
-| 2 | Kiểm soát tồn kho real-time | Trường `available_quantity` cập nhật ngay khi mượn/trả |
-| 3 | Tự động tính phí phạt | `fine_amount = days_overdue × 5,000 VND` — tính tại thời điểm trả |
-| 4 | Phân quyền rõ ràng | RBAC 3 cấp: Reader / Librarian / Admin |
-| 5 | Thống kê quản lý | Admin Dashboard: KPI, biểu đồ tháng, top sách/độc giả |
-| 6 | Trải nghiệm tra cứu | Tìm kiếm full-text, lọc đa tiêu chí, không cần đăng nhập |
+| 1 | Số hoá lưu thông sách | Tạo/theo dõi phiếu mượn, cập nhật tồn kho tức thời |
+| 2 | Tự động hoá phí phạt | Tính phạt = số ngày quá hạn × 5.000 VND, không cần tính tay |
+| 3 | Kiểm soát tồn kho real-time | `available_quantity` cập nhật ngay khi cấp phát / trả sách |
+| 4 | Thống kê hoạt động | Dashboard KPI + biểu đồ mượn/trả theo tháng + top sách/reader |
+| 5 | Tìm kiếm & duyệt sách | Full-text search, lọc thể loại/ngôn ngữ/trạng thái, phân trang |
+| 6 | Đánh giá sách cộng đồng | Reader đã mượn sách được đánh giá 1–5 sao + nhận xét |
 
-### Phạm vi hệ thống
+### Mục tiêu kỹ thuật
 
-**Trong phạm vi:**
-- Quản lý kho sách (CRUD, ảnh bìa, thể loại)
-- Luồng lưu thông sách (mượn, trả, gia hạn, phạt)
-- Quản lý tài khoản người dùng và phân quyền
-- Báo cáo thống kê và dashboard
-- Đánh giá sách bởi độc giả
-
-**Ngoài phạm vi:**
-- Thanh toán trực tuyến (tiền phạt ghi nhận thủ công)
-- Đặt trước / đặt giữ sách (reservation)
-- Gửi email/SMS nhắc nhở
-- Ứng dụng di động
+- Áp dụng kiến trúc phân tầng rõ ràng (Layered Architecture) với Python
+- Xây dựng đồng thời REST API và Web UI trong một ứng dụng duy nhất
+- Bảo mật theo chuẩn công nghiệp: JWT + bcrypt + RBAC
+- Đảm bảo tính toàn vẹn dữ liệu qua ràng buộc DB và kiểm tra nghiệp vụ ở service layer
+- Viết unit test và integration test đầy đủ (pytest + httpx)
 
 ---
 
 ## 3. Target Users
 
-### 3 nhóm người dùng chính
+### Ba vai trò chính trong hệ thống
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│   👤 READER (Độc giả)          Người dùng cuối          │
-│   • Duyệt và tìm kiếm sách     • Tự đăng ký tài khoản  │
-│   • Xem sách đang mượn          • Gia hạn tự phục vụ   │
-│   • Viết đánh giá sách                                  │
-│                                                         │
-│   📚 LIBRARIAN (Thủ thư)       Nhân viên thư viện       │
-│   • Cấp phát sách cho reader    • Xử lý trả sách        │
-│   • Quản lý tất cả phiếu mượn  • Theo dõi sách quá hạn │
-│                                                         │
-│   ⚙️  ADMIN (Quản trị viên)    Ban quản lý              │
-│   • Toàn quyền hệ thống         • Xem dashboard & báo cáo│
-│   • Quản lý sách, thể loại     • Quản lý tài khoản      │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
++------------------------------------------------------------------+
+|                       HE THONG THU VIEN                         |
+|                                                                  |
+|  DOC GIA (Reader)     THU THU (Librarian)   QUAN TRI (Admin)    |
+|                                                                  |
+|  - Tim & duyet sach   - Cap phat sach       - Quan ly kho sach  |
+|  - Xem phieu muon     - Xu ly tra sach      - Quan ly the loai  |
+|  - Gia han sach       - Theo doi phieu      - Quan ly nguoi dung |
+|  - Danh gia sach      - Thu phi phat        - Dashboard thong ke |
+|  - Quan ly ho so                            - Sync qua han       |
++------------------------------------------------------------------+
 ```
 
-### Nhu cầu từng nhóm
-
-| Nhóm | Nhu cầu cốt lõi | Tính năng chính |
+| Vai trò | Đối tượng thực tế | Nhu cầu chính |
 |---|---|---|
-| Độc giả | Tìm sách nhanh, biết sách có sẵn không | Search, filter, book detail, my-books |
-| Thủ thư | Xử lý mượn/trả nhanh, không nhầm lẫn | Live search issue form, return form, fine calc |
-| Admin | Nắm bắt tình hình thư viện tổng thể | Dashboard, charts, reports, user management |
+| **Độc giả** | Sinh viên, thành viên thư viện | Tìm sách nhanh, tự phục vụ gia hạn, biết hạn trả |
+| **Thủ thư** | Nhân viên quầy thư viện | Cấp phát/trả sách nhanh, tính phạt chính xác, không nhầm lẫn |
+| **Admin** | Quản lý thư viện | Báo cáo tổng hợp, kiểm soát nhân sự và kho sách |
 
 ---
 
 ## 4. Technology Stack
 
-### Tổng quan công nghệ
+### Tổng quan công nghệ theo tầng
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│  FRONTEND (Browser)                                      │
-│  TailwindCSS · Alpine.js · HTMX · Chart.js               │
-├──────────────────────────────────────────────────────────┤
-│  WEB SERVER (FastAPI + Uvicorn)                          │
-│  ┌─────────────────┐    ┌──────────────────────────┐    │
-│  │  Web UI (Jinja2) │    │  REST API (/api/v1/)      │    │
-│  │  Server-Side     │    │  JSON responses           │    │
-│  │  Rendering       │    │  Swagger UI               │    │
-│  └─────────────────┘    └──────────────────────────┘    │
-├──────────────────────────────────────────────────────────┤
-│  BUSINESS LAYER                                          │
-│  Services (Python) · Pydantic v2 · PyJWT · bcrypt        │
-├──────────────────────────────────────────────────────────┤
-│  DATA LAYER                                              │
-│  SQLAlchemy (async ORM) · Alembic (migrations)           │
-├──────────────────────────────────────────────────────────┤
-│  DATABASE                                                │
-│  SQLite (aiosqlite driver)                               │
-└──────────────────────────────────────────────────────────┘
++---------------------------------------------+
+|           PRESENTATION LAYER                |
+|  TailwindCSS  HTMX  Alpine.js  Chart.js     |
++---------------------------------------------+
+|           APPLICATION LAYER                 |
+|      Python 3.12   FastAPI   Jinja2         |
++---------------------------------------------+
+|            SECURITY LAYER                   |
+|        PyJWT   bcrypt   Pydantic v2         |
++---------------------------------------------+
+|              DATA LAYER                     |
+|     SQLAlchemy 2.x Async   aiosqlite        |
++---------------------------------------------+
+|               DATABASE                      |
+|            SQLite (library.db)              |
++---------------------------------------------+
 ```
 
-### Giải thích vai trò từng công nghệ
+### Giải thích từng công nghệ
 
-**Python 3.12+ — Ngôn ngữ lập trình**
-- Lý do chọn: Cú pháp rõ ràng, hệ sinh thái phong phú, typing mạnh với Pydantic
-- Vai trò: Nền tảng toàn bộ backend
+#### Backend Core
 
-**FastAPI — Web Framework**
-- Lý do chọn: Async-native, tự động sinh OpenAPI docs, validation tích hợp qua Pydantic
-- Vai trò: Xử lý HTTP requests, routing, dependency injection, phục vụ cả Web UI và REST API
+| Công nghệ | Lý do chọn | Vai trò trong hệ thống |
+|---|---|---|
+| **Python 3.12** | Ngôn ngữ phổ biến, cú pháp rõ ràng, hệ sinh thái phong phú | Ngôn ngữ lập trình toàn bộ backend |
+| **FastAPI** | Async native, tự động sinh API docs, type-safe với Pydantic | Framework chính — phục vụ cả REST API lẫn Web UI |
+| **Uvicorn** | ASGI server hiệu năng cao, tương thích FastAPI | Chạy ứng dụng trong môi trường development và production |
 
-**Uvicorn — ASGI Server**
-- Lý do chọn: Server async hiệu suất cao, chuẩn cho FastAPI
-- Vai trò: Khởi chạy ứng dụng, xử lý kết nối đến
+#### Database & ORM
 
-**SQLite + aiosqlite — Database**
-- Lý do chọn: Zero-config, phù hợp cho dự án học thuật/nhỏ vừa, không cần cài thêm server DB
-- Vai trò: Lưu trữ toàn bộ dữ liệu trong file `library.db`
+| Công nghệ | Lý do chọn | Vai trò trong hệ thống |
+|---|---|---|
+| **SQLite** | Nhẹ, không cần cài server, phù hợp đồ án | Lưu trữ toàn bộ dữ liệu trong 1 file `library.db` |
+| **SQLAlchemy 2.x** | ORM mạnh nhất cho Python, hỗ trợ async | Ánh xạ Python class ↔ bảng DB, viết query Pythonic |
+| **Alembic** | Migration chính thức của SQLAlchemy | Quản lý phiên bản schema, rollback an toàn |
 
-**SQLAlchemy 2.x (async) — ORM**
-- Lý do chọn: ORM chuẩn Python, hỗ trợ async, declarative models rõ ràng
-- Vai trò: Ánh xạ Python class ↔ bảng database, quản lý session, truy vấn async
+#### Bảo mật & Xác thực
 
-**Alembic — Database Migrations**
-- Lý do chọn: Tool migration chính thống của SQLAlchemy
-- Vai trò: Quản lý lịch sử thay đổi schema database, có thể rollback
+| Công nghệ | Lý do chọn | Vai trò trong hệ thống |
+|---|---|---|
+| **PyJWT** | Chuẩn JWT phổ biến nhất cho Python | Tạo/xác thực access token và refresh token |
+| **bcrypt** | Thuật toán hash mật khẩu, chống brute-force | Hash mật khẩu người dùng — không lưu mật khẩu gốc |
+| **Pydantic v2** | Validation mạnh, tích hợp sẵn FastAPI | Validate toàn bộ request/response, tạo API schema tự động |
 
-**PyJWT + bcrypt — Authentication & Security**
-- Lý do chọn: Chuẩn công nghiệp, thay thế các thư viện cũ đã ngừng bảo trì
-- Vai trò: PyJWT tạo/xác thực access token & refresh token; bcrypt hash/verify mật khẩu
+#### Frontend & UI
 
-**Pydantic v2 — Validation**
-- Lý do chọn: Validation cực nhanh (Rust core), tích hợp tự nhiên với FastAPI
-- Vai trò: Xác thực dữ liệu đầu vào, serialize/deserialize request-response
+| Công nghệ | Lý do chọn | Vai trò trong hệ thống |
+|---|---|---|
+| **Jinja2** | Template engine chuẩn Python, tích hợp sẵn FastAPI | Render HTML phía server (SSR) — không cần SPA framework |
+| **HTMX** | Thêm tính năng dynamic vào HTML thuần, không cần nhiều JS | Live search, cập nhật bảng/danh sách không reload trang |
+| **Alpine.js** | Reactivity nhẹ (~15kB), khai báo trực tiếp trong HTML | Dropdown, sidebar toggle, UI state nhỏ |
+| **TailwindCSS** | CSS utility-first, responsive sẵn | Styling toàn bộ giao diện |
+| **Chart.js** | Thư viện biểu đồ phổ biến, dễ tích hợp | Biểu đồ cột mượn/trả theo tháng trên admin dashboard |
 
-**Jinja2 — Templating**
-- Lý do chọn: Template engine chuẩn Python, linh hoạt, hỗ trợ kế thừa template
-- Vai trò: Render HTML phía server, dùng cho toàn bộ giao diện web
+#### Testing & Dev Tools
 
-**HTMX — Partial Page Updates**
-- Lý do chọn: Tăng tính phản hồi UI mà không cần viết JavaScript; server vẫn render HTML
-- Vai trò: Live search (tìm user/sách khi cấp phát), inline CRUD thể loại, dynamic table rows
-
-**Alpine.js — Client-side Reactivity**
-- Lý do chọn: Nhẹ (~15KB), declarative trong HTML, không cần build step
-- Vai trò: Dropdown menu, sidebar toggle, modal, các tương tác UI nhỏ
-
-**TailwindCSS — CSS Framework**
-- Lý do chọn: Utility-first, không cần viết CSS tùy chỉnh nhiều, dùng CDN không cần build
-- Vai trò: Styling toàn bộ giao diện, responsive design
-
-**Chart.js — Data Visualization**
-- Lý do chọn: Thư viện biểu đồ phổ biến, dễ tích hợp, đẹp mắt
-- Vai trò: Vẽ biểu đồ cột mượn/trả theo tháng trên admin dashboard
+| Công nghệ | Lý do chọn | Vai trò trong hệ thống |
+|---|---|---|
+| **pytest + pytest-asyncio** | Framework test tiêu chuẩn Python, hỗ trợ async | Unit test và integration test toàn bộ API |
+| **httpx** | HTTP client async — thay thế requests trong async | Gọi API trong integration tests |
+| **Ruff** | Linter/formatter nhanh nhất cho Python | Đảm bảo chất lượng và nhất quán code style |
 
 ---
 
 ## 5. System Architecture Overview
 
-### Kiến trúc tổng quan
+### Kiến trúc Monolith Full-stack
 
-**Loại kiến trúc:** Monolithic Full-Stack Web Application
-
-```
-                    ┌─────────────────────────────┐
-                    │         BROWSER              │
-                    │  HTML + CSS + JS (HTMX/Alpine)│
-                    └────────────┬────────────────┘
-                                 │ HTTP
-                    ┌────────────▼────────────────┐
-                    │       FastAPI App            │
-                    │    (Uvicorn ASGI Server)     │
-                    │                             │
-                    │  ┌──────────┐ ┌──────────┐  │
-                    │  │ Web UI   │ │REST API  │  │
-                    │  │/…        │ │/api/v1/… │  │
-                    │  └────┬─────┘ └────┬─────┘  │
-                    │       └─────┬──────┘         │
-                    │      ┌──────▼──────┐          │
-                    │      │  Services  │          │
-                    │      │(Biz Logic) │          │
-                    │      └──────┬──────┘          │
-                    │      ┌──────▼──────┐          │
-                    │      │Repositories│          │
-                    │      │(DB Queries)│          │
-                    │      └──────┬──────┘          │
-                    └─────────────┼────────────────┘
-                                 │ SQLAlchemy async
-                    ┌────────────▼────────────────┐
-                    │    SQLite (library.db)       │
-                    └─────────────────────────────┘
-```
-
-### Hai giao diện trên cùng một server
-
-| Giao diện | URL prefix | Phục vụ | Auth |
-|---|---|---|---|
-| Web UI | `/`, `/books`, `/admin/*`, `/reader/*` | Trình duyệt (HTML) | httponly cookie |
-| REST API | `/api/v1/*` | Mobile / 3rd party / Swagger UI | Bearer JWT token |
-
-### Pattern phân tầng (Layered Architecture)
+Hệ thống được thiết kế theo mô hình **Monolith Full-stack** — một ứng dụng FastAPI duy nhất phục vụ cả hai giao diện:
 
 ```
-Request → [Router] → [Service] → [Repository] → [Database]
-                         ↓
-                  [Business Rules]
-                  (validation, fine calc, stock check)
+                 [Trinh duyet Web]
+                        |
+           +------------+------------+
+           |                         |
+   [Web UI Routes]           [REST API Routes]
+   Jinja2 SSR + HTMX          /api/v1/* (JSON)
+   Cookie Auth                 Bearer Token Auth
+           |                         |
+           +------------+------------+
+                        |
+               [FastAPI Application]
+                 (create_app())
+                        |
+           +------------+------------+
+           |            |            |
+      [Services]  [Middleware]  [Dependencies]
+      Business     Access Log    JWT + RBAC
+       Logic
+           |
+     [Repositories]
+     Async DB Queries
+           |
+        [Models]
+      ORM Entities
+           |
+  [SQLite -- library.db]
 ```
 
-- **Router:** Nhận request, parse params, gọi service, trả response
-- **Service:** Toàn bộ logic nghiệp vụ, kiểm tra điều kiện, phối hợp repositories
-- **Repository:** Truy vấn database thuần túy, không có business logic
-- **Model:** SQLAlchemy ORM — định nghĩa cấu trúc bảng, quan hệ
+### Pattern 4 tầng (Layered Architecture)
+
+| Tầng | Thành phần | Trách nhiệm |
+|---|---|---|
+| **Presentation** | `api/v1/` · `web/` · `templates/` | Tiếp nhận request, validate input, trả response/HTML |
+| **Business Logic** | `services/` | Kiểm tra quy tắc nghiệp vụ, điều phối thao tác DB |
+| **Data Access** | `repositories/` | Truy vấn database async — tách biệt khỏi business logic |
+| **Data** | `models/` · SQLite | ORM entities, schema DB, constraint toàn vẹn dữ liệu |
+
+### Dual Authentication
+
+```
+REST API Client         Web Browser
+      |                      |
+Bearer Token (JWT)    httponly Cookie (JWT)
+      |                      |
+ get_current_user()   get_current_web_user()
+      |                      |
+      +----------+-----------+
+                 |
+          require_role()
+    (Reader / Librarian / Admin)
+```
 
 ---
 
 ## 6. Database Design Summary
 
-### 5 bảng chính
+### 5 Entities cốt lõi
 
-| Bảng | Số cột | Mục đích |
-|---|---|---|
-| `users` | 11 | Tài khoản người dùng (reader / librarian / admin) |
-| `categories` | 4 | Phân loại sách |
-| `books` | 15 | Kho sách với tồn kho động |
-| `borrowings` | 14 | Phiếu mượn — trung tâm của hệ thống |
-| `reviews` | 8 | Đánh giá sách (1 user / 1 sách) |
+| Entity | Bảng | Mô tả | Trường quan trọng |
+|---|---|---|---|
+| **User** | `users` | Người dùng hệ thống | role (reader/librarian/admin), status (active/inactive) |
+| **Book** | `books` | Đầu sách trong kho | quantity, available_quantity, status (Có sẵn/Hư hỏng/Mất) |
+| **Category** | `categories` | Thể loại sách | name (unique) |
+| **Borrowing** | `borrowings` | Phiếu mượn sách | status (borrowed/returned/overdue), fine_amount, fine_paid |
+| **Review** | `reviews` | Đánh giá sách | rating (1–5), unique(user_id, book_id) |
 
-### Các trường đặc biệt đáng chú ý
+### Thiết kế tồn kho kép
 
-**Bảng `books`:**
-- `quantity` — tổng số bản sách nhập về
-- `available_quantity` — số bản hiện đang có sẵn để mượn (tự động +/- khi mượn/trả)
-- `status` — Có sẵn / Hư hỏng / Mất
+Bảng `books` dùng **hai trường số lượng** để phân biệt rõ:
 
-**Bảng `borrowings`:**
-- `fine_amount` — tiền phạt (VND), tính tự động khi trả trễ
-- `fine_paid` — boolean xác nhận đã thu phạt
-- `renewed_count` — số lần đã gia hạn (giới hạn 2 lần)
-- `book_condition` — tình trạng sách khi trả (good / fair / poor / damaged)
+```
+quantity           = Tong so ban sach thu vien so huu
+available_quantity = So ban hien co the muon
 
-### Ràng buộc toàn vẹn dữ liệu
+available_quantity = quantity - (so phieu dang BORROWED/OVERDUE)
 
-| Quan hệ | Chiến lược xóa | Lý do |
-|---|---|---|
-| Category → Books | SET NULL | Sách không bị mất khi xóa thể loại |
-| User → Borrowings | RESTRICT | Bảo vệ lịch sử mượn sách |
-| Book → Borrowings | RESTRICT | Bảo vệ lịch sử mượn sách |
-| User → Reviews | CASCADE | Xóa user thì xóa cả reviews |
-| Book → Reviews | CASCADE | Xóa sách thì xóa cả reviews |
+Khi cap phat:  available_quantity -= 1
+Khi tra:       available_quantity += 1
+```
+
+### Cơ chế phí phạt
+
+```
+fine_amount = days_overdue x FINE_PER_DAY (5.000 VND)
+
+days_overdue = (ngay_hom_nay - due_date).days   [neu chua tra]
+             = (return_date - due_date).days     [khi tra]
+
+fine_paid = False  -->  chua thu
+fine_paid = True   -->  da thu (thu thu xac nhan)
+```
 
 ---
 
 ## 7. ERD Description
 
-### Sơ đồ quan hệ thực thể
+### Sơ đồ quan hệ
 
 ```
-┌──────────────┐           ┌──────────────────────┐
-│  categories  │ 1       N │        books          │
-│──────────────│───────────│──────────────────────│
-│ id (PK)      │           │ id (PK)              │
-│ name         │           │ title                │
-│ description  │           │ author               │
-└──────────────┘           │ isbn (UNIQUE)        │
-                           │ publisher            │
-                           │ publication_year     │
-                           │ language             │
-                           │ quantity             │
-                           │ available_quantity   │
-                           │ status               │
-                           │ cover_image          │
-                           │ category_id (FK) ────┘
-                           └──────────┬───────────┘
-                                      │ 1            1
-                           ┌──────────┼──────────────┐
-                           │ N        │              │ N
-              ┌────────────▼──┐   ┌───▼──────────────▼──┐
-              │  borrowings   │   │       reviews        │
-              │───────────────│   │──────────────────────│
-              │ id (PK)       │   │ id (PK)              │
-              │ user_id (FK)──┼─┐ │ book_id (FK)         │
-              │ book_id (FK)  │ │ │ user_id (FK) ────────┼─┐
-              │ borrow_date   │ │ │ rating (1–5)         │ │
-              │ due_date      │ │ │ comment              │ │
-              │ return_date   │ │ │ status               │ │
-              │ status        │ │ └──────────────────────┘ │
-              │ fine_amount   │ │                          │
-              │ fine_paid     │ │  ┌───────────────────┐   │
-              │ renewed_count │ └──┤      users        ├───┘
-              │ book_condition│    │───────────────────│
-              └───────────────┘    │ id (PK)           │
-                                   │ username (UNIQUE) │
-                                   │ email (UNIQUE)    │
-                                   │ password_hash     │
-                                   │ full_name         │
-                                   │ phone             │
-                                   │ address           │
-                                   │ role              │
-                                   │ status            │
-                                   └───────────────────┘
+CATEGORIES (1) -------- (0..N) BOOKS
+  |
+  category_id FK (SET NULL)
+  Xoa the loai: sach van ton tai, category_id = NULL
+
+USERS (1) ------------- (0..N) BORROWINGS
+  |
+  user_id FK (RESTRICT)
+  Khong xoa user con phieu muon
+
+BOOKS (1) ------------- (0..N) BORROWINGS
+  |
+  book_id FK (RESTRICT)
+  Khong xoa sach con phieu muon
+
+USERS (1) ------------- (0..N) REVIEWS
+  |
+  user_id FK (CASCADE)
+  Xoa user: xoa toan bo reviews cua user
+
+BOOKS (1) ------------- (0..N) REVIEWS
+  |
+  book_id FK (CASCADE)
+  Xoa sach: xoa toan bo reviews cua sach
 ```
 
-### Quan hệ tóm tắt
+### Ràng buộc quan trọng
 
-| Quan hệ | Loại | Ghi chú |
+| Ràng buộc | Loại | Ý nghĩa nghiệp vụ |
 |---|---|---|
-| Category → Books | 1 – N | Một thể loại có nhiều sách |
-| User → Borrowings | 1 – N | Một reader có nhiều phiếu mượn |
-| Book → Borrowings | 1 – N | Một sách có nhiều lượt mượn |
-| User → Reviews | 1 – N | Một user có thể viết nhiều review (mỗi sách 1 lần) |
-| Book → Reviews | 1 – N | Một sách có thể có nhiều review |
-| User + Book → Review | UNIQUE | Ràng buộc unique `(user_id, book_id)` |
+| `users.username` UNIQUE | DB Constraint | Không trùng tên đăng nhập |
+| `users.email` UNIQUE | DB Constraint | Không trùng email |
+| `books.isbn` UNIQUE | DB Constraint | Mỗi đầu sách có ISBN riêng |
+| `reviews(user_id, book_id)` UNIQUE | DB Constraint | Mỗi reader chỉ review 1 lần/sách |
+| `borrowings.user_id` RESTRICT | FK Constraint | Bảo vệ lịch sử mượn khi xóa user |
+| `borrowings.book_id` RESTRICT | FK Constraint | Bảo vệ phiếu mượn khi xóa sách |
 
 ---
 
 ## 8. Business Logic Flow
 
-### Luồng 1 — Mượn sách (Issue Book)
+### Luồng 1: Cấp phát sách (Issue Book)
 
 ```
-[Thủ thư]
-    │
-    ▼
-Tìm kiếm Reader          ← HTMX live search (gõ tên/username)
-    │
-    ▼
-Tìm kiếm Sách            ← HTMX live search (gõ tên/ISBN)
-    │
-    ▼
-Chọn ngày trả            ← Mặc định: hôm nay + 14 ngày
-    │
-    ▼
-Hệ thống kiểm tra:
-  ✓ Reader tồn tại & active?
-  ✓ Sách available_quantity > 0?
-  ✓ Reader < 5 phiếu đang mượn?
-  ✓ Reader chưa mượn sách này?
-    │
-    ├── ✗ → Thông báo lỗi cụ thể
-    │
-    └── ✓ → Tạo phiếu mượn
-              Giảm available_quantity -= 1
-              Redirect về danh sách phiếu mượn
+THU THU
+  |
+  +-- 1. Tim kiem reader (live search HTMX)
+  +-- 2. Tim kiem sach (live search HTMX)
+  +-- 3. Thiet lap ngay tra (tuy chon, mac dinh +14 ngay)
+  +-- 4. Nhan "Cap phat"
+              |
+              v
+       [BorrowingService.issue_book()]
+              |
+       Kiem tra 5 dieu kien:
+       [v] Reader active?
+       [v] Sach ton tai?
+       [v] available_quantity > 0?
+       [v] Reader < 5 phieu active?
+       [v] Reader chua muon sach nay?
+              |
+         +----+----+
+       FAIL       PASS
+         |           |
+     Loi 422     Tao Borrowing
+                 available_quantity -= 1
 ```
 
-### Luồng 2 — Trả sách (Return Book)
+### Luồng 2: Trả sách (Return Book)
 
 ```
-[Thủ thư]
-    │
-    ▼
-Tìm phiếu mượn đang active
-    │
-    ▼
-Ghi nhận tình trạng sách    ← good / fair / poor / damaged
-    │
-    ▼
-Hệ thống tính phạt:
-  • Nếu return_date > due_date:
-    fine_amount = (return_date − due_date) × 5,000 VND
-  • Ngược lại: fine_amount = 0
-    │
-    ▼
-Cập nhật phiếu mượn:
-  status = RETURNED
-  return_date = hôm nay
-    │
-    ▼
-Tăng available_quantity += 1
-    │
-    ▼
-Thủ thư thu tiền phạt (nếu có)
-    │
-    ▼
-Click "Đánh dấu đã thanh toán" → fine_paid = true
+THU THU
+  |
+  +-- 1. Chon phieu muon can xu ly
+  +-- 2. Ghi nhan tinh trang sach (good/fair/poor/damaged)
+  +-- 3. Nhan "Xac nhan tra"
+              |
+              v
+       [BorrowingService.return_book()]
+              |
+       Tinh phi phat:
+       fine = days_overdue x 5.000 VND
+              |
+       Cap nhat:
+       status       --> RETURNED
+       return_date  --> hom nay
+       fine_amount  --> fine
+       available_quantity += 1
+              |
+       [Sau do] Thu thu thu tien phat
+       --> mark_fine_paid() --> fine_paid = True
 ```
 
-### Luồng 3 — Gia hạn (Renew)
+### Luồng 3: Gia hạn (Renew)
 
 ```
-[Reader / Thủ thư]
-    │
-    ▼
-Chọn phiếu mượn muốn gia hạn
-    │
-    ▼
-Kiểm tra:
-  ✓ Phiếu đang BORROWED (chưa trả, chưa bị block)?
-  ✓ renewed_count < 2?
-    │
-    ├── ✗ → Thông báo không thể gia hạn
-    │
-    └── ✓ → due_date += 14 ngày
-              renewed_count += 1
+READER hoac THU THU
+  |
+  +--> Yeu cau gia han phieu muon
+              |
+              v
+       [BorrowingService.renew_borrowing()]
+              |
+       Kiem tra:
+       [v] status == BORROWED?
+       [v] renewed_count < 2?
+              |
+         +----+----+
+       FAIL       PASS
+         |           |
+     Loi 409/422  due_date += 14 ngay
+                  renewed_count += 1
 ```
 
-### Luồng 4 — Độc giả tự phục vụ
+### Luồng 4: Đánh giá sách
 
 ```
-[Reader] (không cần đăng nhập)
-    │
-    ▼
-Duyệt sách / Tìm kiếm
-    │
-    ▼
-Xem chi tiết sách + reviews + điểm trung bình
-    │
-    ▼ (cần đăng nhập để tiếp tục)
-Đăng nhập / Đăng ký
-    │
-    ▼
-Xem danh sách sách đang mượn
-    │
-    ▼
-Gia hạn (nếu chưa đủ 2 lần)
-    │
-    ▼
-Sau khi trả sách → Viết đánh giá (1–5 sao + nhận xét)
+READER
+  |
+  +--> Gui danh gia (rating + comment)
+              |
+              v
+       [ReviewService]
+              |
+       Kiem tra:
+       [v] Reader da tung muon sach nay?
+       [v] Chua co review cho cap (user, book)?
+              |
+           PASS --> Luu Review (rating 1-5 + comment)
+```
+
+### Luồng 5: Đồng bộ quá hạn
+
+```
+ADMIN
+  |
+  +--> Kich hoat Sync (Web UI button hoac API)
+              |
+              v
+       [BorrowingService.sync_overdue_statuses()]
+              |
+       Quet tat ca borrowing:
+       status in {BORROWED, OVERDUE} & due_date < hom nay
+              |
+       Voi moi phieu qua han:
+       status      --> OVERDUE
+       fine_amount --> days_overdue x 5.000 VND
+              |
+       Tra ve: so phieu da cap nhat
 ```
 
 ---
 
 ## 9. Roles & Permissions Summary
 
-### Phân cấp quyền hạn
+### Phân cấp vai trò
 
 ```
-ADMIN
-  └── Toàn quyền: sách, thể loại, users, dashboard, mượn/trả
-  
-LIBRARIAN
-  └── Mượn/trả sách, xem tất cả phiếu mượn, tìm kiếm
-  
-READER
-  └── Duyệt sách, xem phiếu mượn của mình, gia hạn, đánh giá
-  
-PUBLIC (chưa đăng nhập)
-  └── Xem danh sách sách, xem chi tiết sách
+ADMIN  >  LIBRARIAN  >  READER
 ```
 
-### Ma trận quyền chính
+_Admin có tất cả quyền của Librarian và Reader_
 
-| Chức năng | Public | Reader | Librarian | Admin |
-|---|---|---|---|---|
-| Duyệt & tìm kiếm sách | ✓ | ✓ | ✓ | ✓ |
-| Xem chi tiết + reviews | ✓ | ✓ | ✓ | ✓ |
-| Xem phiếu mượn của mình | — | ✓ | ✓ | ✓ |
-| Gia hạn phiếu của mình | — | ✓ | ✓ | ✓ |
-| Viết đánh giá sách | — | ✓ | ✓ | ✓ |
-| Cấp phát / trả sách | — | — | ✓ | ✓ |
-| Xem tất cả phiếu mượn | — | — | ✓ | ✓ |
-| Thêm / sửa / xóa sách | — | — | — | ✓ |
-| Quản lý thể loại | — | — | — | ✓ |
-| Quản lý người dùng | — | — | — | ✓ |
-| Xem dashboard & thống kê | — | — | — | ✓ |
+### Tóm tắt quyền theo nhóm
 
-### Quy tắc đặc biệt
+| Nhóm chức năng | Reader | Librarian | Admin |
+|---|:---:|:---:|:---:|
+| **Truy cập public** (không cần login) | ✓ | ✓ | ✓ |
+| **Tự phục vụ** (xem phiếu, gia hạn, đánh giá) | ✓ | ✓ | ✓ |
+| **Lưu thông sách** (cấp phát, trả, thu phạt) | — | ✓ | ✓ |
+| **Quản lý kho sách & thể loại** | — | — | ✓ |
+| **Quản lý người dùng** | — | — | ✓ |
+| **Dashboard & báo cáo** | — | — | ✓ |
 
-- **Đọc giả tự đăng ký:** Chỉ tạo được tài khoản `reader`, không tự lên `librarian`/`admin`
-- **Giới hạn mượn:** Tối đa 5 phiếu mượn đang active cùng lúc / reader
-- **Giới hạn gia hạn:** Tối đa 2 lần / phiếu mượn
-- **Điều kiện review:** Phải đã mượn sách ít nhất 1 lần
-- **Xóa an toàn:** Không xóa được sách/user khi còn phiếu mượn active
+### Cơ chế bảo mật
+
+- **RBAC** được enforce ở 2 lớp: FastAPI Dependency Injection (API) và Web route (Cookie)
+- **Reader isolation**: Reader chỉ thấy dữ liệu của bản thân — kiểm tra ở cả service layer lẫn DB query
+- **Token duality**: REST API dùng Bearer Token trong `Authorization` header; Web UI dùng httponly Cookie (không thể đọc bằng JavaScript)
+- **Account deactivation**: `status=INACTIVE` bị chặn đăng nhập ngay tại AuthService
 
 ---
 
 ## 10. Functional Overview
 
-### Module 1 — Catalogue (Tra cứu sách)
+### Module 1 — Kho Sách (Book Catalog)
 
-| Tính năng | Mô tả | Người dùng |
-|---|---|---|
-| Duyệt sách | Danh sách với phân trang, lọc theo thể loại / ngôn ngữ / trạng thái | Tất cả |
-| Tìm kiếm | Full-text search (tiêu đề, tác giả, ISBN) | Tất cả |
-| Chi tiết sách | Thông tin đầy đủ, ảnh bìa, tồn kho, đánh giá | Tất cả |
-| Trang chủ | Thống kê nhanh + sách nổi bật | Tất cả |
+> Quản lý toàn bộ danh mục sách và thể loại
 
-### Module 2 — Authentication (Xác thực)
+- Thêm/sửa/xóa sách với đầy đủ thông tin (ISBN, tác giả, NXB, năm, ngôn ngữ, mô tả)
+- Upload và hiển thị ảnh bìa sách (đặt tên file theo ISBN)
+- Quản lý thể loại sách — CRUD inline không reload trang (HTMX)
+- Tìm kiếm full-text (tựa sách / tác giả / ISBN) + lọc đa điều kiện
+- Theo dõi tồn kho: tổng số bản / số bản có sẵn / trạng thái vật lý
 
-| Tính năng | Mô tả | Người dùng |
-|---|---|---|
-| Đăng ký | Tạo tài khoản reader mới | Public |
-| Đăng nhập | JWT httponly cookie (Web) / Bearer token (API) | Tất cả |
-| Đổi mật khẩu | Xác thực mật khẩu cũ trước khi đổi | Reader+ |
-| Cập nhật hồ sơ | Sửa tên, phone, địa chỉ | Reader+ |
+### Module 2 — Lưu Thông Sách (Circulation)
 
-### Module 3 — Circulation (Lưu thông sách)
+> Toàn bộ quy trình mượn và trả sách
 
-| Tính năng | Mô tả | Người dùng |
-|---|---|---|
-| Cấp phát sách | Live search reader + sách, thiết lập hạn trả | Librarian+ |
-| Xử lý trả sách | Ghi tình trạng, tính phạt tự động | Librarian+ |
-| Gia hạn | Tự phục vụ hoặc qua thủ thư, max 2 lần | Reader+ |
-| Theo dõi phiếu | Xem tất cả phiếu, lọc quá hạn / theo trạng thái | Librarian+ |
-| Thu phạt | Đánh dấu tiền phạt đã thanh toán | Librarian+ |
+- **Cấp phát:** Live search reader + sách bằng HTMX, kiểm tra 5 điều kiện nghiệp vụ
+- **Trả sách:** Ghi nhận tình trạng, tự động tính phí phạt theo ngày quá hạn
+- **Gia hạn:** Tối đa 2 lần, mỗi lần +14 ngày, kiểm tra điều kiện tự động
+- **Phí phạt:** Theo dõi fine_amount và fine_paid; thủ thư xác nhận sau khi thu tiền
+- **Sync quá hạn:** Cập nhật hàng loạt trạng thái OVERDUE khi được kích hoạt
 
-### Module 4 — Catalogue Management (Quản lý kho)
+### Module 3 — Tự Phục Vụ Độc Giả (Reader Self-Service)
 
-| Tính năng | Mô tả | Người dùng |
-|---|---|---|
-| Thêm sách | Form đầy đủ, upload ảnh bìa | Admin |
-| Sửa sách | Cập nhật thông tin, thay ảnh bìa | Admin |
-| Xóa sách | Chặn nếu còn phiếu active | Admin |
-| Quản lý thể loại | CRUD inline không reload trang (HTMX) | Admin |
+> Độc giả tự quản lý hoạt động mượn sách của mình
 
-### Module 5 — User Management (Quản lý người dùng)
+- Xem danh sách sách đang mượn với trạng thái và hạn trả
+- Gia hạn sách tự phục vụ (không cần ra quầy thủ thư)
+- Xem toàn bộ lịch sử mượn/trả với phân trang
+- Cập nhật hồ sơ cá nhân và đổi mật khẩu
+- Viết đánh giá sách (1–5 sao + nhận xét, điều kiện: đã từng mượn)
 
-| Tính năng | Mô tả | Người dùng |
-|---|---|---|
-| Danh sách users | Tìm kiếm, lọc theo role / status | Admin |
-| Thay đổi role | Reader → Librarian / Admin | Admin |
-| Khoá tài khoản | Activate / deactivate | Admin |
-| Xóa tài khoản | Chặn nếu còn phiếu mượn | Admin |
+### Module 4 — Dashboard & Thống Kê (Analytics)
 
-### Module 6 — Dashboard & Analytics (Thống kê)
+> Tổng hợp dữ liệu hoạt động cho ban quản lý
 
-| Tính năng | Mô tả | Người dùng |
-|---|---|---|
-| KPI Cards | Tổng sách, readers, phiếu active, quá hạn, tiền phạt | Admin |
-| Biểu đồ tháng | Chart.js — số lượng mượn/trả mỗi tháng trong năm | Admin |
-| Top sách | 5 sách được mượn nhiều nhất | Admin |
-| Top độc giả | 5 reader mượn sách nhiều nhất | Admin |
-| Tồn kho | Danh sách sách với số bản hiện có, sắp xếp theo mức thấp nhất | Admin |
+- **KPI Cards:** Tổng sách · Tổng độc giả · Phiếu đang mượn · Phiếu quá hạn · Tiền phạt thu được / chưa thu
+- **Biểu đồ Chart.js:** Số lượng cấp phát và trả sách theo từng tháng trong năm
+- **Top 5 sách phổ biến:** Xếp hạng theo số lượt mượn
+- **Top 5 độc giả tích cực:** Xếp hạng theo số lượt mượn
+- **Bảng tồn kho:** Danh sách sách sắp theo số bản có sẵn (ít nhất lên trên)
 
-### Module 7 — Reviews (Đánh giá)
+### Module 5 — REST API & Tích hợp (API Layer)
 
-| Tính năng | Mô tả | Người dùng |
-|---|---|---|
-| Viết review | Rating 1–5 sao + nhận xét (cần đã mượn) | Reader+ |
-| Xem reviews | Hiển thị trên trang chi tiết sách | Tất cả |
-| Ẩn/hiện review | Kiểm duyệt review không phù hợp | Admin |
+> Giao diện lập trình cho client và tích hợp bên ngoài
+
+- JSON API đầy đủ tại `/api/v1/` — cover 100% chức năng hệ thống
+- Swagger UI tự động tại `/api/docs` (sinh từ Pydantic schema + FastAPI)
+- OAuth2 Password Flow cho lấy token (`POST /api/v1/auth/login`)
+- Phân trang chuẩn hóa với `PaginatedResponse[T]` generic cho mọi danh sách
 
 ---
 
 ## 11. User Journey
 
-### Journey 1 — Độc giả mới
+### Hành trình Độc Giả (Reader Journey)
 
 ```
-1. Truy cập trang chủ (/)
-   → Thấy thống kê thư viện + sách nổi bật
+[Lần đầu - không cần login]
+Truy cập trang chủ
+  --> Duyệt sách / Tìm kiếm / Lọc
+  --> Xem chi tiết sách + đánh giá cộng đồng
+  --> Đăng ký tài khoản
+  --> Đăng nhập
 
-2. Duyệt sách (/books)
-   → Tìm kiếm theo tên/tác giả
-   → Lọc theo thể loại
-   → Xem chi tiết sách (ảnh bìa, mô tả, tồn kho)
-
-3. Đăng ký tài khoản (/register)
-   → Nhập username, email, mật khẩu, họ tên
-
-4. Đăng nhập (/login)
-   → Được redirect về trang trước đó
-
-5. Liên hệ thủ thư để mượn sách
-   (Reader không tự mượn được qua web, phải qua thủ thư)
-
-6. Xem sách đang mượn (/reader/my-books)
-   → Biết hạn trả, trạng thái
-   → Gia hạn nếu cần
-
-7. Trả sách tại quầy
-   → Thủ thư xử lý return trên hệ thống
-
-8. Viết đánh giá (/books/{id})
-   → Rating + nhận xét sau khi trả sách
+[Sau khi mượn sách (qua thủ thư)]
+Vào trang "Sách đang mượn"
+  --> Xem danh sách phiếu + hạn trả
+  --> Gia hạn (nếu cần, tối đa 2 lần)
+  --> [Sau khi trả] Viết đánh giá sách
 ```
 
-### Journey 2 — Thủ thư xử lý một ca mượn
+### Hành trình Thủ Thư (Librarian Journey)
 
 ```
-1. Đăng nhập với tài khoản librarian
-
-2. Reader đến quầy muốn mượn sách
-   → Vào /admin/borrowings/issue
-
-3. Gõ tên reader → live search hiện danh sách → chọn reader
-
-4. Gõ tên sách → live search hiện sách có sẵn → chọn sách
-
-5. Xác nhận ngày trả (mặc định +14 ngày)
-   → Submit → Phiếu mượn #XYZ được tạo
-
-6. Reader trả sách sau đó
-   → Vào /admin/borrowings → Tìm phiếu → Click "Trả sách"
-   → Ghi nhận tình trạng sách
-   → Hệ thống tự tính phạt (nếu trễ)
-   → Thu phạt → Click "Đánh dấu đã thanh toán"
+Đăng nhập
+  --> Trang "Cấp phát sách"
+        --> Gõ tên reader --> live search (HTMX)
+        --> Gõ tên sách   --> live search (HTMX)
+        --> Chọn ngày trả --> Xác nhận cấp phát
+  --> Trang "Quản lý phiếu mượn"
+        --> Lọc: borrowed / overdue / returned
+        --> Chọn phiếu --> Xử lý trả sách
+              --> Ghi tình trạng sách
+              --> Hệ thống hiển thị phí phạt tự tính
+              --> Xác nhận trả
+        --> Thu tiền phạt --> Mark fine paid
 ```
 
-### Journey 3 — Admin xem báo cáo cuối tháng
+### Hành trình Admin (Admin Journey)
 
 ```
-1. Đăng nhập với tài khoản admin
-
-2. Vào /admin/dashboard
-
-3. Xem KPI:
-   • Tổng số phiếu đang mượn
-   • Số phiếu quá hạn
-   • Tiền phạt chưa thu
-
-4. Xem biểu đồ → chọn năm → so sánh mượn/trả từng tháng
-
-5. Xem top 5 sách được mượn nhiều nhất
-
-6. Xem danh sách tồn kho → phát hiện sách sắp hết bản
-
-7. Vào /admin/books → Thêm sách mới nếu cần
+Đăng nhập
+  --> Dashboard
+        --> Xem KPI tổng quan
+        --> Xem biểu đồ mượn/trả theo tháng
+        --> Xem top 5 sách / top 5 độc giả
+  --> Quản lý sách
+        --> Thêm sách mới (upload ảnh bìa)
+        --> Sửa thông tin / số lượng bản
+  --> Quản lý thể loại
+        --> Thêm/sửa/xóa inline (không reload)
+  --> Quản lý người dùng
+        --> Đổi role / activate / deactivate / xóa
+  --> Sync trạng thái quá hạn
+        --> Nhấn Sync --> hệ thống cập nhật hàng loạt
 ```
 
 ---
 
 ## 12. System Limitations
 
-Những hạn chế có thể thấy rõ từ cài đặt hiện tại:
+> Chỉ liệt kê hạn chế thực sự thấy được từ implementation.
 
-### Hạn chế kỹ thuật
+### Giới hạn kỹ thuật
 
-| Hạn chế | Giải thích |
+| Hạn chế | Mô tả | Ảnh hưởng |
+|---|---|---|
+| **SQLite single-file** | Không hỗ trợ multi-writer concurrent tốt | Phù hợp thư viện quy mô nhỏ/vừa; cần PostgreSQL nếu scale |
+| **Sync Overdue thủ công** | Không có cron job tự động chạy định kỳ | Admin phải nhấn nút thủ công để cập nhật trạng thái quá hạn |
+| **Không có email notification** | Không gửi email nhắc nhở hạn trả | Reader không nhận cảnh báo khi sắp đến hạn |
+| **Single server Monolith** | Không có horizontal scaling | Không load balancing, không container orchestration |
+| **Cover image local storage** | Ảnh bìa lưu trên disk server | Không CDN, mất file nếu server bị reset |
+
+### Giới hạn tính năng
+
+| Hạn chế | Mô tả |
 |---|---|
-| **SQLite single-file** | Không phù hợp cho môi trường production nhiều user đồng thời; phù hợp cho project học thuật / thư viện nhỏ |
-| **No reservation system** | Độc giả không thể đặt giữ sách khi sách đang hết; phải hỏi trực tiếp thủ thư |
-| **Sync overdue thủ công** | Trạng thái OVERDUE chỉ cập nhật khi Admin kích hoạt; không có background job tự động |
-| **TailwindCSS qua CDN** | Không nén/tối ưu CSS; phù hợp dev nhưng chậm hơn cho production |
-| **No email notifications** | Không có thông báo email nhắc hạn trả, thông báo sách quá hạn |
-| **File upload local** | Ảnh bìa lưu trực tiếp trên server, không dùng cloud storage |
-
-### Hạn chế nghiệp vụ
-
-| Hạn chế | Giải thích |
-|---|---|
-| **Reader không tự mượn** | Phải qua thủ thư, không có flow self-service hoàn toàn |
-| **Thanh toán tiền phạt offline** | Hệ thống chỉ ghi nhận, không xử lý thanh toán thật |
-| **Không có lịch sử audit** | Không theo dõi ai đã thay đổi gì (audit trail) |
-| **Không hỗ trợ multi-language** | Giao diện hỗ trợ sách Tiếng Việt + Tiếng Anh nhưng UI hoàn toàn là tiếng Anh/Việt pha |
+| **Không có xác thực 2 bước** | Đăng ký và đổi mật khẩu không có OTP/email verify |
+| **Không có tính năng đặt trước** | Reader không thể đặt chỗ sách đang hết |
+| **Không tích hợp barcode** | Cấp phát/trả sách nhập tay, không có máy quét mã vạch |
+| **Báo cáo cơ bản** | Không export PDF/Excel, chỉ xem trên web |
+| **Refresh token chưa có revoke list** | Đăng xuất không vô hiệu hoá token cũ ngay lập tức |
 
 ---
 
 ## 13. Recommended Presentation Story Flow
 
-### Gợi ý trình tự slide tối ưu cho buổi bảo vệ
+### Cấu trúc 10 slide — thứ tự logic từ WHY đến HOW đến WHAT
 
 ```
-Slide 1 — Giới thiệu đề tài
-  "Bài toán thư viện truyền thống và giải pháp số hoá"
+SLIDE 1 -- Gioi thieu de tai
+  Van de thu vien truyen thong --> Giai phap so hoa
+  Hook: "Tu so sach giay den ung dung web Python"
 
-  ↓
+SLIDE 2 -- Muc tieu he thong
+  5 muc tieu chuc nang cu the, do luong duoc
+  Transition: "De dat duoc muc tieu do, chung ta dung gi?"
 
-Slide 2 — Mục tiêu hệ thống
-  "5 mục tiêu cốt lõi, business rules đã được mã hoá"
+SLIDE 3 -- Cong nghe su dung
+  Tech stack theo tang, giai thich ly do chon moi cong nghe
+  Focus: Python + FastAPI la trung tam
 
-  ↓
+SLIDE 4 -- Tong quan kien truc
+  So do Monolith Full-stack, Pattern 4 tang, Dual Auth
+  Transition: "He thong duoc to chuc nhu the nao?"
 
-Slide 3 — Công nghệ sử dụng
-  "Stack Python hiện đại — tại sao chọn FastAPI, SQLite, HTMX?"
+SLIDE 5 -- Cau truc du an
+  Folder tree, module chinh va vai tro tung tang
+  Transition: "Du lieu duoc thiet ke ra sao?"
 
-  ↓
+SLIDE 6 -- ERD & Thiet ke CSDL
+  5 entities, quan he, ton kho kep, co che phi phat
+  Transition: "Nghiep vu van hanh nhu the nao?"
 
-Slide 4 — Kiến trúc hệ thống
-  "Monolith Full-stack: Web UI + REST API trên 1 server"
-  "Layered architecture: Router → Service → Repository → DB"
+SLIDE 7 -- Business Logic Flow
+  3 luong chinh: Cap phat --> Tra --> Gia han (flowchart)
+  Focus: diem kiem tra nghiep vu, tu dong hoa phi phat
 
-  ↓
+SLIDE 8 -- Roles & Phan quyen
+  Ma tran phan quyen 3 vai tro, co che RBAC + dual auth
+  Transition: "He thong co nhung tinh nang gi?"
 
-Slide 5 — Cấu trúc dự án
-  "Tổ chức thư mục rõ ràng, phân tách trách nhiệm"
+SLIDE 9 -- Chuc nang & Giao dien
+  Screenshots giao dien thuc te theo tung module
+  Demo: Live search HTMX, Dashboard Chart.js, Admin panel
 
-  ↓
-
-Slide 6 — ERD & Thiết kế database
-  "5 bảng, quan hệ, ràng buộc toàn vẹn dữ liệu"
-
-  ↓
-
-Slide 7 — Business Logic Flow
-  "Demo luồng mượn sách: 5 bước kiểm tra, auto fine calc"
-
-  ↓
-
-Slide 8 — Roles & Phân quyền
-  "RBAC 3 cấp — Reader / Librarian / Admin"
-
-  ↓
-
-Slide 9 — Chức năng hệ thống & Giao diện
-  "Demo / Screenshot: Dashboard, Issue form, Book list"
-
-  ↓
-
-Slide 10 — Kết luận, Hạn chế & Hướng phát triển
-  "Những gì đã làm được — những gì còn thiếu — bước tiếp theo"
+SLIDE 10 -- Ket luan, Han che & Huong phat trien
+  Tong ket ket qua, han che thuc te, cai tien tuong lai
+  Ket: Q&A
 ```
 
-### Điểm nhấn nên đề cập khi trình bày
+### Điểm nhấn khi trình bày
 
-1. **Async architecture** — FastAPI + SQLAlchemy async → xử lý đồng thời tốt
-2. **Dual interface** — Cùng 1 server phục vụ cả Web UI và REST API
-3. **HTMX live search** — Demo trực tiếp tính năng này ấn tượng
-4. **Auto fine calculation** — Logic tính phạt tự động, không cần nhập tay
-5. **RBAC enforcement** — Phân quyền enforce ở cả Web và API layer
-6. **Swagger UI** — REST API tự document, professional
-
-### Thứ tự ưu tiên demo (nếu có thời gian)
-
-1. Trang chủ + duyệt sách (public, ấn tượng ngay)
-2. Issue form với live search (HTMX)
-3. Admin dashboard với biểu đồ Chart.js
-4. Swagger UI tại `/api/docs`
+1. **Mở đầu bằng vấn đề thực tế** — đừng bắt đầu bằng kỹ thuật
+2. **Giải thích lý do chọn công nghệ** — không chỉ liệt kê tên
+3. **Dùng sơ đồ kiến trúc** — người nghe thấy được bức tranh toàn cảnh
+4. **Luồng nghiệp vụ bằng flowchart** — dễ hiểu hơn bảng chữ
+5. **Demo giao diện thực tế** — slide 9 nên có screenshots hoặc video ngắn
+6. **Hạn chế — trình bày tự tin** — thể hiện sự hiểu rõ phạm vi dự án
+7. **Kết bằng hướng phát triển** — cho thấy tư duy mở rộng
