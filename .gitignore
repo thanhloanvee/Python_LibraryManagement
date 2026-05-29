@@ -1,61 +1,51 @@
-# phpstorm project files
-.idea
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
 
-# visual studio code project files
-.vscode
-
-# netbeans project files
-nbproject
-
-# zend studio for eclipse project files
-.buildpath
-.project
-.settings
-
-# windows thumbnail cache
-Thumbs.db
-
-# composer vendor dir
-/vendor
-
-# composer itself is not needed
-composer.phar
-
-# Mac DS_Store Files
-.DS_Store
-
-# phpunit itself is not needed
-phpunit.phar
-# local phpunit config
-/phpunit.xml
-
-tests/_output/*
-tests/_support/_generated
-
-#vagrant folder
-/.vagrant
-
-# Runtime files
-/runtime/*
-!/runtime/.gitkeep
-
-# Uploaded files
-/web/uploads/*
-!/web/uploads/.gitkeep
-
-# Assets cache
-/web/assets/*
-!/web/assets/.gitkeep
-
-# Backup files
-*.backup.*
+# Virtual environments
+.venv/
+venv/
+*env/
+ENV/
 
 # Environment files
 .env
 .env.local
-__pycache__/
-.playwright-mcp/
-.github/
+.env.*.local
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
 *.log
-*env/
-uploads/
+logs/
+
+# Database (SQLite)
+*.db
+*.sqlite3
+
+# Uploads (img content)
+backend/app/static/uploads/
+
+# Alembic compiled
+backend/alembic/versions/__pycache__/
