@@ -1,91 +1,128 @@
-# PRESENTATION_OUTLINE.md — Library Management System
+# PRESENTATION_OUTLINE.md — Hệ Thống Quản Lý Thư Viện
 ## Phase 3 Part B: Slide Comparison & Final Presentation Outline
 
 ---
 
 ## 1. Coverage Analysis
 
-### So sánh File A (16 slides) và File B (10 slides) với tài liệu phân tích
+### File A (Python_LMS_Slides.pptx — 16 slides)
 
-| Chủ đề cần trình bày | File A | File B | Đánh giá |
-|---|---|---|---|
-| Giới thiệu đề tài / bài toán | Slide 2 | Slide 1–2 | Có, đủ nội dung |
-| Mục tiêu hệ thống | Slide 2 (gộp) | Slide 2 | Mờ nhạt — thiếu bảng mục tiêu rõ ràng |
-| Công nghệ sử dụng | Slide 4 | Slide 3 | File A thiếu HTMX, Alpine.js, TailwindCSS, Chart.js, Ruff |
-| Kiến trúc hệ thống | Slide 5–6 | Slide 4 | Có, nhưng Slide 6 (MVC) dư thừa — không cần thiết |
-| Cấu trúc dự án | Slide 7 | Slide 4 (gộp) | File A có riêng; File B gộp vào kiến trúc |
-| ERD & Thiết kế CSDL | Slide 8 | Slide 6 | Có; thiếu bảng `categories`; thiếu ON DELETE strategy |
-| Business Logic Flow | Slide 9 (một phần) | Slide 7 | Cả hai chỉ list bước — thiếu diagram flow có trực quan |
-| Roles & Phân quyền | Slide 10 | Slide 8 | Có; File A đầy đủ hơn |
-| Chức năng & Giao diện | Slide 3, 12 | Slide 9 | Slide 3 list features; Slide 12 UI mock — thiếu screenshot thực |
-| Hạn chế hệ thống | Slide 13 | Slide 10 (gộp) | Có; File A có điểm sai (Soft Delete — thực tế DB dùng RESTRICT) |
-| Hướng phát triển | Slide 14 | Slide 10 | Có |
-| Kết luận | Slide 15 | Slide 10 | Có |
+| Slide | Tiêu đề | Đánh giá |
+|---|---|---|
+| 1 | Cover / Title | Ổn — đầy đủ thông tin nhóm |
+| 2 | Giới thiệu đề tài | Ổn — có problem, goals, target users |
+| 3 | Chức năng chính | Ổn — liệt kê theo 4 module |
+| 4 | Công nghệ sử dụng | Thiếu — không có HTMX, TailwindCSS, Alpine.js, Chart.js |
+| 5 | Kiến trúc hệ thống | Ổn — nhưng thiếu dual auth, thiếu sơ đồ trực quan |
+| 6 | Mô hình MVC | **Không chính xác** — hệ thống không theo MVC mà là Layered Architecture (4 tầng) |
+| 7 | Tổ chức mã nguồn | Ổn — có folder tree và module roles |
+| 8 | Data Model / ERD | Thiếu — không có Category entity, thiếu quan hệ ON DELETE, thiếu cơ chế tồn kho kép |
+| 9 | Controller Layer / API Flow | Quá chi tiết kỹ thuật — liệt kê 10 bước internal + endpoint table |
+| 10 | Bảo mật & Phân quyền | Ổn — nhưng trộn lẫn security techniques và RBAC matrix |
+| 11 | Demo (placeholder) | Không cần thiết — nên gộp vào slide Chức năng & Giao diện |
+| 12 | Demo Giao diện | Ổn — nhưng tách ra 2 slide làm loãng nội dung |
+| 13 | Hạn chế hệ thống | Có "No Soft Delete" — **sai thực tế** (hệ thống đã có RESTRICT FK bảo vệ, không phải lỗi) |
+| 14 | Hướng phát triển | Ổn — 3 phase roadmap |
+| 15 | Tổng kết | Ổn |
+| 16 | Cảm ơn | Ổn |
+
+### File B (Draft-LMS-Slides.pptx — 10 slides)
+
+| Slide | Tiêu đề | Đánh giá |
+|---|---|---|
+| 1 | Cover | **Vi phạm framing** — đề cập "Migration from PHP/Yii2" |
+| 2 | Mục tiêu & Chức năng | Ổn — có actor workflow table |
+| 3 | Công nghệ sử dụng | Tốt hơn File A — có đủ HTMX, Tailwind, Alpine.js, Chart.js |
+| 4 | Kiến trúc dự án | Tốt — có layer responsibilities, đề cập Separation of Concerns |
+| 5 | Môi trường thực nghiệm | Không cần thiết cho bảo vệ — thông tin setup quá chi tiết |
+| 6 | ERD & CSDL | Ổn — có 5 entities nhưng thiếu quan hệ và ràng buộc |
+| 7 | Quy trình nghiệp vụ | Tốt — 3 luồng rõ ràng trong bảng |
+| 8 | Phân quyền RBAC | Tốt — có role definitions và permission matrix |
+| 9 | Chức năng & Giao diện | Ổn — 4 module nhưng thiếu screenshots |
+| 10 | Tổng kết | **Vi phạm framing** — "Successfully migrated from PHP/Yii2 to Python async" |
 
 ---
 
 ## 2. Missing Presentation Content
 
-### Chủ đề hoàn toàn thiếu
+### 2.1 Nội dung thiếu hoàn toàn
 
-| # | Nội dung thiếu | Vị trí nên thêm |
+| Nội dung thiếu | Tầm quan trọng | Có trong doc nào |
 |---|---|---|
-| 1 | **HTMX live search** — tính năng UX nổi bật nhất, không xuất hiện trong File A | Slide Công nghệ + Slide Demo |
-| 2 | **Dual interface** — cùng 1 server phục vụ cả Web UI (/web/*) lẫn REST API (/api/v1/) với 2 auth mechanism khác nhau (cookie vs Bearer) | Slide Kiến trúc |
-| 3 | **User Journey** — luồng tương tác đầu từ đầu đến cuối của từng vai trò (Reader, Librarian, Admin) | Slide Business Logic |
-| 4 | **Bảng categories trong ERD** — toàn bộ File A bỏ sót entity này | Slide ERD |
-| 5 | **ON DELETE strategy** — SET NULL / RESTRICT / CASCADE — minh chứng cho data integrity | Slide ERD |
-| 6 | **Sync overdue workflow** — Admin kích hoạt thủ công, logic tính phạt tích lũy | Slide Business Logic |
-| 7 | **Screenshot thực tế** — cả hai file dùng mock data; không có screenshot thật từ app | Slide Demo / Giao diện |
-| 8 | **Dual auth mechanism** — JWT httponly cookie (Web) vs Bearer token (API) | Slide Bảo mật |
+| **HTMX live search** — điểm kỹ thuật nổi bật nhất của UI | Cao | DESIGN_DOC.md §10 |
+| **Dual Authentication** — Bearer token (API) vs httponly cookie (Web) | Cao | PROJECT_ANALYSIS.md §3 |
+| **Tồn kho kép** (quantity vs available_quantity) — cơ chế cốt lõi | Cao | PROJECT_ANALYSIS.md §9 |
+| **Category entity** trong ERD — 5 entities không phải 4 | Trung bình | PROJECT_ANALYSIS.md §9 |
+| **ON DELETE behavior** trong quan hệ DB (RESTRICT vs CASCADE vs SET NULL) | Trung bình | PROJECT_ANALYSIS.md §9 |
+| **Sync Overdue flow** — luồng nghiệp vụ thứ 5 | Trung bình | DESIGN_DOC.md §8 |
+| **Dashboard KPI chi tiết** — fine collected/outstanding, top books | Trung bình | PROJECT_ANALYSIS.md §8 |
 
-### Nội dung sai hoặc thiếu chính xác trong slide hiện tại
+### 2.2 Nội dung sai hoặc cần chỉnh
 
-| # | Slide | Vấn đề |
+| Vấn đề | File | Mô tả |
 |---|---|---|
-| 1 | File A — Slide 13 | "No Soft Delete — Deleting a book with active borrows can cause data integrity errors" — **SAI**: DB dùng `RESTRICT` constraint, hệ thống **chặn** xóa sách khi còn phiếu active; không gây lỗi integrity |
-| 2 | File A — Slide 4 | Thiếu HTMX, Alpine.js, TailwindCSS, Chart.js — là các công nghệ frontend quan trọng |
-| 3 | File A — Slide 9 | Borrow API list endpoint `/books` ghi "Librarian+" nhưng thực tế là **Public** |
-| 4 | File B — Slide 7 | "Reader requests" renewal — thực ra Reader tự gia hạn trực tiếp, không "request" |
+| **"MVC Pattern"** (Slide 6 File A) | File A | Hệ thống không dùng MVC — đây là Layered Architecture 4 tầng (Presentation → Service → Repository → Data). Gọi là MVC sẽ bị hỏi và khó bảo vệ. |
+| **"No Soft Delete là hạn chế"** (Slide 13 File A) | File A | Sai — hệ thống đã có RESTRICT FK ngăn xóa sách/user có phiếu mượn ở DB level. Đây là thiết kế có chủ đích. |
+| **"PHP/Yii2 migration"** (Slide 1, 10 File B) | File B | Vi phạm tuyệt đối quy tắc framing — đây là đồ án Python tự thiết kế |
+| **Tech stack thiếu** (Slide 4 File A) | File A | HTMX, TailwindCSS, Alpine.js, Chart.js — 4 công nghệ frontend quan trọng bị bỏ qua |
+| **"Borrow online" cho Reader** (Slide 10 File B) | File B | Không chính xác — Reader không tự mượn online, phải qua Thủ thư |
+
+### 2.3 Slides thừa hoặc cần gộp
+
+| Slide thừa | Đề xuất |
+|---|---|
+| **Slide 11 (Demo placeholder)** File A | Xóa — không có nội dung, làm gián đoạn flow |
+| **Slide 6 (MVC Pattern) + Slide 7 (Code Structure)** File A | Gộp thành 1 slide "Cấu trúc dự án" với folder tree + layer responsibilities |
+| **Slide 9 (API Flow) + Slide 10 (RBAC)** File A | Tách nội dung đúng hơn: Slide 7 = Business Logic Flow, Slide 8 = RBAC |
+| **Slide 5 (Setup & Environment)** File B | Xóa — không phù hợp bảo vệ học thuật, chỉ để demo hướng dẫn |
 
 ---
 
 ## 3. Recommended Slide Improvements
 
-### File A — Những slide nên sửa
+### Slide "Công nghệ sử dụng" (hiện tại Slide 4 File A)
 
-| Slide | Vấn đề | Hành động |
-|---|---|---|
-| Slide 3 (Chức năng chính) | Liệt kê dạng bảng module, thiếu context nghiệp vụ | Gộp vào Slide Mục tiêu hoặc Business Logic Flow |
-| Slide 4 (Tech Stack) | Thiếu HTMX, Alpine.js, TailwindCSS, Chart.js, Ruff | Bổ sung frontend stack |
-| Slide 5 (Kiến trúc) | Diagram text-only, không trực quan | Thay bằng diagram có layers rõ ràng |
-| Slide 6 (MVC Pattern) | Nội dung trùng lặp với Slide 5 và 7; MVC không chính xác với kiến trúc thực (Layered, không phải MVC thuần) | **Xóa** hoặc gộp vào Slide Kiến trúc |
-| Slide 8 (ERD) | Thiếu bảng `categories`; thiếu ON DELETE rules | Bổ sung đủ 5 entities và constraints |
-| Slide 11 (Demo placeholder) | Slide trống | Thay bằng nội dung thực hoặc xóa |
-| Slide 13 (Limitations) | Nội dung sai về Soft Delete | Sửa: "DB RESTRICT prevents deletion" thay vì "can cause errors" |
+**Vấn đề:** Thiếu 4 công nghệ frontend (HTMX, TailwindCSS, Alpine.js, Chart.js)
 
-### Slide nên gộp
+**Cải tiến:** Chia theo tầng như File B — Backend / Frontend / Security / Quality. Thêm cột "Lý do chọn" thay vì chỉ liệt kê.
 
-| Gộp | Lý do |
-|---|---|
-| Slide 5 + Slide 6 | Slide 5 (Architecture) đã bao gồm nội dung Slide 6 (MVC); gộp thành 1 slide Kiến trúc đầy đủ |
-| Slide 11 + Slide 12 | Slide 11 là placeholder trống; gộp vào Slide Demo thực |
-| Slide 3 + Slide 9 | Chức năng chính (Slide 3) và API Flow (Slide 9) cùng nói về features; tách theo góc nhìn (business vs technical) |
+### Slide "Kiến trúc hệ thống" (hiện tại Slide 5 File A)
 
-### Slide nên tách
+**Vấn đề:** Không có dual auth, không nhấn Layered Architecture rõ ràng
 
-| Tách | Lý do |
-|---|---|
-| Slide 2 (Giới thiệu + Mục tiêu) | Quá nhiều nội dung; tách thành Slide 1 (Giới thiệu bài toán) và Slide 2 (Mục tiêu + phạm vi) |
+**Cải tiến:** Sơ đồ 2 luồng: Web UI (cookie) và REST API (bearer token) hội tụ vào FastAPI → Service → Repository → DB. Thêm bảng 4 tầng với trách nhiệm.
+
+### Slide "Cấu trúc dự án" (gộp Slide 6+7 File A)
+
+**Vấn đề:** MVC không chính xác, folder tree và module table tách biệt
+
+**Cải tiến:** Bỏ "MVC", thay bằng "Layered Architecture". Giữ folder tree + bảng module responsibilities trong 1 slide.
+
+### Slide "ERD & CSDL" (Slide 8 File A / Slide 6 File B)
+
+**Vấn đề:** Thiếu Category, thiếu tồn kho kép, thiếu ON DELETE
+
+**Cải tiến:** 5 entities đầy đủ. Thêm hộp giải thích `quantity vs available_quantity`. Thêm bảng ON DELETE behavior.
+
+### Slide "Business Logic Flow" (Slide 9 File A → quá kỹ thuật)
+
+**Vấn đề:** 10 bước internal implementation, liệt kê endpoint — không phù hợp bảo vệ
+
+**Cải tiến:** 3 flowchart nghiệp vụ dạng mũi tên: Mượn → Trả → Gia hạn. Tập trung vào điểm kiểm tra và kết quả, không phải code steps.
+
+### Slide "Hạn chế" (Slide 13 File A)
+
+**Vấn đề:** "No Soft Delete" sai thực tế; thiếu hạn chế quan trọng hơn (sync manual, no email)
+
+**Cải tiến:** Xóa mục "No Soft Delete". Thêm: Sync Overdue thủ công, Không có email notification. Giữ: SQLite concurrency, No rate limiting.
 
 ---
 
 ## 4. Recommended New Slides
 
-| Slide mới | Nội dung | Lý do cần thiết |
+| Slide mới | Lý do | Nội dung |
 |---|---|---|
-| **User Journey** | Sơ đồ 3 hành trình: Reader → Librarian → Admin với các bước cụ thể | Giúp hội đồng hiểu hệ thống từ góc nhìn người dùng thực tế |
-| **HTMX Demo context** | Giải thích HTMX partial update; minh họa live search without SPA | Tính năng kỹ thuật đặc sắc nhất, chưa được đề cập |
+| Không cần thêm slide mới | Target là 10 slides — cần cắt bớt từ 16 (File A) hoặc tái cấu trúc | Xem outline bên dưới |
 
 ---
 
@@ -93,220 +130,237 @@
 
 | Slide | Visual đề xuất |
 |---|---|
-| Giới thiệu đề tài | Before/After: Sổ giấy thủ công → Web interface |
-| Công nghệ | Tech stack diagram phân layer (Frontend / Backend / DB) |
-| Kiến trúc | Layered architecture diagram: Browser → FastAPI → Services → Repo → SQLite |
-| ERD | Sơ đồ ERD với 5 bảng và đường quan hệ có nhãn cardinality |
-| Business Logic Flow | Flowchart mượn sách với 5 điểm kiểm tra (diamond shapes) |
-| Roles & Phân quyền | Ma trận quyền dạng bảng màu (xanh = có, đỏ = không) |
-| Demo / Giao diện | Screenshot thực: Dashboard, Issue form với live search, Book list |
-| Kết luận | Timeline roadmap 3 giai đoạn |
+| Giới thiệu đề tài | Sơ đồ 2 cột: Thủ công (giấy tờ) → Hệ thống số (web) |
+| Công nghệ sử dụng | Icon grid theo 4 tầng: Backend / Frontend / Security / Tools |
+| Kiến trúc hệ thống | Sơ đồ flow dọc: Browser → FastAPI → Service → Repository → SQLite, với 2 nhánh Auth |
+| Cấu trúc dự án | Folder tree ASCII + bảng tầng bên cạnh |
+| ERD & CSDL | Sơ đồ hộp-quan hệ 5 entities + callout tồn kho kép |
+| Business Logic Flow | 3 flowchart nhỏ ngang: Mượn / Trả / Gia hạn |
+| Roles & Phân quyền | Bảng ma trận ✓/— với màu sắc theo vai trò |
+| Chức năng & Giao diện | Screenshots thực tế: Dashboard / Book list / Issue form / Reader portal |
+| Kết luận & Hướng phát triển | Bảng 2 cột: Đã đạt / Tương lai |
 
 ---
 
 ## 6. Final Presentation Outline — 10 Slides
 
-> Target: 10 slides · Ngôn ngữ: Tiếng Việt (nội dung chính) + English (thuật ngữ kỹ thuật)
+---
+
+### SLIDE 1 — Giới thiệu đề tài
+
+**Mục tiêu:** Hook bằng bài toán thực tế → giới thiệu giải pháp
+
+**Key bullets:**
+- Thư viện truyền thống: sổ sách giấy → khó kiểm soát tồn kho, không có báo cáo tức thời
+- Giải pháp: Hệ thống quản lý thư viện trực tuyến full-stack bằng Python
+- Đối tượng: Độc giả · Thủ thư · Quản trị viên
+- Phạm vi: Quản lý kho sách · Lưu thông sách · Phân quyền 3 cấp · Dashboard thống kê
+
+**Visual đề xuất:** Sơ đồ chuyển đổi: [Giấy tờ thủ công] → [Hệ thống web Python]. Icons đơn giản cho 3 vai trò.
+
+**Speaker notes:**
+> Mở đầu: "Thư viện truyền thống quản lý bằng sổ tay — không kiểm soát được tồn kho real-time, không có báo cáo tức thời, không theo dõi được sách quá hạn. Đề tài này xây dựng hệ thống web Python giải quyết toàn bộ bài toán đó, với giao diện web và REST API trong cùng một ứng dụng."
 
 ---
 
-### Slide 1 — Giới thiệu đề tài
+### SLIDE 2 — Mục tiêu hệ thống
 
-**Objective:** Đặt bài toán thực tế và giới thiệu giải pháp số hoá.
+**Mục tiêu:** Trình bày 5 mục tiêu cụ thể, đo lường được
 
-**Key Bullets:**
-- Thư viện truyền thống: quản lý sổ giấy → khó kiểm soát, dễ sai sót
-- Giải pháp: Hệ thống LMS trực tuyến — số hoá toàn bộ quy trình
-- Dự án tái viết từ PHP/Yii2 → Python/FastAPI hiện đại
-- Vừa là Web App hoàn chỉnh, vừa là REST API có thể tích hợp
-- Nhóm: Lê Thị Thanh Loan (24210228) · Trần Hưng Khoa (24210220)
+**Key bullets:**
+- Số hoá lưu thông sách — tạo/theo dõi phiếu mượn, cập nhật tồn kho tức thời
+- Tự động tính phí phạt — số ngày quá hạn × 5.000 VND, không cần tính tay
+- Kiểm soát tồn kho real-time — `available_quantity` cập nhật ngay khi cấp phát / trả
+- Thống kê hoạt động — Dashboard KPI + biểu đồ + top sách/reader
+- Cung cấp REST API đầy đủ — Swagger UI tự động, có thể tích hợp ngoài
 
-**Suggested Visual:** Split-screen — bên trái: hình ảnh sổ sách thủ công; bên phải: screenshot trang chủ LMS web app
+**Visual đề xuất:** Bảng 5 hàng với icon mô tả mục tiêu, cột "Kết quả cụ thể".
 
-**Speaker Notes:**
-> Mở đầu bằng bài toán thực tế — thư viện phải ghi chép bằng tay, không biết sách nào đang được mượn, ai đang giữ, sách nào quá hạn. Hệ thống này giải quyết trọn vẹn bài toán đó. Đặc biệt, đây không chỉ là migration công nghệ mà là một rewrite hoàn toàn, giữ nguyên nghiệp vụ nhưng nâng cấp toàn bộ nền tảng kỹ thuật.
-
----
-
-### Slide 2 — Mục tiêu hệ thống
-
-**Objective:** Trình bày rõ 6 mục tiêu cốt lõi và phạm vi hệ thống.
-
-**Key Bullets:**
-- Số hoá phiếu mượn/trả — thay thế sổ giấy
-- Kiểm soát tồn kho real-time (`available_quantity` cập nhật ngay)
-- Tự động tính phí phạt: `days_overdue × 5,000 VND`
-- Phân quyền rõ ràng — RBAC 3 cấp: Reader / Librarian / Admin
-- Dashboard thống kê — KPI, biểu đồ tháng, top sách/độc giả
-- REST API đầy đủ — sẵn sàng tích hợp mobile / third-party
-
-**Suggested Visual:** Bảng mục tiêu 2 cột: Mục tiêu | Giải pháp trong hệ thống (lấy từ DESIGN_DOC Section 2)
-
-**Speaker Notes:**
-> Mỗi mục tiêu đều được "mã hoá" trực tiếp vào business rules trong code — không chỉ là lý thuyết. Ví dụ: tự động tính phạt được implement trong `BorrowingService.calculate_fine()`, giới hạn 5 phiếu/reader được enforce trong `issue_book()`. Nêu phạm vi: không bao gồm thanh toán online, reservation, hay mobile app — những thứ này là future work.
+**Speaker notes:**
+> "Hệ thống hướng đến 5 mục tiêu rõ ràng. Quan trọng nhất là: tự động hóa hoàn toàn việc tính phí phạt và kiểm soát tồn kho real-time — hai điểm mà quản lý thủ công hay sai nhất."
 
 ---
 
-### Slide 3 — Công nghệ sử dụng
+### SLIDE 3 — Công nghệ sử dụng
 
-**Objective:** Giới thiệu toàn bộ tech stack phân theo layer, giải thích lý do chọn.
+**Mục tiêu:** Giới thiệu tech stack theo tầng, giải thích lý do chọn
 
-**Key Bullets:**
-- **Backend:** Python 3.12 + FastAPI (async-native, auto OpenAPI docs) + Uvicorn
-- **Database:** SQLite + SQLAlchemy 2.x async ORM + Alembic migrations
-- **Frontend:** Jinja2 SSR + HTMX (partial updates) + Alpine.js + TailwindCSS + Chart.js
-- **Security:** PyJWT + bcrypt + Pydantic v2 validation
-- **Dev Tools:** pytest + pytest-asyncio + httpx + Ruff
+**Key bullets:**
+- **Backend:** Python 3.12 · FastAPI (async, auto-docs) · Uvicorn (ASGI server)
+- **Database:** SQLite · SQLAlchemy 2.x async ORM · Alembic (migration)
+- **Frontend:** Jinja2 SSR · HTMX (live search, không reload) · Alpine.js · TailwindCSS · Chart.js
+- **Security:** PyJWT · bcrypt · Pydantic v2
+- **Quality:** pytest · pytest-asyncio · httpx · Ruff
 
-**Suggested Visual:** Layer diagram (5 tầng màu sắc khác nhau): Frontend → Web Server → Business Layer → Data Layer → Database; mỗi tầng liệt kê tên tech tương ứng
+**Visual đề xuất:** Grid 4 tầng (hộp màu): Backend / Frontend / Security / Quality. Mỗi tầng liệt kê logo/tên công nghệ.
 
-**Speaker Notes:**
-> Điểm đáng chú ý: cùng 1 FastAPI server phục vụ cả Web UI (Jinja2 SSR) và REST API (JSON) — không cần 2 server riêng biệt. HTMX là lựa chọn thay thế SPA (React/Vue) — giữ được SSR đơn giản mà vẫn có UX phản hồi tức thì (live search, inline edit). Nếu hội đồng hỏi "tại sao không dùng React?" — trả lời: HTMX phù hợp hơn với server-centric architecture, không cần build pipeline riêng.
-
----
-
-### Slide 4 — Tổng quan kiến trúc hệ thống
-
-**Objective:** Trình bày Monolith Full-stack architecture, luồng request, và dual interface.
-
-**Key Bullets:**
-- Kiến trúc: **Monolith Full-stack** — 1 FastAPI server, 2 giao diện
-- **Web UI** (`/`, `/books`, `/admin/*`, `/reader/*`) → auth via httponly cookie
-- **REST API** (`/api/v1/*`) → auth via Bearer JWT token + Swagger UI
-- Layered: Router → Service (business logic) → Repository (DB queries) → SQLite
-- Dependency Injection: FastAPI DI quản lý DB session, auth, RBAC
-
-**Suggested Visual:** Architecture diagram dọc: Browser ↔ [Web UI / REST API] ↔ Services ↔ Repositories ↔ SQLite; với chú thích "httponly cookie" và "Bearer JWT" ở hai nhánh
-
-**Speaker Notes:**
-> Điểm kỹ thuật quan trọng: 2 interface trên cùng 1 server với 2 cơ chế auth khác nhau. Web dùng cookie để tránh XSS (httponly), API dùng Bearer token cho programmatic access. Service layer là trung tâm — toàn bộ business rules nằm ở đây, không rải rác trong routes. Repository chỉ thuần query DB, không có logic nghiệp vụ.
+**Speaker notes:**
+> "Điểm khác biệt của stack này: HTMX cho phép live search và cập nhật bảng không cần reload trang, mà không cần viết JavaScript SPA. FastAPI tự sinh Swagger UI từ Pydantic schema — không cần viết tài liệu API thủ công."
 
 ---
 
-### Slide 5 — Cấu trúc dự án
+### SLIDE 4 — Tổng quan kiến trúc hệ thống
 
-**Objective:** Giải thích tổ chức thư mục và vai trò từng package chính.
+**Mục tiêu:** Trình bày kiến trúc Monolith Full-stack và Pattern 4 tầng
 
-**Key Bullets:**
-- `models/` — 5 SQLAlchemy ORM entities (User, Book, Category, Borrowing, Review)
-- `schemas/` — Pydantic v2 DTOs: validate input, serialize output
-- `repositories/` — Data access layer: async DB queries, không có business logic
-- `services/` — Business logic layer: BorrowingService, AuthService, DashboardService
-- `api/v1/` + `web/` — REST endpoints (JSON) + Web UI endpoints (HTML)
-- `dependencies/` — `auth.py` (JWT decode) + `rbac.py` (role enforcement)
+**Key bullets:**
+- Kiến trúc Monolith Full-stack — 1 server FastAPI phục vụ cả Web UI và REST API
+- Pattern 4 tầng: Presentation → Service → Repository → Data
+- Dual Authentication: Bearer Token (REST API) · httponly Cookie (Web UI)
+- RBAC 3 cấp: Reader ⊂ Librarian ⊂ Admin — enforce ở Dependency layer
 
-**Suggested Visual:** Directory tree diagram với 2 màu: xanh = layer logic, cam = infrastructure; hoặc dạng card từng module với tên file ví dụ
-
-**Speaker Notes:**
-> Nguyên tắc thiết kế: mỗi layer có trách nhiệm duy nhất. Nếu hội đồng hỏi "tại sao cần cả Service lẫn Repository?" — giải thích: Repository chỉ biết "lấy data thế nào", Service mới biết "khi nào được lấy và làm gì với data đó". Ví dụ: `BorrowingRepository` chỉ query DB, còn `BorrowingService` kiểm tra 5 điều kiện trước khi gọi repository.
-
----
-
-### Slide 6 — ERD & Thiết kế cơ sở dữ liệu
-
-**Objective:** Trình bày 5 entity, quan hệ, và chiến lược toàn vẹn dữ liệu.
-
-**Key Bullets:**
-- 5 bảng: `users` · `categories` · `books` · `borrowings` · `reviews`
-- Trường đặc biệt: `available_quantity` (cập nhật real-time), `fine_amount`, `renewed_count`
-- Ràng buộc ON DELETE: `RESTRICT` (user/book → borrowings), `CASCADE` (user/book → reviews), `SET NULL` (category → books)
-- Unique constraint: `(user_id, book_id)` trên `reviews` — mỗi reader chỉ review 1 lần/sách
-- Migration: Alembic `001_initial_schema.py`
-
-**Suggested Visual:** ERD diagram đầy đủ 5 bảng với cardinality (1–N), tên cột chính, và mũi tên ON DELETE được tô màu (đỏ = RESTRICT, xanh = CASCADE, xám = SET NULL)
-
-**Speaker Notes:**
-> Điểm cần nhấn: `RESTRICT` trên borrowings bảo vệ lịch sử dữ liệu — không thể xóa user hay sách khi còn phiếu mượn. Đây là data integrity được enforce ở tầng DB, không chỉ ở code. `available_quantity` tách biệt với `quantity` (tổng bản nhập) để tracking real-time mà không cần count phiếu mượn mỗi lần query.
-
----
-
-### Slide 7 — Business Logic Flow
-
-**Objective:** Trình bày chi tiết 2 luồng nghiệp vụ cốt lõi: mượn và trả sách.
-
-**Key Bullets:**
-- **Mượn sách (Issue):** 5 kiểm tra tuần tự → tạo phiếu → `available_quantity -= 1`
-  - ✓ Reader tồn tại & active · ✓ Sách tồn tại · ✓ `available_quantity > 0` · ✓ Reader < 5 phiếu active · ✓ Reader chưa mượn sách này
-- **Trả sách (Return):** Ghi tình trạng → tính phạt tự động → `available_quantity += 1` → thu phạt
-  - `fine_amount = (return_date − due_date) × 5,000 VND`
-- **Gia hạn (Renew):** Tối đa 2 lần · `due_date += 14 ngày` · `renewed_count += 1`
-- **Sync overdue:** Admin kích hoạt → tất cả phiếu quá hạn được cập nhật status + tính lại fine
-
-**Suggested Visual:** Flowchart dọc luồng mượn sách với 5 diamond (điều kiện) màu đỏ/xanh; bên cạnh là mini-flowchart luồng trả sách
-
-**Speaker Notes:**
-> Đây là core business logic — mỗi validation check trong `BorrowingService.issue_book()` tương ứng với 1 quy tắc nghiệp vụ thực tế. Demo luồng này trực tiếp trên form `/admin/borrowings/issue` sẽ rất ấn tượng — nhập reader, nhập sách, hệ thống tự kiểm tra và báo lỗi cụ thể nếu vi phạm rule.
-
----
-
-### Slide 8 — Roles & Phân quyền
-
-**Objective:** Trình bày RBAC 3 cấp, ma trận quyền, và cách enforce trong code.
-
-**Key Bullets:**
-- **3 roles:** Reader (độc giả) · Librarian (thủ thư) · Admin (quản trị viên)
-- **Public access** (chưa đăng nhập): Duyệt sách, xem chi tiết — không cần login
-- **Enforce tại 2 tầng:** Web layer (cookie) + API layer (Bearer JWT) → cùng `rbac.py`
-- **Quy tắc đặc biệt:** Reader tự đăng ký (chỉ role `reader`); tối đa 5 phiếu active; tối đa 2 lần gia hạn
-- **Inactive account:** Không thể đăng nhập, bị chặn ngay tại `AuthService.login()`
-
-**Suggested Visual:** Ma trận quyền dạng bảng màu: cột = Feature groups, hàng = Roles; ô xanh = có quyền, ô đỏ = không; thêm cột "Public" cho anonymous access
-
-**Speaker Notes:**
-> RBAC được enforce ở cả 2 layer — không chỉ ở UI. Nếu hội đồng hỏi "Reader có thể bypass bằng cách gọi API trực tiếp không?" — câu trả lời là không, vì `require_reader/librarian/admin` trong `dependencies/rbac.py` được inject vào cả API routes lẫn Web routes. Demo: thử gọi `POST /api/v1/borrowings` với Reader token → nhận 403.
-
----
-
-### Slide 9 — Chức năng hệ thống & Giao diện
-
-**Objective:** Demo các màn hình thực tế, nhóm theo 7 module chức năng.
-
-**Key Bullets:**
-- **Catalogue:** Trang chủ, danh sách sách (search + filter), chi tiết sách + reviews
-- **Circulation:** Issue form (HTMX live search reader/book), Return form (auto fine calc), Renew
-- **Admin Dashboard:** KPI cards · Biểu đồ mượn/trả theo tháng (Chart.js) · Top 5 sách/readers
-- **Catalogue Management:** CRUD sách (upload ảnh bìa), CRUD thể loại (inline HTMX)
-- **User Management:** Danh sách users, thay đổi role, khoá tài khoản
-- **Reader Portal:** My Books, Lịch sử, Hồ sơ, Đổi mật khẩu
-- **API Docs:** Swagger UI tại `/api/docs` — tự động từ FastAPI + Pydantic schemas
-
-**Suggested Visual:** Screenshot grid 2×3: (1) Admin Dashboard với Chart.js, (2) Issue form live search, (3) Book list với search/filter, (4) Book detail + reviews, (5) Return form với fine display, (6) Swagger UI
-
-**Speaker Notes:**
-> Demo trực tiếp theo thứ tự: (1) trang chủ public, (2) issue form với HTMX live search — gõ tên reader/sách, kết quả hiện ngay không reload, (3) admin dashboard với Chart.js, (4) Swagger UI. Nếu không có thời gian demo thực, nhấn mạnh HTMX live search — đây là điểm kỹ thuật phân biệt hệ thống này với các giải pháp SSR thông thường.
-
----
-
-### Slide 10 — Kết luận, Hạn chế & Hướng phát triển
-
-**Objective:** Tổng kết thành quả, thừa nhận hạn chế thực tế, đề xuất roadmap.
-
-**Key Bullets:**
-- **Đã hoàn thành:** Full-stack Web App + REST API · RBAC 3 cấp · Circulation workflow (borrow/return/renew/fine) · Admin Dashboard + Chart.js · 18 test cases (auth, books, borrowings)
-- **Hạn chế chính:** SQLite (phù hợp học thuật, không production-scale) · Sync overdue thủ công · Chưa có email notifications · Reader chưa tự mượn được
-- **Hướng phát triển ngắn hạn:** PostgreSQL + APScheduler auto-sync · Rate limiting · Book reservation queue
-- **Hướng phát triển dài hạn:** Mobile app (tận dụng REST API có sẵn) · Docker + CI/CD · AI recommendation · VNPay integration
-
-**Suggested Visual:** 2 cột: bên trái "Đã làm được" (checkmark xanh), bên phải "Hướng phát triển" (arrow icon); phía dưới: timeline roadmap 3 giai đoạn ngắn/trung/dài hạn
-
-**Speaker Notes:**
-> Khi nói về hạn chế: không xin lỗi về SQLite — thay vào đó nêu "SQLite phù hợp với quy mô dự án học thuật và thư viện nhỏ; khi scale lên, chỉ cần đổi connection string sang PostgreSQL vì SQLAlchemy đã abstract database driver". Nhấn mạnh: REST API đã sẵn sàng — mobile app chỉ cần consume API, không cần viết lại backend.
-
----
-
-## 7. Slide Reorder Rationale
-
+**Visual đề xuất:**
 ```
-Slide 1  — Giới thiệu đề tài       (Bài toán → Giải pháp → Context migration)
-Slide 2  — Mục tiêu hệ thống       (6 mục tiêu cụ thể + phạm vi)
-Slide 3  — Công nghệ sử dụng       (Full stack: tại sao chọn, vai trò từng tech)
-Slide 4  — Kiến trúc hệ thống      (Monolith, dual interface, layered pattern)
-Slide 5  — Cấu trúc dự án          (Directory + module roles)
-Slide 6  — ERD & CSDL              (5 entities, relationships, constraints)
-Slide 7  — Business Logic Flow     (Issue / Return / Renew / Sync flowchart)
-Slide 8  — Roles & Phân quyền      (RBAC matrix, enforce mechanism)
-Slide 9  — Chức năng & Giao diện   (Screenshots: 7 modules, HTMX demo)
-Slide 10 — Kết luận & Hướng phát triển (Summary, limitations, roadmap)
+[Browser]
+    |-- Web UI (Jinja2+HTMX) --> Cookie Auth
+    |-- REST API (JSON)      --> Bearer Token
+              |
+         [FastAPI App]
+              |
+    [Service Layer] -- Business Rules
+              |
+    [Repository Layer] -- Async DB Queries
+              |
+         [SQLite DB]
 ```
 
-**Logic trình bày:** Why (bài toán) → What (mục tiêu) → How/Tech (công nghệ + kiến trúc + cấu trúc) → Data (ERD) → Logic (business flow + RBAC) → Show (demo) → Reflect (kết luận)
+**Speaker notes:**
+> "Một server FastAPI duy nhất phục vụ hai giao diện. Web UI dùng cookie để bảo mật hơn cho browser — JavaScript không đọc được httponly cookie. REST API dùng Bearer token cho client code. Cả hai hội tụ vào cùng Service layer."
+
+---
+
+### SLIDE 5 — Cấu trúc dự án
+
+**Mục tiêu:** Cho thấy tổ chức module rõ ràng theo Layered Architecture
+
+**Key bullets:**
+- `models/` — 5 ORM entities: User · Book · Category · Borrowing · Review
+- `repositories/` — Data access layer: async queries, không có business logic
+- `services/` — Business logic: kiểm tra quy tắc nghiệp vụ trước DB
+- `api/v1/` + `web/` — REST API (JSON) và Web UI (SSR Jinja2)
+- `dependencies/` — JWT auth + RBAC injection
+
+**Visual đề xuất:** Folder tree cô đọng bên trái + bảng tầng và trách nhiệm bên phải.
+
+**Speaker notes:**
+> "Nguyên tắc thiết kế: mỗi tầng chỉ làm đúng một việc. Service layer giữ toàn bộ business rule — không có logic trong router, không có logic trong repository. Điều này giúp dễ test và dễ thay đổi từng phần."
+
+---
+
+### SLIDE 6 — ERD & Thiết kế cơ sở dữ liệu
+
+**Mục tiêu:** Trình bày 5 entities, quan hệ, và 2 cơ chế thiết kế quan trọng
+
+**Key bullets:**
+- 5 entities: users · books · categories · borrowings · reviews
+- Tồn kho kép: `quantity` (tổng) vs `available_quantity` (hiện có) — cập nhật ngay khi mượn/trả
+- Phí phạt: `fine_amount = days_overdue × 5.000 VND` · `fine_paid` theo dõi thu tiền
+- ON DELETE: RESTRICT (borrowings) · CASCADE (reviews) · SET NULL (category → books)
+- Unique constraint: `(user_id, book_id)` trong reviews — 1 review/sách/user
+
+**Visual đề xuất:** Sơ đồ ERD 5 hộp với đường quan hệ + callout box "Tồn kho kép" và "Fine logic".
+
+**Speaker notes:**
+> "Hai điểm thiết kế đáng chú ý: Tồn kho kép cho phép biết ngay bao nhiêu bản đang có sẵn mà không cần đếm phiếu mượn. RESTRICT FK ngăn xóa sách hay user còn phiếu mượn — bảo vệ tính toàn vẹn dữ liệu ở tầng DB."
+
+---
+
+### SLIDE 7 — Business Logic Flow
+
+**Mục tiêu:** Trình bày 3 luồng nghiệp vụ cốt lõi dạng flowchart
+
+**Key bullets:**
+- **Mượn:** Thủ thư live-search → Kiểm tra 5 điều kiện → Tạo phiếu → `available_quantity -= 1`
+- **Trả:** Chọn phiếu → Ghi tình trạng → Tính phạt tự động → `available_quantity += 1` → Thu phạt
+- **Gia hạn:** Kiểm tra `renewed_count < 2` → `due_date += 14 ngày`
+- Quy tắc cứng: max 5 phiếu active/reader · max 2 gia hạn · 5.000 VND/ngày
+- Sync Overdue: Admin kích hoạt → cập nhật hàng loạt status + fine_amount
+
+**Visual đề xuất:** 3 flowchart nhỏ nằm ngang, mỗi luồng 4–5 bước với điểm kiểm tra màu đỏ (FAIL) và xanh (PASS).
+
+**Speaker notes:**
+> "3 điểm kiểm tra quan trọng trong luồng mượn: sách phải có sẵn, reader chưa đủ 5 phiếu active, và reader chưa đang mượn cuốn đó. Tất cả đều do Service layer kiểm tra trước khi chạm vào DB."
+
+---
+
+### SLIDE 8 — Roles & Phân quyền
+
+**Mục tiêu:** Trình bày hệ thống RBAC 3 cấp và cơ chế bảo mật
+
+**Key bullets:**
+- 3 vai trò theo thứ bậc: Reader ⊂ Librarian ⊂ Admin
+- Phân quyền theo nhóm chức năng: Public · Tự phục vụ · Lưu thông · Quản lý · Dashboard
+- Enforce 2 lớp: FastAPI Dependency (API) và Web route dependency (Cookie)
+- Reader isolation: chỉ thấy phiếu của bản thân — kiểm tra ở service + query
+- Bảo mật: bcrypt hash · JWT access 60' + refresh 7 ngày · httponly cookie · CORSMiddleware
+
+**Visual đề xuất:** Bảng ma trận phân quyền với màu: xanh lá (✓), xám (—), phân biệt màu nền theo vai trò.
+
+**Speaker notes:**
+> "RBAC được enforce ở 2 lớp độc lập: Dependency Injection cho REST API và Web route middleware cho Web UI. Reader không thể xem phiếu của người khác dù biết ID — kiểm tra được thực hiện ở cả service layer lẫn DB query."
+
+---
+
+### SLIDE 9 — Chức năng hệ thống & Giao diện
+
+**Mục tiêu:** Demo 4 module chính qua screenshots thực tế
+
+**Key bullets:**
+- **Kho sách:** Tìm kiếm live (HTMX), lọc thể loại/ngôn ngữ, upload ảnh bìa
+- **Lưu thông:** Live search cấp phát, tự động tính phạt, quản lý phiếu mượn
+- **Tự phục vụ:** Reader xem phiếu, gia hạn, lịch sử, đánh giá sách
+- **Dashboard:** KPI cards · Biểu đồ mượn/trả Chart.js · Top 5 sách/reader · Bảng tồn kho
+
+**Visual đề xuất:** Grid 2×2 screenshots giao diện thực tế: Admin Dashboard / Book List / Issue Form / Reader Portal. Highlight HTMX live search bằng annotation mũi tên.
+
+**Speaker notes:**
+> "Điểm nổi bật nhất về UX: live search dùng HTMX — gõ tên sách là bảng kết quả cập nhật ngay, không reload trang, không viết một dòng JavaScript. Dashboard lấy dữ liệu từ SQL aggregation query và render Chart.js — không có data fake."
+
+---
+
+### SLIDE 10 — Kết luận, Hạn chế & Hướng phát triển
+
+**Mục tiêu:** Tổng kết kết quả, thừa nhận hạn chế tự tin, định hướng tương lai
+
+**Key bullets:**
+- **Đã đạt:** REST API + Web UI dual interface · Layered Architecture · RBAC 3 cấp · Phí phạt tự động · Swagger UI · 17 integration tests
+- **Hạn chế thực tế:** SQLite (single-writer) · Sync Overdue thủ công · Không có email notification · Không có export báo cáo
+- **Cải tiến gần:** Thêm APScheduler cho auto sync · Rate limiting (slowapi) · Async file upload
+- **Tương lai:** PostgreSQL · Email notification · Docker + CI/CD · Export PDF/Excel · Book reservation
+
+**Visual đề xuất:** 2 cột song song: Đã đạt (checkmark xanh) vs Hướng phát triển (mũi tên). Timeline roadmap nhỏ phía dưới.
+
+**Speaker notes:**
+> "Hệ thống đáp ứng đầy đủ yêu cầu đề tài: phân quyền rõ ràng, nghiệp vụ chính xác, kiến trúc có thể mở rộng. Hạn chế lớn nhất là SQLite không phù hợp production quy mô lớn và chưa có thông báo tự động — cả hai đều có lộ trình cụ thể để giải quyết."
+
+---
+
+## 7. Slide Restructuring Summary
+
+### Từ File A (16 slides) → 10 slides theo cấu trúc đề xuất
+
+| Slide cũ (File A) | Xử lý | Slide mới |
+|---|---|---|
+| Slide 1 (Cover) | Giữ nguyên | Cover (nằm ngoài 10 slides nội dung) |
+| Slide 2 (Giới thiệu) | Giữ, tinh chỉnh | → Slide 1: Giới thiệu đề tài |
+| — | Tạo mới từ DESIGN_DOC | → Slide 2: Mục tiêu hệ thống |
+| Slide 4 (Tech Stack) | Bổ sung HTMX/Tailwind/Alpine/Chart | → Slide 3: Công nghệ sử dụng |
+| Slide 5 (Architecture) | Thêm dual auth, làm rõ 4 tầng | → Slide 4: Kiến trúc hệ thống |
+| Slide 6 (MVC) + Slide 7 (Structure) | Gộp, đổi tên, bỏ "MVC" | → Slide 5: Cấu trúc dự án |
+| Slide 8 (ERD) | Bổ sung Category, tồn kho kép, ON DELETE | → Slide 6: ERD & Thiết kế CSDL |
+| Slide 9 (API Flow) | Chuyển sang nghiệp vụ, bỏ technical steps | → Slide 7: Business Logic Flow |
+| Slide 10 (Security+RBAC) | Tách: RBAC riêng + security tóm gọn | → Slide 8: Roles & Phân quyền |
+| Slide 11 (Demo) + Slide 12 (UI) | Gộp, thêm screenshots thực tế | → Slide 9: Chức năng & Giao diện |
+| Slide 13+14+15 (Hạn chế+Roadmap+Summary) | Gộp, sửa nội dung sai | → Slide 10: Kết luận, Hạn chế & Hướng phát triển |
+| Slide 3 (Core Features) | Phân tán vào Slide 1, 2, 9 | Loại bỏ |
+| Slide 16 (Cảm ơn) | Giữ | Cover cuối (nằm ngoài 10 slides nội dung) |
+
+### Nội dung cần xóa khỏi slides
+
+| Vị trí | Nội dung cần xóa | Lý do |
+|---|---|---|
+| File B Slide 1 | "Migration from PHP/Yii2 to modern Python async" | Vi phạm tuyệt đối quy tắc framing đồ án |
+| File B Slide 10 | "Successfully migrated from PHP/Yii2 to Python async" | Vi phạm tuyệt đối quy tắc framing đồ án |
+| File A Slide 6 | Toàn bộ khung MVC | Không đúng với kiến trúc thực tế của hệ thống |
+| File A Slide 13 | Mục "No Soft Delete" trong hạn chế | Sai thực tế — hệ thống đã có RESTRICT FK bảo vệ |
+| File A Slide 9 | 10 bước internal implementation | Quá kỹ thuật, không phù hợp bảo vệ |

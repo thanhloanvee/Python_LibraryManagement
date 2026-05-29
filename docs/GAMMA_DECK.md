@@ -1,473 +1,180 @@
-# GAMMA_DECK.md — Hệ thống Quản lý Thư viện
+# GAMMA_DECK.md — Hệ Thống Quản Lý Thư Viện
 ## Phase 3 Part C · Gamma-Compatible Presentation Deck
 
 > **Theme:** Pastel blue palette · Montserrat font · Modern academic · 10 slides · 16:9
-> **Ngôn ngữ:** Tiếng Việt (nội dung chính) + English (thuật ngữ kỹ thuật)
-> **Đối tượng:** Giảng viên thạc sĩ / Hội đồng bảo vệ đồ án
+> **Audience:** Hội đồng bảo vệ đồ án · Kỹ thuật lập trình Python
+> **Ngôn ngữ:** Tiếng Việt (nội dung chính) · English (thuật ngữ kỹ thuật)
 
 ---
 
 ## Slide 1 — Giới thiệu đề tài
 
-### Hệ thống Quản lý Thư viện
-#### *Library Management System*
+**Hệ Thống Quản Lý Thư Viện Trực Tuyến**
 
-**Bài toán thực tế:**
-- Thư viện truyền thống ghi sổ tay → dễ sai sót, không kiểm soát được tồn kho
-- Không biết sách nào đang mượn, ai đang giữ, sách nào quá hạn
-- Không có báo cáo tổng hợp — ban quản lý mù thông tin
+* Thư viện truyền thống: sổ sách giấy → khó kiểm soát tồn kho, không có báo cáo tức thời
+* Giải pháp: ứng dụng web full-stack bằng **Python / FastAPI**
+* 3 vai trò người dùng: **Độc giả · Thủ thư · Quản trị viên**
+* Phạm vi: quản lý kho sách · lưu thông mượn/trả · phân quyền · thống kê
 
-**Giải pháp:**
-- Số hoá toàn bộ quy trình: mượn · trả · gia hạn · tính phạt · báo cáo
-- Xây dựng lại hoàn toàn từ hệ thống cũ sang nền tảng hiện đại hơn
-- Phục vụ đồng thời: giao diện Web cho nhân viên & API mở cho tích hợp sau này
-
-**Nhóm thực hiện:**
-- Lê Thị Thanh Loan — MSSV 24210228
-- Trần Hưng Khoa — MSSV 24210220
-
-**Visual Suggestion:**
-```
-┌─────────────────────────┬─────────────────────────┐
-│         TRƯỚC           │           SAU            │
-│   [Hình sổ ghi tay]     │   [Screenshot Web App]  │
-│                         │                         │
-│  • Ghi sổ thủ công      │  • Theo dõi real-time   │
-│  • Dễ mất / sai thông   │  • Tính phạt tự động    │
-│    tin                  │  • Báo cáo tức thì      │
-│  • Không có báo cáo     │  • Tra cứu dễ dàng      │
-└─────────────────────────┴─────────────────────────┘
-```
-*Split-screen Before / After — tone pastel blue bên phải*
+Visual Suggestion:
+Sơ đồ 2 cột đối xứng — trái: icon tập hồ sơ giấy (thủ công) · phải: icon màn hình web (hệ thống số).
+Mũi tên lớn chỉ từ trái sang phải. Ba icon nhỏ phía dưới: người đọc sách · nhân viên · quản trị viên.
+Màu nền: pastel blue nhạt. Tiêu đề Montserrat Bold 40px.
 
 ---
 
 ## Slide 2 — Mục tiêu hệ thống
 
-### 6 Mục tiêu Cốt lõi
+**Mục Tiêu Hệ Thống**
 
-| # | Mục tiêu | Hệ thống giải quyết như thế nào |
-|---|---|---|
-| 1 | Số hoá phiếu mượn / trả | Quản lý toàn bộ vòng đời phiếu: Đang mượn → Quá hạn → Đã trả |
-| 2 | Kiểm soát tồn kho real-time | Số lượng sách có sẵn cập nhật ngay lập tức khi mượn hoặc trả |
-| 3 | Tự động tính phí phạt | Hệ thống tự tính: số ngày trễ × 5.000 VND khi xử lý trả sách |
-| 4 | Phân quyền 3 cấp rõ ràng | Độc giả · Thủ thư · Quản trị viên — mỗi cấp thấy đúng chức năng của mình |
-| 5 | Dashboard thống kê | Tổng quan KPI · Biểu đồ hoạt động · Danh sách sách / độc giả nổi bật |
-| 6 | Sẵn sàng tích hợp mở rộng | REST API đầy đủ — mobile app hay hệ thống khác kết nối được ngay |
+* Số hoá lưu thông sách — phiếu mượn & tồn kho cập nhật **real-time**
+* Tự động tính phí phạt — `ngày quá hạn × 5.000 VND`, không cần tính tay
+* Cung cấp **REST API** đầy đủ kèm Swagger UI tự động
+* Dashboard thống kê — KPI · biểu đồ theo tháng · top sách/reader
+* Phân quyền 3 cấp rõ ràng — **Reader ⊂ Librarian ⊂ Admin**
 
-**Ngoài phạm vi đề tài:** Thanh toán online · Đặt giữ sách trước · Gửi email nhắc nhở · Ứng dụng di động
-
-**Visual Suggestion:**
-Bảng 3 cột màu pastel — Mục tiêu | Giải pháp | ✓ Đã hoàn thành — icon check xanh lá từng dòng
+Visual Suggestion:
+5 hàng, mỗi hàng gồm: icon nhỏ bên trái + tên mục tiêu bold + mô tả kết quả bên phải.
+Icon gợi ý: cuốn sách · đồng hồ · API brackets · biểu đồ cột · khóa bảo mật.
+Nền trắng, viền card pastel blue, font Montserrat Regular 20px.
 
 ---
 
 ## Slide 3 — Công nghệ sử dụng
 
-### Tech Stack — Phân theo vai trò trong hệ thống
+**Tech Stack — Theo Tầng**
 
-```
-┌────────────────────────────────────────────────────┐
-│  GIAO DIỆN NGƯỜI DÙNG                              │
-│  TailwindCSS  ·  Alpine.js  ·  HTMX  ·  Chart.js  │
-│  → Giao diện hiện đại, tìm kiếm tức thì,          │
-│    biểu đồ thống kê trực quan                      │
-├────────────────────────────────────────────────────┤
-│  WEB SERVER & FRAMEWORK                            │
-│  Python 3.12  ·  FastAPI  ·  Uvicorn               │
-│  → Xử lý request nhanh, tự động sinh tài liệu API  │
-├────────────────────────────────────────────────────┤
-│  BẢO MẬT & XÁC THỰC                               │
-│  JWT Token  ·  Bcrypt  ·  Pydantic v2              │
-│  → Mã hoá mật khẩu, phiên đăng nhập an toàn        │
-├────────────────────────────────────────────────────┤
-│  CƠ SỞ DỮ LIỆU                                     │
-│  SQLite  ·  SQLAlchemy ORM  ·  Alembic             │
-│  → Lưu trữ dữ liệu, quản lý thay đổi schema       │
-└────────────────────────────────────────────────────┘
-```
+* **Backend:** Python 3.12 · FastAPI (async, auto-docs) · Uvicorn · SQLAlchemy 2.x · SQLite · Alembic
+* **Frontend:** Jinja2 SSR · HTMX (live search, không reload) · Alpine.js · TailwindCSS · Chart.js
+* **Security:** PyJWT · bcrypt · Pydantic v2 · itsdangerous
+* **Quality:** pytest · pytest-asyncio · httpx · Ruff
 
-**Lý do chọn công nghệ:**
-- **FastAPI** — framework Python hiện đại, hiệu năng cao, tự sinh tài liệu API
-- **HTMX** — tìm kiếm trực tiếp (live search) mà không cần tải lại trang
-- **Chart.js** — biểu đồ thống kê đẹp, dễ đọc trên dashboard quản trị
-- **SQLite** — phù hợp quy mô thư viện vừa, không cần cài đặt server riêng
-
-**Visual Suggestion:**
-Layer diagram 4 tầng — mỗi tầng một màu pastel khác nhau, tên công nghệ kèm logo, mũi tên luồng từ trên xuống
+Visual Suggestion:
+Grid 4 ô theo tầng, mỗi ô có màu nền pastel khác nhau (xanh dương / xanh lá nhạt / tím nhạt / cam nhạt).
+Trong mỗi ô: tên tầng Montserrat Bold + danh sách badge tên công nghệ dạng pill/chip.
+Không cần logo — text pill đủ rõ ràng cho slide bảo vệ.
 
 ---
 
 ## Slide 4 — Tổng quan kiến trúc hệ thống
 
-### Một server — Hai giao diện phục vụ độc lập
+**Kiến Trúc Monolith Full-Stack**
 
-```
-                    ┌──────────────────────────┐
-                    │       NGƯỜI DÙNG         │
-                    │   (Trình duyệt / App)    │
-                    └────────┬─────────────────┘
-                             │
-              ┌──────────────┴──────────────┐
-              │                             │
-    ┌─────────▼──────────┐    ┌─────────────▼──────────┐
-    │    GIAO DIỆN WEB   │    │      REST API           │
-    │                    │    │                         │
-    │  Trang chủ · Sách  │    │  Dữ liệu JSON           │
-    │  Quản trị · Độc giả│    │  Cho mobile / tích hợp  │
-    │                    │    │  Tài liệu Swagger UI    │
-    │  Đăng nhập: Cookie │    │  Đăng nhập: JWT Token   │
-    └────────┬───────────┘    └────────────┬────────────┘
-             └──────────────┬──────────────┘
-                    ┌───────▼────────┐
-                    │  Xử lý nghiệp  │
-                    │     vụ         │  ← Toàn bộ quy tắc kinh doanh
-                    └───────┬────────┘
-                    ┌───────▼────────┐
-                    │  Truy vấn dữ   │  ← Chỉ đọc / ghi dữ liệu
-                    │    liệu        │
-                    └───────┬────────┘
-                    ┌───────▼────────┐
-                    │   Cơ sở dữ     │
-                    │    liệu        │
-                    └────────────────┘
-```
+* 1 server **FastAPI** phục vụ cả Web UI (SSR) và REST API (JSON)
+* **Layered Architecture** 4 tầng: Presentation → Service → Repository → Data
+* **Dual Auth:** httponly Cookie (Web UI) · Bearer Token (REST API)
+* RBAC enforce tại **Dependency layer** — không thể bypass
 
-**Điểm nổi bật của kiến trúc:**
-- Cùng một server phục vụ cả nhân viên thư viện (giao diện Web) lẫn hệ thống tích hợp (API)
-- Quy tắc nghiệp vụ tập trung tại một nơi — không bị phân tán, dễ bảo trì
-- Phân tách rõ ràng: tầng giao diện không chứa logic nghiệp vụ
-
-**Visual Suggestion:**
-Architecture diagram dọc, 2 nhánh Web/API hợp lại tại tầng nghiệp vụ — màu pastel, nhãn tiếng Việt rõ ràng
+Visual Suggestion:
+Sơ đồ dọc, từ trên xuống:
+[Trình duyệt] → 2 nhánh: [Web UI / Cookie] và [REST API / Bearer Token]
+Hội tụ vào [FastAPI App] → [Service Layer] → [Repository Layer] → [SQLite DB].
+Mỗi hộp màu pastel blue đậm dần từ trên xuống. Mũi tên có nhãn.
+Cạnh phải: bảng nhỏ 4 hàng liệt kê tầng + trách nhiệm.
 
 ---
 
 ## Slide 5 — Cấu trúc dự án
 
-### Tổ chức theo trách nhiệm — mỗi tầng một việc
+**Layered Architecture — Tổ Chức Module**
 
-```
-Hệ thống chia thành 4 tầng rõ ràng:
+* `models/` — 5 ORM entities: User · Book · Category · Borrowing · Review
+* `repositories/` — async DB queries, **không có** business logic
+* `services/` — toàn bộ business rules, kiểm tra trước khi chạm DB
+* `api/v1/` + `web/` — REST endpoints (JSON) và Web UI (Jinja2 SSR)
+* `dependencies/` — JWT verification · RBAC role injection
 
-┌─────────────────────────────────────────────────┐
-│  TẦNG GIAO DIỆN                                 │
-│  Web UI (HTML/Jinja2)  ·  REST API (JSON)        │
-│  → Nhận yêu cầu từ người dùng, trả kết quả     │
-├─────────────────────────────────────────────────┤
-│  TẦNG NGHIỆP VỤ (Services)                      │
-│  Xác thực · Mượn/Trả · Sách · Thống kê · ...   │
-│  → Kiểm tra điều kiện, áp dụng quy tắc nghiệp  │
-│    vụ trước khi thao tác dữ liệu                │
-├─────────────────────────────────────────────────┤
-│  TẦNG DỮ LIỆU (Repositories)                    │
-│  Truy vấn người dùng · Sách · Phiếu mượn · ...  │
-│  → Chỉ đọc/ghi database, không chứa logic      │
-├─────────────────────────────────────────────────┤
-│  TẦNG MÔ HÌNH (Models & Schemas)                │
-│  5 Entities: User · Book · Category ·           │
-│              Borrowing · Review                 │
-│  → Định nghĩa cấu trúc dữ liệu, ràng buộc      │
-└─────────────────────────────────────────────────┘
-```
-
-**Ý nghĩa của cách tổ chức này:**
-- Tầng nghiệp vụ biết *khi nào* và *điều kiện gì* — tầng dữ liệu chỉ biết *cách lấy dữ liệu*
-- Thêm tính năng mới không ảnh hưởng đến tầng khác
-- Tái sử dụng: cùng một logic nghiệp vụ phục vụ cả Web lẫn API
-
-**Visual Suggestion:**
-4 khối màu pastel xếp dọc như tầng — mỗi tầng ghi rõ tên module thực tế, mũi tên luồng xử lý từ trên xuống
+Visual Suggestion:
+Bố cục 2 cột: trái là folder tree dạng monospace (cô đọng 8–10 dòng), phải là bảng 5 hàng module + trách nhiệm.
+Highlight `services/` bằng viền màu vàng nhạt — nhấn đây là tầng quan trọng nhất.
+Font monospace cho folder tree, Montserrat cho bảng.
 
 ---
 
-## Slide 6 — Thiết kế cơ sở dữ liệu
+## Slide 6 — ERD & Thiết kế cơ sở dữ liệu
 
-### 5 Bảng dữ liệu — Quan hệ và Toàn vẹn dữ liệu
+**5 Entities · Quan Hệ · Ràng Buộc**
 
-```
-      [Thể loại]
-          │ 1
-          │ N  (Xoá thể loại → sách vẫn còn, chỉ bỏ gán)
-          ▼
-       [Sách] ─────────────────────────────┐
-          │ 1                              │ 1
-          │ N  (Còn phiếu → CHẶN xoá)     │ N  (Xoá sách → xoá đánh giá)
-          ▼                               ▼
-    [Phiếu mượn]                     [Đánh giá]
-          ▲ N                              ▲ N
-          │  (Còn phiếu → CHẶN xoá)       │  (Xoá người dùng → xoá đánh giá)
-          │ 1                              │ 1
-       [Người dùng] ─────────────────────┘
-```
+* **5 bảng:** users · books · categories · borrowings · reviews
+* **Tồn kho kép:** `quantity` (tổng bản) vs `available_quantity` (có sẵn) — tự động cập nhật
+* **Phí phạt:** `fine_amount = days_overdue × 5.000 VND` · `fine_paid` theo dõi thu tiền
+* **ON DELETE:** RESTRICT (borrowings) · CASCADE (reviews) · SET NULL (categories)
+* **Unique:** `(user_id, book_id)` trong reviews — 1 review / sách / reader
 
-**Các trường nghiệp vụ quan trọng:**
-
-| Bảng | Trường đặc biệt | Ý nghĩa |
-|---|---|---|
-| Sách | Số lượng tổng / Số lượng còn sẵn | Tách biệt để theo dõi real-time |
-| Phiếu mượn | Trạng thái (Đang mượn / Quá hạn / Đã trả) | Vòng đời phiếu mượn |
-| Phiếu mượn | Tiền phạt / Đã thu chưa | Ghi nhận phạt và xác nhận thu tiền |
-| Phiếu mượn | Số lần gia hạn | Giới hạn tối đa 2 lần |
-| Phiếu mượn | Tình trạng sách khi trả | good / fair / poor / damaged |
-| Đánh giá | Ràng buộc 1 đánh giá / người / sách | Mỗi độc giả chỉ review 1 lần |
-
-**Chiến lược bảo vệ dữ liệu:**
-- **Chặn xoá** — không thể xoá sách hoặc người dùng khi còn phiếu mượn chưa trả
-- **Tự động dọn** — xoá sách thì xoá luôn đánh giá liên quan
-- **Giữ nguyên** — xoá thể loại không ảnh hưởng đến sách
-
-**Visual Suggestion:**
-ERD diagram 5 bảng với đường quan hệ tô màu theo chiến lược: đỏ = chặn xoá · xanh = tự động xoá · xám = giữ nguyên; kèm cardinality 1–N rõ ràng
+Visual Suggestion:
+ERD diagram 5 hộp chữ nhật bo góc, bố trí theo hình chữ thập:
+- Trung tâm: borrowings · Trên: users · Phải: books · Góc trên phải: reviews · Góc trên trái: categories.
+Đường kẻ quan hệ có nhãn ON DELETE. Callout box nhỏ bên cạnh books: "quantity = 5 / available = 3".
 
 ---
 
 ## Slide 7 — Business Logic Flow
 
-### Quy trình nghiệp vụ cốt lõi
+**3 Luồng Nghiệp Vụ Cốt Lõi**
 
-#### Quy trình 1 — Cấp phát sách cho Độc giả
+* **Mượn:** Live-search reader + sách → 5 kiểm tra → tạo phiếu → `available_quantity -= 1`
+* **Trả:** Ghi tình trạng sách → tính phạt tự động → `available_quantity += 1` → xác nhận thu tiền
+* **Gia hạn:** Kiểm tra `renewed_count < 2` → `due_date += 14 ngày`
+* Quy tắc cứng: tối đa **5 phiếu active** / reader · tối đa **2 lần gia hạn**
+* Sync Overdue: Admin kích hoạt → cập nhật hàng loạt trạng thái + fine_amount
 
-```
-Thủ thư tìm Độc giả          ← Tìm kiếm trực tiếp, kết quả hiện ngay
-        │
-        ▼
-Thủ thư tìm Sách              ← Tìm kiếm trực tiếp, kết quả hiện ngay
-        │
-        ▼
-Hệ thống kiểm tra tự động:
-  ✓  Độc giả còn hoạt động?
-  ✓  Sách còn bản có sẵn?
-  ✓  Độc giả chưa vượt giới hạn 5 phiếu?
-  ✓  Độc giả chưa đang mượn chính sách này?
-        │
-        ├── Không đạt → Thông báo lý do cụ thể, dừng lại
-        │
-        └── Đạt tất cả → Tạo phiếu mượn
-                         Hạn trả = hôm nay + 14 ngày
-                         Tồn kho tự động giảm 1
-```
-
-#### Quy trình 2 — Xử lý trả sách
-
-```
-Thủ thư chọn phiếu mượn
-        │
-        ▼
-Ghi nhận tình trạng sách      ← Tốt / Còn dùng / Kém / Hư hỏng
-        │
-        ▼
-Hệ thống tự tính phạt         ← Số ngày trễ × 5.000 VND
-        │
-        ▼
-Xác nhận trả → Tồn kho tự động tăng 1
-        │
-        ▼
-Thủ thư thu tiền phạt (nếu có) → Đánh dấu đã thanh toán
-```
-
-#### Quy trình 3 — Gia hạn
-
-```
-Độc giả hoặc Thủ thư yêu cầu gia hạn
-        │
-Kiểm tra: Chưa trả + Chưa gia hạn đủ 2 lần?
-        │
-        └── Đạt → Hạn trả tự động cộng thêm 14 ngày
-```
-
-#### Quy trình 4 — Đồng bộ sách quá hạn
-
-```
-Quản trị viên kích hoạt thủ công
-        │
-        ▼
-Hệ thống quét toàn bộ phiếu: Đang mượn + Đã quá hạn ngày trả
-        │
-        ▼
-Cập nhật trạng thái → Quá hạn · Tính lại tiền phạt tích luỹ
-```
-
-**Quy tắc nghiệp vụ cố định:**
-
-| Quy tắc | Giá trị |
-|---|---|
-| Thời hạn mượn mặc định | 14 ngày |
-| Tối đa gia hạn | 2 lần / phiếu |
-| Tối đa phiếu đang mượn | 5 phiếu / độc giả |
-| Phí phạt quá hạn | 5.000 VND / ngày |
-
-**Visual Suggestion:**
-Flowchart dọc Quy trình 1 — 4 hình thoi điều kiện (đỏ nhạt = không đạt / xanh = đạt); mini-flowchart Quy trình 2 đặt bên phải; bảng Quy tắc nghiệp vụ bên dưới
+Visual Suggestion:
+3 flowchart nhỏ nằm ngang, mỗi cái 4–5 bước hình thoi + hình chữ nhật:
+[Mượn] [Trả] [Gia hạn] — cạnh nhau theo chiều ngang.
+Hình thoi (điều kiện) màu đỏ nhạt khi FAIL, xanh lá nhạt khi PASS.
+Phía dưới: thanh horizontal bar "Business Rules" với 2 badge số: 5 phiếu · 2 gia hạn · 5.000 VND/ngày.
 
 ---
 
 ## Slide 8 — Roles & Phân quyền
 
-### 3 Vai trò — Phân quyền rõ ràng theo chức năng
+**RBAC — Reader ⊂ Librarian ⊂ Admin**
 
-```
-┌──────────────────────────────────────────────────────┐
-│  QUẢN TRỊ VIÊN (Admin)                               │
-│  Toàn quyền hệ thống                                 │
-│  + Quản lý kho sách & thể loại                       │
-│  + Quản lý tài khoản người dùng & vai trò            │
-│  + Xem dashboard & báo cáo thống kê                  │
-│  + Kích hoạt đồng bộ sách quá hạn                    │
-├──────────────────────────────────────────────────────┤
-│  THỦ THƯ (Librarian)                                 │
-│  + Cấp phát sách cho độc giả (tìm kiếm trực tiếp)   │
-│  + Xử lý trả sách & tính phạt tự động                │
-│  + Xem và quản lý toàn bộ phiếu mượn                 │
-│  + Xác nhận thu tiền phạt                            │
-├──────────────────────────────────────────────────────┤
-│  ĐỘC GIẢ (Reader)                                    │
-│  + Tự đăng ký tài khoản                              │
-│  + Duyệt & tìm kiếm sách (không cần đăng nhập)      │
-│  + Xem sách đang mượn của mình                       │
-│  + Tự gia hạn (tối đa 2 lần)                         │
-│  + Viết đánh giá sách (sau khi đã mượn)              │
-└──────────────────────────────────────────────────────┘
-```
+* **Reader:** Duyệt sách · xem phiếu cá nhân · gia hạn · đánh giá sách
+* **Librarian:** Reader + cấp phát sách · xử lý trả · thu phí phạt
+* **Admin:** Librarian + quản lý kho · quản lý user · dashboard thống kê
+* Enforce **2 lớp:** FastAPI Dependency (API) · Web route middleware (Cookie)
+* Reader **chỉ thấy dữ liệu của bản thân** — isolation kiểm tra tại service + query
 
-**Ma trận quyền:**
-
-| Chức năng | Chưa đăng nhập | Độc giả | Thủ thư | Quản trị |
-|---|---|---|---|---|
-| Duyệt & tìm kiếm sách | ✓ | ✓ | ✓ | ✓ |
-| Xem chi tiết sách + đánh giá | ✓ | ✓ | ✓ | ✓ |
-| Xem & gia hạn phiếu của mình | — | ✓ | ✓ | ✓ |
-| Viết đánh giá sách | — | ✓ | ✓ | ✓ |
-| Cấp phát / xử lý trả sách | — | — | ✓ | ✓ |
-| Xem tất cả phiếu mượn | — | — | ✓ | ✓ |
-| Thêm / sửa / xóa sách | — | — | — | ✓ |
-| Quản lý người dùng | — | — | — | ✓ |
-| Xem dashboard & báo cáo | — | — | — | ✓ |
-
-**Quy tắc đặc biệt:**
-- Tài khoản bị khoá không thể đăng nhập — bị chặn ngay khi xác thực
-- Độc giả chỉ nhìn thấy phiếu mượn của bản thân — không xem được người khác
-- Không thể xoá sách hoặc người dùng khi còn phiếu mượn chưa trả
-
-**Visual Suggestion:**
-Ma trận quyền dạng bảng 5 cột màu — ô xanh pastel = có quyền · ô đỏ nhạt = không có quyền; phần header mỗi role dùng icon người tương ứng
+Visual Suggestion:
+Bảng ma trận phân quyền: hàng = nhóm chức năng (5 nhóm), cột = 3 vai trò.
+Ô ✓ màu xanh lá nhạt, ô — màu xám nhạt.
+Tiêu đề cột có badge màu phân biệt: Reader (xanh dương) · Librarian (xanh lá) · Admin (tím).
+Phía dưới bảng: 2 badge nhỏ "API: Bearer Token" và "Web: httponly Cookie".
 
 ---
 
 ## Slide 9 — Chức năng hệ thống & Giao diện
 
-### 7 Nhóm chức năng — Phục vụ từng vai trò
+**4 Module Chính**
 
-**Dành cho tất cả (Public):**
-- Trang chủ: thống kê nhanh số sách · số thể loại · sách nổi bật
-- Danh sách sách: tìm kiếm theo tên / tác giả · lọc thể loại · phân trang
-- Chi tiết sách: thông tin đầy đủ · ảnh bìa · điểm đánh giá trung bình · bình luận
+* **Kho sách:** Tìm kiếm live (HTMX), lọc đa điều kiện, upload ảnh bìa
+* **Lưu thông:** Live-search cấp phát, tính phạt tự động, quản lý phiếu mượn
+* **Tự phục vụ:** Reader xem phiếu · gia hạn · lịch sử · đánh giá sách
+* **Dashboard Admin:** KPI cards · Chart.js biểu đồ theo tháng · Top 5 sách/reader
 
-**Dành cho Thủ thư:**
-- Cấp phát sách: tìm kiếm độc giả và sách trực tiếp (gõ là hiện ngay, không reload)
-- Xử lý trả: ghi tình trạng sách · hệ thống hiển thị tiền phạt tự động
-- Quản lý phiếu: lọc theo trạng thái · độc giả · đang quá hạn
-
-**Dành cho Quản trị viên:**
-- Dashboard: KPI tổng quan · biểu đồ mượn/trả theo tháng · top sách & độc giả tích cực
-- Quản lý kho sách: thêm / sửa / xoá sách · upload ảnh bìa · quản lý thể loại
-- Quản lý người dùng: thay đổi vai trò · khoá / mở tài khoản
-
-**Dành cho Độc giả:**
-- Sách đang mượn: hạn trả · trạng thái · nút gia hạn ngay
-- Lịch sử mượn toàn bộ · Cập nhật hồ sơ cá nhân
-
-**Kênh tích hợp (Developers / Hệ thống ngoài):**
-- REST API đầy đủ với tài liệu tự động (Swagger UI) — sẵn sàng cho mobile / third-party
-
-**Visual Suggestion:**
-```
-┌──────────────────────┬──────────────────────┬──────────────────────┐
-│   Admin Dashboard    │   Cấp phát sách       │   Danh sách sách     │
-│  [KPI + Chart.js]    │  [Live search form]   │  [Search + filter]   │
-├──────────────────────┼──────────────────────┼──────────────────────┤
-│   Chi tiết sách      │   Xử lý trả sách      │   Swagger API Docs   │
-│  [Ảnh + Đánh giá]   │  [Tiền phạt tự động]  │  [/api/docs]         │
-└──────────────────────┴──────────────────────┴──────────────────────┘
-```
-*Screenshot grid 2×3 — ưu tiên Dashboard + Form cấp phát live search*
+Visual Suggestion:
+Grid 2×2 screenshots giao diện thực tế của ứng dụng:
+- Ô trên trái: Admin Dashboard với KPI cards và biểu đồ cột Chart.js
+- Ô trên phải: Trang danh sách sách với live search HTMX (annotation mũi tên: "Live search — không reload")
+- Ô dưới trái: Form cấp phát sách (Issue Book) với live search reader
+- Ô dưới phải: Reader portal — danh sách phiếu mượn và nút gia hạn
+Viền bo góc pastel blue, caption nhỏ dưới mỗi ô.
 
 ---
 
 ## Slide 10 — Kết luận, Hạn chế & Hướng phát triển
 
-### Tổng kết đồ án
+**Tổng Kết Đề Tài**
 
-**Những gì đã hoàn thành:**
-- Hệ thống Web hoàn chỉnh + REST API — một server phục vụ cả hai
-- Phân quyền 3 cấp hoạt động đồng thời trên cả giao diện Web và API
-- Quy trình lưu thông sách đầy đủ: Cấp phát · Trả sách · Gia hạn · Tính phạt · Đồng bộ quá hạn
-- Dashboard quản trị: KPI · Biểu đồ theo tháng · Xếp hạng sách & độc giả
-- Bộ kiểm thử tự động: 18 test cases bao phủ xác thực, quản lý sách, quy trình mượn/trả
+* **Đạt được:** REST API + Web UI dual · Layered Architecture · RBAC 3 cấp · phí phạt tự động · Swagger UI · 17 integration tests
+* **Hạn chế:** SQLite (single-writer) · Sync Overdue thủ công · chưa có email notification · chưa có export báo cáo
+* **Cải tiến gần:** APScheduler (auto sync) · rate limiting · async file upload
+* **Tương lai:** PostgreSQL · email notification · Docker + CI/CD · export PDF/Excel
 
-**Hạn chế thực tế:**
-
-| Hạn chế | Đánh giá |
-|---|---|
-| Cơ sở dữ liệu phù hợp quy mô vừa nhỏ | Tốt cho thư viện học thuật, cần nâng cấp khi scale |
-| Đồng bộ quá hạn kích hoạt thủ công | Có thể tự động hoá bằng lịch chạy định kỳ |
-| Chưa có thông báo email nhắc hạn | Tính năng phụ, không ảnh hưởng nghiệp vụ cốt lõi |
-| Độc giả chưa tự đặt yêu cầu mượn | Luôn phải qua thủ thư — hướng cải thiện rõ ràng |
-
-**Hướng phát triển:**
-
-| Ngắn hạn | Trung hạn | Dài hạn |
-|---|---|---|
-| Nâng cấp database production | Hệ thống đặt giữ sách | Ứng dụng di động |
-| Tự động đồng bộ quá hạn | Độc giả tự đặt yêu cầu mượn | Tích hợp thanh toán |
-| Giới hạn tần suất truy cập API | Thông báo email nhắc hạn | Gợi ý sách thông minh |
-| | Nhật ký thay đổi hệ thống | Triển khai Docker + CI/CD |
-
-**Visual Suggestion:**
-Trái — checklist "Đã hoàn thành" (5 dòng, icon check xanh) · Phải — Timeline roadmap 3 cột Ngắn / Trung / Dài hạn với màu gradient từ xanh nhạt đến xanh đậm
-
----
-
-## Gamma Theme Configuration
-
-```
-Theme:         Custom
-Primary:       #93C5FD  (pastel blue)
-Secondary:     #BFDBFE  (light pastel blue)
-Accent:        #1D4ED8  (deep blue — headings)
-Background:    #F0F9FF  (ultra-light blue tint)
-Text:          #1E293B  (dark slate)
-Check/OK:      #86EFAC  (pastel green)
-Block/Fail:    #FCA5A5  (pastel red)
-
-Font:          Montserrat · Heading Large Bold · Body Medium
-Layout:        Clean / Minimal · 16:9 Widescreen
-Icons:         Outlined · Minimal
-Diagrams:      Flowchart arrows · Pastel fills · No drop shadows
-```
-
----
-
-## Thứ tự Demo (nếu có thời gian trình bày trực tiếp)
-
-1. **Trang chủ** — không cần đăng nhập, ấn tượng ngay từ đầu
-2. **Form cấp phát sách** — gõ tên độc giả / sách → kết quả hiện ngay, không reload trang
-3. **Admin Dashboard** — KPI tổng quan + biểu đồ hoạt động theo tháng
-4. **Tài liệu API (Swagger UI)** — minh chứng REST API đầy đủ, sẵn sàng tích hợp
-
----
-
-## Presentation Story Flow
-
-```
-Slide 1  — TẠI SAO   Bài toán thực tế → lý do cần số hoá
-Slide 2  — CÁI GÌ    6 mục tiêu cụ thể đã được hiện thực
-Slide 3  — CÔNG CỤ   Công nghệ → vai trò từng thành phần
-Slide 4  — KIẾN TRÚC 1 server, 2 giao diện, phân tầng rõ ràng
-Slide 5  — TỔ CHỨC   Cấu trúc dự án → phân tách trách nhiệm
-Slide 6  — DỮ LIỆU   5 bảng, quan hệ, chiến lược bảo vệ dữ liệu
-Slide 7  — NGHIỆP VỤ Quy trình mượn / trả / gia hạn / đồng bộ
-Slide 8  — PHÂN QUYỀN 3 vai trò, ma trận quyền chi tiết
-Slide 9  — DEMO      7 nhóm chức năng, giao diện thực tế
-Slide 10 — KẾT LUẬN  Thành quả · Hạn chế trung thực · Roadmap
-```
+Visual Suggestion:
+Bố cục 2 cột song song:
+- Cột trái "Đã đạt được" — danh sách bullet với checkmark icon màu xanh lá
+- Cột phải "Hướng phát triển" — danh sách bullet với mũi tên icon màu xanh dương
+Phía dưới: timeline ngang 2 giai đoạn "Cải tiến gần" và "Tương lai" với badge pill.
+Nền slide: gradient pastel blue rất nhạt. Font Montserrat Medium 20px.
