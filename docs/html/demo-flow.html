@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo Flow – Hệ Thống Quản Lý Thư Viện</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --blue:    #2563eb;
+    --blue-lt: #dbeafe;
+    --green:   #059669;
+    --green-lt:#d1fae5;
+    --amber:   #d97706;
+    --amber-lt:#fef3c7;
+    --red:     #dc2626;
+    --red-lt:  #fee2e2;
+    --purple:  #7c3aed;
+    --purple-lt:#ede9fe;
+    --gray:    #6b7280;
+    --gray-lt: #f3f4f6;
+    --ink:     #111827;
+    --border:  #e5e7eb;
+    --radius:  12px;
+    --shadow:  0 4px 24px rgba(0,0,0,.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: #f8fafc;
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 60%, #3b82f6 100%);
+    color: #fff;
+    padding: 40px 48px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.07);
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 30%;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.04);
+  }
+  header h1 { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
+  header p  { opacity: .8; margin-top: 6px; font-size: 15px; }
+  .badge-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px; font-weight: 600;
+    backdrop-filter: blur(8px);
+  }
+  .badge .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ── NAV TABS ────────────────────────────────────────── */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex; gap: 2px;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .nav-tab {
+    padding: 14px 18px;
+    border: none; background: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px; font-weight: 600;
+    color: var(--gray);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all .2s;
+  }
+  .nav-tab:hover { color: var(--blue); }
+  .nav-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  /* ── MAIN LAYOUT ─────────────────────────────────────── */
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── SECTION HEADER ──────────────────────────────────── */
+  .sec-head {
+    display: flex; align-items: flex-start; gap: 16px;
+    margin-bottom: 28px;
+  }
+  .sec-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .sec-head h2 { font-size: 20px; font-weight: 800; }
+  .sec-head p  { color: var(--gray); margin-top: 2px; font-size: 13px; }
+
+  /* ── TIMELINE ────────────────────────────────────────── */
+  .timeline { position: relative; padding-left: 36px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 13px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--blue-lt), transparent);
+  }
+  .step {
+    position: relative;
+    margin-bottom: 24px;
+    animation: fadeUp .4s ease both;
+  }
+  .step:nth-child(1) { animation-delay: .05s; }
+  .step:nth-child(2) { animation-delay: .1s; }
+  .step:nth-child(3) { animation-delay: .15s; }
+  .step:nth-child(4) { animation-delay: .2s; }
+  .step:nth-child(5) { animation-delay: .25s; }
+  .step:nth-child(6) { animation-delay: .3s; }
+  .step:nth-child(7) { animation-delay: .35s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-num {
+    position: absolute;
+    left: -36px; top: 14px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1;
+    box-shadow: 0 0 0 4px var(--blue-lt);
+  }
+  .step-num.green  { background: var(--green);  box-shadow: 0 0 0 4px var(--green-lt); }
+  .step-num.amber  { background: var(--amber);  box-shadow: 0 0 0 4px var(--amber-lt); }
+  .step-num.red    { background: var(--red);    box-shadow: 0 0 0 4px var(--red-lt); }
+  .step-num.purple { background: var(--purple); box-shadow: 0 0 0 4px var(--purple-lt); }
+
+  .step-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .step-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.12); }
+  .step-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .step-card p  { font-size: 12.5px; color: #4b5563; }
+
+  .step-card .url-badge {
+    display: inline-block;
+    background: #f0f4ff; color: var(--blue);
+    border: 1px solid #c7d7fd;
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 11.5px; font-family: 'Courier New', monospace; font-weight: 600;
+    margin-top: 8px;
+  }
+
+  .step-card .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tag {
+    border-radius: 6px;
+    padding: 2px 9px;
+    font-size: 11px; font-weight: 600;
+  }
+  .tag.blue   { background: var(--blue-lt);   color: var(--blue); }
+  .tag.green  { background: var(--green-lt);  color: var(--green); }
+  .tag.amber  { background: var(--amber-lt);  color: var(--amber); }
+  .tag.red    { background: var(--red-lt);    color: var(--red); }
+  .tag.purple { background: var(--purple-lt); color: var(--purple); }
+  .tag.gray   { background: var(--gray-lt);   color: #374151; }
+
+  /* ── ROLE CARD ───────────────────────────────────────── */
+  .role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 32px; }
+  .role-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+  .role-card .role-icon { font-size: 28px; margin-bottom: 10px; }
+  .role-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .role-card p  { font-size: 12.5px; color: var(--gray); }
+  .role-card .cred {
+    margin-top: 12px;
+    background: #f9fafb;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+  .role-card .cred strong { display: block; margin-bottom: 4px; font-weight: 700; }
+  .role-card .cred code {
+    display: block;
+    font-family: 'Courier New', monospace;
+    color: var(--blue);
+    line-height: 1.8;
+  }
+
+  /* ── DATA TABLE ──────────────────────────────────────── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  .data-table th {
+    background: #f8fafc;
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--gray);
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 10px 16px;
+    font-size: 12.5px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #fafafa; }
+
+  /* ── INFO BOX ────────────────────────────────────────── */
+  .info-box {
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    display: flex; gap: 10px; align-items: flex-start;
+    border: 1px solid;
+  }
+  .info-box.blue   { background: #eff6ff;  border-color: #bfdbfe; color: #1e40af; }
+  .info-box.amber  { background: #fffbeb;  border-color: #fde68a; color: #92400e; }
+  .info-box.green  { background: #f0fdf4;  border-color: #bbf7d0; color: #14532d; }
+  .info-box.red    { background: #fef2f2;  border-color: #fecaca; color: #991b1b; }
+  .info-box-icon   { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── SCRIPT PANEL ────────────────────────────────────── */
+  .script-box {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    font-size: 13px;
+    line-height: 1.8;
+    margin-top: 14px;
+    position: relative;
+  }
+  .script-box::before {
+    content: '🎤 Script thuyết trình';
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 10px;
+  }
+  .script-box em  { color: #93c5fd; font-style: normal; }
+  .script-box strong { color: #fbbf24; }
+
+  /* ── FLOW DIAGRAM ────────────────────────────────────── */
+  .flow-diagram {
+    display: flex; align-items: center; justify-content: flex-start;
+    flex-wrap: wrap; gap: 0;
+    padding: 20px 0; margin-bottom: 20px;
+    overflow-x: auto;
+  }
+  .flow-node {
+    text-align: center; padding: 12px 16px;
+    background: #fff;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    min-width: 110px;
+    font-size: 12px; font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    flex-shrink: 0;
+  }
+  .flow-node.active-node { border-color: var(--blue); color: var(--blue); background: var(--blue-lt); }
+  .flow-node.green-node  { border-color: var(--green); color: var(--green); background: var(--green-lt); }
+  .flow-node.amber-node  { border-color: var(--amber); color: var(--amber); background: var(--amber-lt); }
+  .flow-node.red-node    { border-color: var(--red); color: var(--red); background: var(--red-lt); }
+  .flow-arrow { padding: 0 6px; color: #9ca3af; font-size: 18px; flex-shrink: 0; }
+
+  /* ── OVERVIEW GRID ───────────────────────────────────── */
+  .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .ov-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .ov-card .ov-num { font-size: 30px; font-weight: 800; }
+  .ov-card .ov-label { font-size: 12px; color: var(--gray); margin-top: 4px; }
+
+  /* ── TIMING STRIP ────────────────────────────────────── */
+  .timing-strip {
+    display: flex; gap: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 28px;
+  }
+  .timing-cell {
+    flex: 1; padding: 14px 8px;
+    text-align: center; font-size: 12px;
+    border-right: 1px solid var(--border);
+    min-width: 80px;
+  }
+  .timing-cell:last-child { border-right: none; }
+  .timing-cell .t-time { font-size: 15px; font-weight: 800; }
+  .timing-cell .t-label { color: var(--gray); margin-top: 4px; font-size: 11px; }
+  .timing-cell.highlight { background: var(--blue-lt); }
+  .timing-cell.highlight .t-time { color: var(--blue); }
+
+  /* ── PRINT ───────────────────────────────────────────── */
+  @media print {
+    header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .nav { display: none; }
+    .section { display: block !important; page-break-before: always; }
+    .section:first-of-type { page-break-before: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header>
+  <h1>📚 Hệ Thống Quản Lý Thư Viện</h1>
+  <p>Demo Flow – Thuyết trình (5–7 phút) · 3 vai trò · Python / FastAPI / SQLite</p>
+  <div class="badge-row">
+    <span class="badge"><span class="dot" style="background:#34d399"></span>Admin</span>
+    <span class="badge"><span class="dot" style="background:#fbbf24"></span>Thủ thư (Librarian)</span>
+    <span class="badge"><span class="dot" style="background:#a78bfa"></span>Độc giả (Reader)</span>
+    <span class="badge"><span class="dot" style="background:#f87171"></span>Demo 5–7 phút</span>
+  </div>
+</header>
+
+<!-- ═══════════════════ NAV TABS ═══════════════════ -->
+<nav class="nav">
+  <button class="nav-tab active" onclick="switchTab('overview')">🗺️ Tổng quan</button>
+  <button class="nav-tab" onclick="switchTab('start')">🚀 Khởi động app</button>
+  <button class="nav-tab" onclick="switchTab('admin')">🛡️ Admin</button>
+  <button class="nav-tab" onclick="switchTab('librarian')">📖 Thủ thư</button>
+  <button class="nav-tab" onclick="switchTab('reader')">👤 Độc giả</button>
+  <button class="nav-tab" onclick="switchTab('data')">🗄️ Dummy data</button>
+  <button class="nav-tab" onclick="switchTab('script')">🎤 Script đầy đủ</button>
+</nav>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<main>
+
+<!-- ──────────────────────────────────────────────────
+     TAB 0 – TỔNG QUAN
+────────────────────────────────────────────────── -->
+<div id="tab-overview" class="section active">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:#dbeafe;">🗺️</div>
+    <div>
+      <h2>Tổng quan demo</h2>
+      <p>Cấu trúc 5–7 phút · Luồng trình bày theo vai trò</p>
+    </div>
+  </div>
+
+  <!-- Timing strip -->
+  <div class="timing-strip">
+    <div class="timing-cell highlight">
+      <div class="t-time">~1 phút</div>
+      <div class="t-label">Khởi động app</div>
+    </div>
+    <div class="timing-cell highlight">
+      <div class="t-time">~2 phút</div>
+      <div class="t-label">Admin</div>
+    </div>
+    <div class="timing-cell highlight">
+      <div class="t-time">~2 phút</div>
+      <div class="t-label">Thủ thư</div>
+    </div>
+    <div class="timing-cell highlight">
+      <div class="t-time">~1.5 phút</div>
+      <div class="t-label">Độc giả</div>
+    </div>
+    <div class="timing-cell">
+      <div class="t-time" style="color:#059669">~30 giây</div>
+      <div class="t-label">Kết thúc</div>
+    </div>
+  </div>
+
+  <!-- Stats overview -->
+  <div class="overview-grid">
+    <div class="ov-card">
+      <div class="ov-num" style="color:var(--blue)">70+</div>
+      <div class="ov-label">Đầu sách (7 thể loại)</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-num" style="color:var(--purple)">29</div>
+      <div class="ov-label">Người dùng mẫu</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-num" style="color:var(--amber)">34</div>
+      <div class="ov-label">Phiếu mượn (seed)</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-num" style="color:var(--red)">6</div>
+      <div class="ov-label">Sách quá hạn</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-num" style="color:var(--green)">3</div>
+      <div class="ov-label">Vai trò người dùng</div>
+    </div>
+  </div>
+
+  <!-- Master flow -->
+  <div class="info-box blue">
+    <span class="info-box-icon">ℹ️</span>
+    <div><strong>Luồng demo chính:</strong> Khởi động → Admin quản trị hệ thống → Thủ thư cấp phát & thu hồi sách → Độc giả tìm kiếm & xem lịch sử</div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-node active-node">🚀<br>Chạy app<br><span style="font-size:10px;color:#64748b">localhost:8000</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node active-node">🔑<br>Đăng nhập<br><span style="font-size:10px;color:#64748b">3 tài khoản</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" style="border-color:#16a34a;color:#16a34a;background:#f0fdf4">🛡️<br>Admin<br><span style="font-size:10px;color:#64748b">Dashboard + Users</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node amber-node">📖<br>Thủ thư<br><span style="font-size:10px;color:#64748b">Cấp phát + Thu hồi</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" style="border-color:#7c3aed;color:#7c3aed;background:#ede9fe">👤<br>Độc giả<br><span style="font-size:10px;color:#64748b">Tìm sách + Lịch sử</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node green-node">✅<br>Kết thúc<br><span style="font-size:10px;color:#64748b">Q&A</span></div>
+  </div>
+
+  <!-- Role cards -->
+  <div class="role-grid">
+    <div class="role-card">
+      <div class="role-icon">🛡️</div>
+      <h3>Admin</h3>
+      <p>Quản trị toàn hệ thống: xem dashboard, quản lý người dùng, thể loại sách, cài đặt hệ thống.</p>
+      <div class="cred">
+        <strong>Thông tin đăng nhập</strong>
+        <code>
+          User: admin<br>
+          Pass: Admin@123456<br>
+          URL:  /admin/dashboard
+        </code>
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-icon">📖</div>
+      <h3>Thủ thư (Librarian)</h3>
+      <p>Cấp phát sách, ghi nhận trả sách, quản lý phiếu mượn, xử lý sách quá hạn & tiền phạt.</p>
+      <div class="cred">
+        <strong>Thông tin đăng nhập</strong>
+        <code>
+          User: librarian1<br>
+          Pass: Lib@123456<br>
+          URL:  /admin/borrowings
+        </code>
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-icon">👤</div>
+      <h3>Độc giả (Reader)</h3>
+      <p>Tìm kiếm sách, xem thông tin chi tiết, theo dõi lịch sử mượn, đánh giá sách đã đọc.</p>
+      <div class="cred">
+        <strong>Thông tin đăng nhập</strong>
+        <code>
+          User: tranvandoc<br>
+          Pass: Reader@123<br>
+          URL:  /books
+        </code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────
+     TAB 1 – KHỞI ĐỘNG APP
+────────────────────────────────────────────────── -->
+<div id="tab-start" class="section">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:#dbeafe;">🚀</div>
+    <div>
+      <h2>Bước 0 – Khởi động ứng dụng</h2>
+      <p>~1 phút · Chạy server và kiểm tra giao diện</p>
+    </div>
+  </div>
+
+  <div class="info-box amber">
+    <span class="info-box-icon">⚠️</span>
+    <div>Chuẩn bị trước khi demo: mở terminal sẵn, đã có sẵn dữ liệu seed từ <code>python seed.py</code></div>
+  </div>
+
+  <div class="timeline">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-card">
+        <h3>Chạy lệnh khởi động server</h3>
+        <p>Mở terminal, chạy: <code style="color:var(--blue);font-weight:600">cd backend && uvicorn app.main:app --reload</code></p>
+        <div class="url-badge">http://localhost:8000</div>
+        <div class="tag-row">
+          <span class="tag blue">FastAPI</span>
+          <span class="tag gray">SQLite</span>
+          <span class="tag green">Hot reload</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-card">
+        <h3>Mở trình duyệt – Trang chủ</h3>
+        <p>Truy cập trang chủ, giới thiệu giao diện: danh sách sách, thanh tìm kiếm, nút đăng nhập.</p>
+        <div class="url-badge">GET /</div>
+        <div class="tag-row">
+          <span class="tag blue">Trang chủ công khai</span>
+          <span class="tag gray">Không cần đăng nhập</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-card">
+        <h3>Nhấn vào trang đăng nhập</h3>
+        <p>Click "Đăng nhập" trên navigation bar. Cho thầy thấy form đăng nhập đơn giản, gọn gàng.</p>
+        <div class="url-badge">GET /auth/login</div>
+      </div>
+    </div>
+
+    <div class="script-box">
+      <em>"Thưa thầy, đây là hệ thống Quản lý Thư viện được xây dựng bằng Python/FastAPI kết hợp SQLite và giao diện Jinja2.</em>
+      <br><br>
+      <em>Hệ thống hỗ trợ <strong>3 loại người dùng</strong>: Admin quản trị toàn bộ, Thủ thư xử lý nghiệp vụ mượn-trả, và Độc giả sử dụng thư viện.</em>
+      <br><br>
+      <em>Bây giờ em sẽ lần lượt demo từng vai trò..."</em>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────
+     TAB 2 – ADMIN
+────────────────────────────────────────────────── -->
+<div id="tab-admin" class="section">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:#d1fae5;">🛡️</div>
+    <div>
+      <h2>Vai trò Admin – ~2 phút</h2>
+      <p>Quản trị hệ thống: Dashboard, Người dùng, Sách, Thể loại</p>
+    </div>
+  </div>
+
+  <div class="info-box blue">
+    <span class="info-box-icon">🔑</span>
+    <div><strong>Đăng nhập:</strong> username: <code>admin</code> · password: <code>Admin@123456</code></div>
+  </div>
+
+  <div class="timeline">
+
+    <div class="step">
+      <div class="step-num green">1</div>
+      <div class="step-card">
+        <h3>Đăng nhập Admin & xem Dashboard</h3>
+        <p>Đăng nhập bằng tài khoản admin. Dashboard hiển thị 5 KPI: tổng sách, số lượng tồn kho, lượt mượn hiện tại, sách quá hạn, tổng người dùng.</p>
+        <div class="url-badge">GET /admin/dashboard</div>
+        <div class="tag-row">
+          <span class="tag blue">70+ sách</span>
+          <span class="tag amber">14 đang mượn</span>
+          <span class="tag red">6 quá hạn</span>
+          <span class="tag purple">29 người dùng</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">2</div>
+      <div class="step-card">
+        <h3>Xem biểu đồ lượt mượn theo tháng</h3>
+        <p>Dashboard có biểu đồ cột Chart.js thể hiện số lượt mượn theo từng tháng trong năm. Admin dùng để theo dõi xu hướng sử dụng thư viện.</p>
+        <div class="url-badge">Biểu đồ: /admin/dashboard?year=2026</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">3</div>
+      <div class="step-card">
+        <h3>Quản lý Người dùng</h3>
+        <p>Click menu "Người dùng". Xem danh sách 29 tài khoản (25 active, 4 bị khóa). Chức năng: tìm kiếm, lọc theo vai trò, thay đổi trạng thái, xem chi tiết.</p>
+        <div class="url-badge">GET /admin/users</div>
+        <div class="tag-row">
+          <span class="tag blue">Tìm kiếm tên/email</span>
+          <span class="tag amber">Lọc theo vai trò</span>
+          <span class="tag red">Khóa/mở tài khoản</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">4</div>
+      <div class="step-card">
+        <h3>Quản lý Sách</h3>
+        <p>Menu "Sách" → xem danh sách 70 đầu sách. Thao tác: thêm sách mới, chỉnh sửa thông tin, xem tồn kho. Highlight sách có số lượng ≤ 3 màu đỏ.</p>
+        <div class="url-badge">GET /admin/books</div>
+        <div class="tag-row">
+          <span class="tag green">Thêm sách mới</span>
+          <span class="tag blue">Chỉnh sửa</span>
+          <span class="tag red">Tồn kho thấp</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">5</div>
+      <div class="step-card">
+        <h3>Quản lý Thể loại</h3>
+        <p>7 thể loại sách: Văn học VN, KHCN, Lịch sử, Kinh tế, Ngoại ngữ, Thiếu nhi, KHMT. Admin có thể thêm/sửa/xóa thể loại.</p>
+        <div class="url-badge">GET /admin/categories</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="script-box">
+    <em>"Đây là giao diện của Admin – người có quyền cao nhất trong hệ thống.</em>
+    <br><br>
+    <em>Ngay trên Dashboard, admin thấy ngay <strong>5 chỉ số quan trọng</strong>: 70 đầu sách, 14 lượt mượn đang chạy, <strong>6 sách quá hạn</strong> cần xử lý.</em>
+    <br><br>
+    <em>Biểu đồ theo tháng giúp thủ thư nhận ra mùa cao điểm để chuẩn bị bổ sung sách kịp thời.</em>
+    <br><br>
+    <em>Admin quản lý toàn bộ tài khoản người dùng – có thể <strong>khóa tài khoản</strong> vi phạm nội quy mà không cần xóa dữ liệu..."</em>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────
+     TAB 3 – THỦ THƯ
+────────────────────────────────────────────────── -->
+<div id="tab-librarian" class="section">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:#fef3c7;">📖</div>
+    <div>
+      <h2>Vai trò Thủ thư – ~2 phút</h2>
+      <p>Nghiệp vụ cốt lõi: cấp phát sách, xử lý trả sách, quá hạn & tiền phạt</p>
+    </div>
+  </div>
+
+  <div class="info-box blue">
+    <span class="info-box-icon">🔑</span>
+    <div><strong>Đăng nhập:</strong> username: <code>librarian1</code> · password: <code>Lib@123456</code></div>
+  </div>
+
+  <!-- Sub-flow: cấp phát sách -->
+  <div class="info-box green" style="margin-top:4px">
+    <span class="info-box-icon">🔄</span>
+    <div><strong>Luồng A: Cấp phát sách</strong> · Tìm độc giả → Chọn sách → Tạo phiếu mượn</div>
+  </div>
+
+  <div class="timeline">
+
+    <div class="step">
+      <div class="step-num amber">1</div>
+      <div class="step-card">
+        <h3>Đăng nhập Thủ thư & xem Phiếu mượn</h3>
+        <p>Đăng nhập librarian1. Vào "Phiếu mượn" → thấy danh sách đang mượn, lọc nhanh "Quá hạn" để ưu tiên xử lý 6 trường hợp.</p>
+        <div class="url-badge">GET /admin/borrowings</div>
+        <div class="tag-row">
+          <span class="tag amber">14 đang mượn</span>
+          <span class="tag red">6 quá hạn</span>
+          <span class="tag green">14 đã trả</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num amber">2</div>
+      <div class="step-card">
+        <h3>Cấp phát sách cho độc giả (Issue)</h3>
+        <p>Click "Cấp phát sách mới". Điền tên độc giả: <strong>Ngô Thị Lan Anh</strong>, tìm sách: <strong>Mắt Biếc</strong>. Thời hạn mặc định 14 ngày. Submit tạo phiếu.</p>
+        <div class="url-badge">POST /admin/borrowings/issue</div>
+        <div class="tag-row">
+          <span class="tag blue">ngothilananh</span>
+          <span class="tag green">Mắt Biếc – Nguyễn Nhật Ánh</span>
+          <span class="tag gray">14 ngày</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num amber">3</div>
+      <div class="step-card">
+        <h3>Xử lý trả sách (Return)</h3>
+        <p>Tìm phiếu mượn của <strong>Trần Văn Đọc</strong> (đang mượn "Số Đỏ"). Click "Ghi nhận trả sách", chọn tình trạng sách: <em>Tốt</em>. Hệ thống tự cập nhật tồn kho.</p>
+        <div class="url-badge">POST /admin/borrowings/{id}/return</div>
+        <div class="tag-row">
+          <span class="tag green">Trả đúng hạn</span>
+          <span class="tag blue">Tình trạng: Tốt</span>
+          <span class="tag gray">Tồn kho +1</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num amber">4</div>
+      <div class="step-card">
+        <h3>Xử lý trả sách quá hạn + Tính tiền phạt</h3>
+        <p>Filter "Quá hạn", chọn phiếu của <strong>Ngô Thị Lan Anh</strong> (mượn "Nỗi Buồn Chiến Tranh" 11 ngày trễ). Hệ thống hiển thị tiền phạt: <strong>55.000đ</strong> (5.000đ/ngày × 11 ngày).</p>
+        <div class="url-badge">GET /admin/borrowings/{id}</div>
+        <div class="tag-row">
+          <span class="tag red">Quá hạn 11 ngày</span>
+          <span class="tag amber">Phạt: 55.000đ</span>
+          <span class="tag gray">5.000đ/ngày</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num amber">5</div>
+      <div class="step-card">
+        <h3>Xem chi tiết phiếu mượn</h3>
+        <p>Click vào phiếu để xem chi tiết: ngày mượn, ngày hạn, ngày trả thực tế, tình trạng sách, ghi chú thủ thư, lịch sử gia hạn.</p>
+        <div class="url-badge">GET /admin/borrowings/{id}</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="script-box">
+    <em>"Bây giờ em đăng nhập với tài khoản Thủ thư – đây là người trực tiếp xử lý việc mượn và trả sách hàng ngày.</em>
+    <br><br>
+    <em>Thủ thư thấy ngay <strong>6 phiếu quá hạn</strong> cần ưu tiên. Em thao tác <strong>cấp phát sách</strong> cho độc giả Ngô Thị Lan Anh mượn 'Mắt Biếc' – chỉ cần nhập tên và tìm sách.</em>
+    <br><br>
+    <em>Với sách quá hạn, hệ thống <strong>tự động tính tiền phạt</strong> theo công thức 5.000đ/ngày. Thủ thư không cần tính tay, chỉ cần xác nhận và ghi nhận thanh toán..."</em>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────
+     TAB 4 – ĐỘC GIẢ
+────────────────────────────────────────────────── -->
+<div id="tab-reader" class="section">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:#ede9fe;">👤</div>
+    <div>
+      <h2>Vai trò Độc giả – ~1.5 phút</h2>
+      <p>Trải nghiệm người dùng: tìm sách, xem lịch sử, đánh giá</p>
+    </div>
+  </div>
+
+  <div class="info-box blue">
+    <span class="info-box-icon">🔑</span>
+    <div><strong>Đăng nhập:</strong> username: <code>tranvandoc</code> · password: <code>Reader@123</code></div>
+  </div>
+
+  <div class="timeline">
+
+    <div class="step">
+      <div class="step-num purple">1</div>
+      <div class="step-card">
+        <h3>Đăng nhập & Trang chủ sách</h3>
+        <p>Đăng nhập bằng tài khoản <strong>tranvandoc</strong>. Hệ thống điều hướng về trang sách. Thấy ngay danh sách 70+ đầu sách với ảnh bìa, tác giả, thể loại.</p>
+        <div class="url-badge">GET /books</div>
+        <div class="tag-row">
+          <span class="tag purple">Giao diện đẹp</span>
+          <span class="tag blue">Grid sách</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num purple">2</div>
+      <div class="step-card">
+        <h3>Tìm kiếm sách</h3>
+        <p>Gõ <strong>"Clean Code"</strong> vào thanh tìm kiếm hoặc lọc thể loại "Khoa học máy tính". Kết quả hiển thị tức thì, có số lượng còn lại.</p>
+        <div class="url-badge">GET /books?q=clean+code</div>
+        <div class="tag-row">
+          <span class="tag blue">Tìm theo tên</span>
+          <span class="tag green">Lọc thể loại</span>
+          <span class="tag gray">Còn 5 quyển</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num purple">3</div>
+      <div class="step-card">
+        <h3>Xem chi tiết sách & đánh giá</h3>
+        <p>Click vào "Clean Code" để xem trang chi tiết: mô tả, tác giả, nhà xuất bản, năm xuất bản, tình trạng còn sách. Bên dưới có phần đánh giá của độc giả khác.</p>
+        <div class="url-badge">GET /books/{id}</div>
+        <div class="tag-row">
+          <span class="tag purple">3 đánh giá</span>
+          <span class="tag amber">⭐ 4.7/5</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num purple">4</div>
+      <div class="step-card">
+        <h3>Xem "Sách đang mượn của tôi"</h3>
+        <p>Click avatar → "Sách đang mượn". Thấy danh sách sách đang giữ, ngày hạn trả, cảnh báo sắp đến hạn. Nút "Gia hạn" nếu còn lượt.</p>
+        <div class="url-badge">GET /reader/my-books</div>
+        <div class="tag-row">
+          <span class="tag blue">Đang mượn: Số Đỏ</span>
+          <span class="tag green">Còn 11 ngày</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num purple">5</div>
+      <div class="step-card">
+        <h3>Xem lịch sử mượn</h3>
+        <p>Tab "Lịch sử" hiển thị toàn bộ phiếu mượn: đã trả, đang mượn, quá hạn. Độc giả có thể tra cứu lại sách đã đọc trong quá khứ.</p>
+        <div class="url-badge">GET /reader/history</div>
+        <div class="tag-row">
+          <span class="tag green">Đã trả: 1 phiếu</span>
+          <span class="tag blue">Đang mượn: 1 phiếu</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num purple">6</div>
+      <div class="step-card">
+        <h3>Đổi mật khẩu / Cập nhật hồ sơ</h3>
+        <p>Vào "Hồ sơ cá nhân" → cập nhật số điện thoại, địa chỉ. Hoặc đổi mật khẩu tại trang riêng.</p>
+        <div class="url-badge">GET /reader/profile</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="script-box">
+    <em>"Cuối cùng là trải nghiệm của Độc giả – người dùng cuối của hệ thống.</em>
+    <br><br>
+    <em>Độc giả có giao diện thân thiện để <strong>tìm kiếm sách theo từ khóa</strong>, lọc theo thể loại. Trang chi tiết sách cho thấy <strong>đánh giá từ cộng đồng</strong> giúp độc giả chọn sách phù hợp.</em>
+    <br><br>
+    <em>Trang 'Sách đang mượn của tôi' giúp độc giả <strong>không quên ngày hạn trả</strong>, tránh bị phạt. Lịch sử mượn đầy đủ giúp tra cứu lại sách đã đọc bất cứ lúc nào..."</em>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────
+     TAB 5 – DUMMY DATA
+────────────────────────────────────────────────── -->
+<div id="tab-data" class="section">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:#fef3c7;">🗄️</div>
+    <div>
+      <h2>Dữ liệu mẫu (Seed Data)</h2>
+      <p>Tài khoản, sách và phiếu mượn dùng để demo</p>
+    </div>
+  </div>
+
+  <!-- Tài khoản -->
+  <h3 style="font-weight:700;margin-bottom:12px;margin-top:4px">Tài khoản đăng nhập</h3>
+  <table class="data-table">
+    <thead>
+      <tr><th>Tên đăng nhập</th><th>Mật khẩu</th><th>Vai trò</th><th>Họ và tên</th><th>Trạng thái</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>admin</code></td><td><code>Admin@123456</code></td><td><span class="tag green">Admin</span></td><td>System Administrator</td><td><span class="tag green">Hoạt động</span></td></tr>
+      <tr><td><code>librarian1</code></td><td><code>Lib@123456</code></td><td><span class="tag amber">Thủ thư</span></td><td>Nguyễn Thị Thủ Thư</td><td><span class="tag green">Hoạt động</span></td></tr>
+      <tr><td><code>librarian2</code></td><td><code>Lib@123456</code></td><td><span class="tag amber">Thủ thư</span></td><td>Phạm Văn Quản Lý</td><td><span class="tag green">Hoạt động</span></td></tr>
+      <tr><td><code>tranvandoc</code></td><td><code>Reader@123</code></td><td><span class="tag purple">Độc giả</span></td><td>Trần Văn Đọc</td><td><span class="tag green">Hoạt động</span></td></tr>
+      <tr><td><code>lethimuon</code></td><td><code>Reader@123</code></td><td><span class="tag purple">Độc giả</span></td><td>Lê Thị Mượn</td><td><span class="tag green">Hoạt động</span></td></tr>
+      <tr><td><code>ngothilananh</code></td><td><code>Reader@123</code></td><td><span class="tag purple">Độc giả</span></td><td>Ngô Thị Lan Anh</td><td><span class="tag green">Hoạt động</span></td></tr>
+      <tr><td><code>tranvanz_old</code></td><td><code>Reader@123</code></td><td><span class="tag purple">Độc giả</span></td><td>Trần Văn Zeta (cũ)</td><td><span class="tag red">Bị khóa</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- Sách nổi bật -->
+  <h3 style="font-weight:700;margin-bottom:12px;margin-top:24px">Sách nổi bật để demo</h3>
+  <table class="data-table">
+    <thead>
+      <tr><th>Tên sách</th><th>Tác giả</th><th>Thể loại</th><th>Số lượng</th><th>Còn lại</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Số Đỏ</td><td>Vũ Trọng Phụng</td><td><span class="tag blue">Văn học VN</span></td><td>4</td><td><span class="tag amber">3</span></td></tr>
+      <tr><td>Đắc Nhân Tâm</td><td>Dale Carnegie</td><td><span class="tag green">Kinh tế</span></td><td>12</td><td><span class="tag green">11</span></td></tr>
+      <tr><td>Mắt Biếc</td><td>Nguyễn Nhật Ánh</td><td><span class="tag blue">Văn học VN</span></td><td>7</td><td><span class="tag green">7</span></td></tr>
+      <tr><td>Clean Code</td><td>Robert C. Martin</td><td><span class="tag purple">KHMT</span></td><td>5</td><td><span class="tag green">4</span></td></tr>
+      <tr><td>Lập Trình Python Cơ Bản</td><td>Nguyễn Văn Lập</td><td><span class="tag amber">KHCN</span></td><td>10</td><td><span class="tag green">9</span></td></tr>
+      <tr><td>Nỗi Buồn Chiến Tranh</td><td>Bảo Ninh</td><td><span class="tag blue">Văn học VN</span></td><td>4</td><td><span class="tag red">3 (1 quá hạn)</span></td></tr>
+      <tr><td>Sapiens: Lược Sử Loài Người</td><td>Yuval Noah Harari</td><td><span class="tag gray">Lịch sử</span></td><td>7</td><td><span class="tag green">7</span></td></tr>
+      <tr><td>TOEIC 900 – Chinh Phục Điểm Cao</td><td>Kim Se Ryung</td><td><span class="tag green">Ngoại ngữ</span></td><td>15</td><td><span class="tag green">14</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- Phiếu mượn nổi bật -->
+  <h3 style="font-weight:700;margin-bottom:12px;margin-top:24px">Phiếu mượn đang hoạt động (demo)</h3>
+  <table class="data-table">
+    <thead>
+      <tr><th>Độc giả</th><th>Sách</th><th>Trạng thái</th><th>Ghi chú</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Trần Văn Đọc</td>
+        <td>Số Đỏ</td>
+        <td><span class="tag blue">Đang mượn</span></td>
+        <td>Mượn 3 ngày trước, còn 11 ngày</td>
+      </tr>
+      <tr>
+        <td>Trần Thị Hải (Ngô Thị Lan Anh)</td>
+        <td>Nỗi Buồn Chiến Tranh</td>
+        <td><span class="tag red">Quá hạn</span></td>
+        <td>Quá hạn 11 ngày – phạt <strong>55.000đ</strong></td>
+      </tr>
+      <tr>
+        <td>Hoàng Văn Cường</td>
+        <td>TOEIC 900</td>
+        <td><span class="tag blue">Đang mượn</span></td>
+        <td>Mượn 7 ngày trước</td>
+      </tr>
+      <tr>
+        <td>Trần Văn Khải</td>
+        <td>Đại Việt Sử Ký Toàn Thư</td>
+        <td><span class="tag blue">Đang mượn</span></td>
+        <td>Đã gia hạn 1 lần</td>
+      </tr>
+      <tr>
+        <td>Lê Thị Mượn</td>
+        <td>Lập Trình Python Cơ Bản</td>
+        <td><span class="tag blue">Đang mượn</span></td>
+        <td>Mượn 5 ngày trước</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box amber" style="margin-top:20px">
+    <span class="info-box-icon">💡</span>
+    <div><strong>Gợi ý demo tiền phạt:</strong> Mở phiếu quá hạn của <em>Dương Thị Dung (Hoàng Văn Cường)</em> – phạt cao nhất: <strong>16 ngày × 5.000đ = 80.000đ</strong> (phiếu #17, Design Patterns).</div>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────
+     TAB 6 – SCRIPT ĐẦY ĐỦ
+────────────────────────────────────────────────── -->
+<div id="tab-script" class="section">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:#ede9fe;">🎤</div>
+    <div>
+      <h2>Script thuyết trình đầy đủ</h2>
+      <p>Tham khảo lời dẫn cho từng phần trong 5–7 phút</p>
+    </div>
+  </div>
+
+  <div class="timing-strip" style="margin-bottom:20px">
+    <div class="timing-cell highlight"><div class="t-time">0:00</div><div class="t-label">Mở đầu</div></div>
+    <div class="timing-cell highlight"><div class="t-time">1:00</div><div class="t-label">Admin</div></div>
+    <div class="timing-cell highlight"><div class="t-time">3:00</div><div class="t-label">Thủ thư</div></div>
+    <div class="timing-cell highlight"><div class="t-time">5:00</div><div class="t-label">Độc giả</div></div>
+    <div class="timing-cell"><div class="t-time">6:30</div><div class="t-label">Kết thúc</div></div>
+  </div>
+
+  <div class="script-box" style="margin-bottom:18px">
+    <strong>[ 0:00 – Giới thiệu ]</strong>
+    <br><br>
+    <em>"Kính thưa thầy, em xin phép trình bày demo hệ thống Quản lý Thư viện được xây dựng bằng Python với framework FastAPI, cơ sở dữ liệu SQLite và giao diện web Jinja2/Tailwind.</em>
+    <br><br>
+    <em>Hệ thống có <strong>3 vai trò người dùng</strong> với phân quyền khác nhau: Admin toàn quyền quản trị, Thủ thư xử lý nghiệp vụ mượn-trả, và Độc giả là người dùng cuối.</em>
+    <br><br>
+    <em>Dữ liệu đã được seed sẵn với hơn <strong>70 đầu sách</strong>, 29 tài khoản và 34 phiếu mượn thực tế, bao gồm cả các trường hợp quá hạn để demo đầy đủ tính năng."</em>
+  </div>
+
+  <div class="script-box" style="margin-bottom:18px">
+    <strong>[ 1:00 – Admin Dashboard ]</strong>
+    <br><br>
+    <em>"Em đăng nhập bằng tài khoản Admin. Giao diện Dashboard hiện 5 chỉ số quan trọng ngay lập tức: <strong>70 đầu sách, 14 phiếu mượn đang mở, 6 sách quá hạn</strong> và tổng 29 người dùng.</em>
+    <br><br>
+    <em>Biểu đồ lượt mượn theo tháng được vẽ bằng Chart.js, Admin có thể xem từng năm để phân tích xu hướng sử dụng thư viện theo mùa.</em>
+    <br><br>
+    <em>Trong quản lý người dùng, em click vào 'Người dùng' – thấy danh sách 29 tài khoản. Có 4 tài khoản đang <strong>bị khóa</strong> (trạng thái Inactive), Admin có thể mở lại hoặc xóa vĩnh viễn. Đây là tính năng kiểm soát truy cập quan trọng khi độc giả vi phạm nội quy."</em>
+  </div>
+
+  <div class="script-box" style="margin-bottom:18px">
+    <strong>[ 3:00 – Thủ thư – Cấp phát & Thu hồi sách ]</strong>
+    <br><br>
+    <em>"Em đăng xuất và đăng nhập bằng tài khoản <strong>librarian1 / Lib@123456</strong>. Đây là vai trò Thủ thư.</em>
+    <br><br>
+    <em>Thủ thư có quyền truy cập vào nghiệp vụ cốt lõi nhưng <strong>không có quyền quản lý hệ thống</strong> như Admin.</em>
+    <br><br>
+    <em>Em thao tác <strong>cấp phát sách</strong>: click 'Cấp phát sách mới', nhập tên độc giả Ngô Thị Lan Anh, chọn sách Mắt Biếc. Hệ thống tự đặt thời hạn 14 ngày theo cấu hình. Click Submit – phiếu mượn được tạo và tồn kho sách giảm 1.</em>
+    <br><br>
+    <em>Tiếp theo, em demo <strong>thu hồi sách quá hạn</strong>. Lọc 'Quá hạn' → có 6 phiếu. Mở phiếu của độc giả Ngô Thị Lan Anh mượn 'Nỗi Buồn Chiến Tranh' – quá hạn 11 ngày. Hệ thống hiển thị tiền phạt tự động: <strong>11 × 5.000đ = 55.000đ</strong>. Thủ thư chọn tình trạng sách và ghi nhận trả, tiền phạt được lưu lại."</em>
+  </div>
+
+  <div class="script-box" style="margin-bottom:18px">
+    <strong>[ 5:00 – Độc giả ]</strong>
+    <br><br>
+    <em>"Cuối cùng, em demo giao diện phía Độc giả. Đăng nhập <strong>tranvandoc / Reader@123</strong>.</em>
+    <br><br>
+    <em>Độc giả thấy ngay kho sách với giao diện dạng lưới (grid). Gõ 'Clean Code' vào ô tìm kiếm – kết quả hiện tức thì cùng thông tin còn bao nhiêu quyển.</em>
+    <br><br>
+    <em>Trang 'Sách đang mượn của tôi' cho biết đang giữ 'Số Đỏ', còn 11 ngày mới phải trả. Không bị động chờ thủ thư nhắc nhở.</em>
+    <br><br>
+    <em>Trang Lịch sử hiển thị toàn bộ phiếu mượn từ trước đến nay – tiện cho việc tra cứu lại sách đã đọc."</em>
+  </div>
+
+  <div class="script-box">
+    <strong>[ 6:30 – Kết luận ]</strong>
+    <br><br>
+    <em>"Như vậy, em đã demo các chức năng chính của hệ thống qua 3 vai trò.</em>
+    <br><br>
+    <em>Về mặt kỹ thuật: hệ thống sử dụng <strong>FastAPI</strong> làm backend, <strong>SQLAlchemy async</strong> với SQLite, <strong>Alembic</strong> để migrate schema, JWT để xác thực, và <strong>Jinja2 + Tailwind CSS + Alpine.js</strong> cho giao diện.</em>
+    <br><br>
+    <em>Hệ thống còn có REST API riêng tại <code>/api/v1</code> kèm Swagger UI để tích hợp với các ứng dụng khác.</em>
+    <br><br>
+    <em>Em xin kết thúc phần demo. Kính mời thầy đặt câu hỏi ạ."</em>
+  </div>
+
+  <div class="info-box green" style="margin-top:20px">
+    <span class="info-box-icon">✅</span>
+    <div><strong>Checklist trước khi demo:</strong> Server đang chạy · Dữ liệu seed đã nạp · Trình duyệt đã xóa cache · Chuẩn bị sẵn terminal để chạy lại nếu cần</div>
+  </div>
+</div>
+
+</main>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
