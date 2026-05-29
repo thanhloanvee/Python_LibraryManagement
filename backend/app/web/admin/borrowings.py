@@ -147,7 +147,7 @@ async def issue_submit(
         payload = BorrowingCreate(
             user_id=user_id,
             book_id=book_id,
-            due_date=datetime.datetime.combine(due, datetime.time.min),
+            due_date=due,
             librarian_notes=librarian_notes or None,
         )
         borrowing = await BorrowingService(db).issue_book(payload)
@@ -235,8 +235,7 @@ async def mark_fine_paid(
     db: AsyncSession = Depends(get_db),
     _=Depends(require_librarian),
 ):
-    from app.schemas.borrowing import MarkFinePaidRequest
-    await BorrowingService(db).mark_fine_paid(borrowing_id, MarkFinePaidRequest())
+    await BorrowingService(db).mark_fine_paid(borrowing_id)
     resp = RedirectResponse(url=f"/admin/borrowings/{borrowing_id}", status_code=302)
     set_flash(resp, "Đã đánh dấu tiền phạt là đã thanh toán.", "success")
     return resp

@@ -47,7 +47,6 @@ def _form_to_book_dict(
         "language": BookLanguage(language),
         "description": description or None,
         "quantity": quantity,
-        "available_quantity": quantity,
         "status": BookStatus(status),
         "category_id": category_id or None,
         "cover_image": cover_image,
@@ -127,7 +126,7 @@ async def book_create(
             title, author, isbn, publisher, publication_year,
             language, description, quantity, status, category_id, cover_file,
         )
-        data["available_quantity"] = quantity
+        data["available_quantity"] = quantity  # set only on create
         await BookService(db).create_book(BookCreate(**data))
         resp = RedirectResponse(url="/admin/books", status_code=302)
         set_flash(resp, f"Sách '{title}' đã được tạo thành công.", "success")
@@ -195,7 +194,6 @@ async def book_update(
             language, description, quantity, status, category_id, cover_file,
             existing_cover=book.cover_image,
         )
-        del data["available_quantity"]  # don't override manually
         await svc.update_book(book_id, BookUpdate(**data))
         resp = RedirectResponse(url="/admin/books", status_code=302)
         set_flash(resp, f"Sách '{title}' đã được cập nhật.", "success")

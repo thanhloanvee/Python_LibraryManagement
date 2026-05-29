@@ -64,10 +64,12 @@ async def renew_borrowing(
     try:
         from app.schemas.borrowing import RenewBorrowingRequest
         svc = BorrowingService(db)
-        b = await svc.get_or_404(borrowing_id)
-        if b.user_id != user.id:
-            raise PermissionError("Not your borrowing.")
-        updated = await svc.renew_borrowing(borrowing_id, RenewBorrowingRequest())
+        updated = await svc.renew_borrowing(
+            borrowing_id,
+            RenewBorrowingRequest(),
+            requesting_user_id=user.id,
+            requesting_role=user.role,
+        )
         resp = RedirectResponse(url="/reader/my-books", status_code=302)
         set_flash(
             resp,

@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import enum
-from datetime import datetime, timezone
+from datetime import datetime
+
+from app.db.base import ICT
 
 from sqlalchemy import (
     DateTime,
@@ -51,14 +53,14 @@ class Review(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(ICT),
         server_default=func.now(),
         nullable=False,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(ICT),
+        onupdate=lambda: datetime.now(ICT),
         server_default=func.now(),
         nullable=False,
     )

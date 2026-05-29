@@ -47,6 +47,7 @@ class BorrowingCreate(BaseModel):
             "Override due date; defaults to today + BORROWING_PERIOD_DAYS"
         ),
     )
+    librarian_notes: Optional[str] = Field(default=None, max_length=2000)
 
     @model_validator(mode="after")
     def due_date_in_future(self) -> "BorrowingCreate":

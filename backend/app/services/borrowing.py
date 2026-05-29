@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.models.borrowing import Borrowing, BorrowingStatus
+from app.models.user import UserRole
 from app.repositories.book import BookRepository
 from app.repositories.borrowing import BorrowingRepository
 from app.repositories.user import UserRepository
@@ -76,7 +77,7 @@ class BorrowingService:
                 detail="Book not found.",
             )
 
-        # 3. Check availability
+        # 3. Check availability (snapshot — final atomic check happens at step 7)
         if not book.is_available:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -120,8 +121,13 @@ class BorrowingService:
                 detail="due_date must be after borrow_date.",
             )
 
-        book.available_quantity -= 1
-        await self._book_repo.save(book)
+        # 7. Atomic decrement — prevents concurrent over-issue
+        decremented = await self._book_repo.decrement_available(data.book_id)
+        if not decremented:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Book is no longer available (just taken by another request).",
+            )
 
         # 8. Create borrowing record
         borrowing = Borrowing(
@@ -133,6 +139,7 @@ class BorrowingService:
             renewed_count=0,
             fine_amount=0.0,
             fine_paid=False,
+            librarian_notes=data.librarian_notes,
         )
         return await self._repo.create(borrowing)
 
@@ -171,11 +178,22 @@ class BorrowingService:
         return await self._repo.save(borrowing)
 
     async def renew_borrowing(
-        self, borrowing_id: int, data: RenewBorrowingRequest, requesting_user_id: int
+        self,
+        borrowing_id: int,
+        data: RenewBorrowingRequest,
+        requesting_user_id: int | None = None,
+        requesting_role: UserRole = UserRole.READER,
     ) -> Borrowing:
         borrowing = await self.get_or_404(borrowing_id)
 
-        if borrowing.status != BorrowingStatus.BORROWED:
+        if requesting_role == UserRole.READER and requesting_user_id is not None:
+            if borrowing.user_id != requesting_user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You can only renew your own borrowings.",
+                )
+
+        if borrowing.status not in (BorrowingStatus.BORROWED, BorrowingStatus.OVERDUE):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Only active borrowings can be renewed.",

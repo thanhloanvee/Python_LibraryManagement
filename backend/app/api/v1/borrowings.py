@@ -173,7 +173,12 @@ async def renew_borrowing(
     Enforces MAX_RENEWALS limit.
     """
     service = BorrowingService(db)
-    b = await service.renew_borrowing(borrowing_id, data, current_user.id)
+    b = await service.renew_borrowing(
+        borrowing_id,
+        data,
+        requesting_user_id=current_user.id,
+        requesting_role=current_user.role,
+    )
     return _borrowing_to_read(b)
 
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -23,6 +23,16 @@ class BookRepository:
             .where(Book.id == book_id)
         )
         return result.scalar_one_or_none()
+
+    async def decrement_available(self, book_id: int) -> bool:
+        stmt = (
+            update(Book)
+            .where(Book.id == book_id, Book.available_quantity > 0)
+            .values(available_quantity=Book.available_quantity - 1)
+            .execution_options(synchronize_session="fetch")
+        )
+        result = await self._db.execute(stmt)
+        return result.rowcount > 0
 
     async def get_by_isbn(self, isbn: str) -> Optional[Book]:
         result = await self._db.execute(
