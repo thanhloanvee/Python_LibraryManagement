@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
-from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -18,11 +17,12 @@ from app.schemas.borrowing import (
     RenewBorrowingRequest,
     ReturnBookRequest,
 )
+from app.services.base import BaseService
 
 settings = get_settings()
 
 
-class BorrowingService:
+class BorrowingService(BaseService):
     def __init__(self, db: AsyncSession) -> None:
         self._repo = BorrowingRepository(db)
         self._book_repo = BookRepository(db)
@@ -30,12 +30,7 @@ class BorrowingService:
 
     async def get_or_404(self, borrowing_id: int) -> Borrowing:
         borrowing = await self._repo.get_by_id(borrowing_id)
-        if not borrowing:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Borrowing record not found",
-            )
-        return borrowing
+        return await super().get_or_404(borrowing, "Borrowing")
 
     async def list_borrowings(
         self,
@@ -44,7 +39,7 @@ class BorrowingService:
         page: int = 1,
         page_size: int = 20,
     ):
-        offset = (page - 1) * page_size
+        offset = self.calculate_offset(page, page_size)
         return await self._repo.list_borrowings(
             user_id=filters.user_id,
             book_id=filters.book_id,
@@ -169,11 +164,10 @@ class BorrowingService:
         if data.librarian_notes is not None:
             borrowing.librarian_notes = data.librarian_notes
 
-        # Increment available_quantity
-        book = await self._book_repo.get_by_id(borrowing.book_id)
-        if book:
-            book.available_quantity += 1
-            await self._book_repo.save(book)
+        # Increment available_quantity (book already eager-loaded)
+        if borrowing.book:
+            borrowing.book.available_quantity += 1
+            await self._book_repo.save(borrowing.book)
 
         return await self._repo.save(borrowing)
 

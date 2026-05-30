@@ -1,27 +1,23 @@
 """Book service — business logic for book management."""
 from __future__ import annotations
 
-from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.book import Book
 from app.repositories.book import BookRepository
 from app.repositories.category import CategoryRepository
 from app.schemas.book import BookCreate, BookFilter, BookUpdate
+from app.services.base import BaseService
 
 
-class BookService:
+class BookService(BaseService):
     def __init__(self, db: AsyncSession) -> None:
         self._repo = BookRepository(db)
         self._cat_repo = CategoryRepository(db)
 
     async def get_or_404(self, book_id: int) -> Book:
         book = await self._repo.get_by_id(book_id)
-        if not book:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Book not found"
-            )
-        return book
+        return await super().get_or_404(book, "Book")
 
     async def list_books(
         self,
@@ -30,7 +26,7 @@ class BookService:
         page: int = 1,
         page_size: int = 20,
     ):
-        offset = (page - 1) * page_size
+        offset = self.calculate_offset(page, page_size)
         return await self._repo.list_books(
             title=filters.title,
             author=filters.author,

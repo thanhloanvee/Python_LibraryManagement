@@ -1,29 +1,25 @@
 """User service — business logic for user management."""
 from __future__ import annotations
 
-from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import hash_password
 from app.models.user import User, UserRole, UserStatus
 from app.repositories.user import UserRepository
 from app.schemas.user import UserAdminUpdate, UserCreate, UserUpdate
+from app.services.base import BaseService
 
 
-class UserService:
+class UserService(BaseService):
     def __init__(self, db: AsyncSession) -> None:
         self._repo = UserRepository(db)
 
     async def get_or_404(self, user_id: int) -> User:
         user = await self._repo.get_by_id(user_id)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-            )
-        return user
+        return await super().get_or_404(user, "User")
 
     async def list_users(self, *, role=None, status=None, search=None, page=1, page_size=20):
-        offset = (page - 1) * page_size
+        offset = self.calculate_offset(page, page_size)
         return await self._repo.list_users(
             role=role, status=status, search=search, offset=offset, limit=page_size
         )

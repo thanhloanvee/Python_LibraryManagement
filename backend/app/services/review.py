@@ -1,26 +1,21 @@
 """Review service."""
 from __future__ import annotations
 
-from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.review import Review, ReviewStatus
 from app.repositories.review import ReviewRepository
 from app.schemas.review import ReviewAdminUpdate, ReviewCreate, ReviewUpdate
+from app.services.base import BaseService
 
 
-class ReviewService:
+class ReviewService(BaseService):
     def __init__(self, db: AsyncSession) -> None:
         self._repo = ReviewRepository(db)
 
     async def get_or_404(self, review_id: int) -> Review:
         review = await self._repo.get_by_id(review_id)
-        if not review:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Review not found",
-            )
-        return review
+        return await super().get_or_404(review, "Review")
 
     async def list_reviews(
         self,
@@ -31,7 +26,7 @@ class ReviewService:
         page=1,
         page_size=20,
     ):
-        offset = (page - 1) * page_size
+        offset = self.calculate_offset(page, page_size)
         return await self._repo.list_reviews(
             book_id=book_id,
             user_id=user_id,

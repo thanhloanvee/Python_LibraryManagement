@@ -1,6 +1,7 @@
 """Admin book management."""
 from __future__ import annotations
 
+import asyncio
 import os
 import shutil
 from pathlib import Path
@@ -22,7 +23,7 @@ router = APIRouter()
 UPLOAD_DIR = Path(__file__).resolve().parents[2] / "static" / "uploads"
 
 
-def _form_to_book_dict(
+async def _form_to_book_dict(
     title: str, author: str, isbn: str, publisher: str,
     publication_year: int, language: str, description: str,
     quantity: int, status: str, category_id: int | None,
@@ -34,8 +35,10 @@ def _form_to_book_dict(
         ext = Path(cover_file.filename).suffix.lower()
         safe_name = f"{isbn.replace('/', '_')}{ext}"
         dest = UPLOAD_DIR / safe_name
-        with open(dest, "wb") as f:
-            shutil.copyfileobj(cover_file.file, f)
+        def save_file():
+            with open(dest, "wb") as f:
+                shutil.copyfileobj(cover_file.file, f)
+        await asyncio.to_thread(save_file)
         cover_image = f"static/uploads/{safe_name}"
 
     return {
@@ -122,7 +125,7 @@ async def book_create(
     _=Depends(require_admin),
 ):
     try:
-        data = _form_to_book_dict(
+        data = await _form_to_book_dict(
             title, author, isbn, publisher, publication_year,
             language, description, quantity, status, category_id, cover_file,
         )
@@ -189,7 +192,7 @@ async def book_update(
     try:
         svc = BookService(db)
         book = await svc.get_or_404(book_id)
-        data = _form_to_book_dict(
+        data = await _form_to_book_dict(
             title, author, isbn, publisher, publication_year,
             language, description, quantity, status, category_id, cover_file,
             existing_cover=book.cover_image,

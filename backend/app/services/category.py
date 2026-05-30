@@ -7,23 +7,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.category import Category
 from app.repositories.category import CategoryRepository
 from app.schemas.category import CategoryCreate, CategoryUpdate
+from app.services.base import BaseService
 
 
-class CategoryService:
+class CategoryService(BaseService):
     def __init__(self, db: AsyncSession) -> None:
         self._repo = CategoryRepository(db)
 
     async def get_or_404(self, category_id: int) -> Category:
         cat = await self._repo.get_by_id(category_id)
-        if not cat:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Category not found",
-            )
-        return cat
+        return await super().get_or_404(cat, "Category")
 
     async def list_categories(self, *, search=None, page=1, page_size=100):
-        offset = (page - 1) * page_size
+        offset = self.calculate_offset(page, page_size)
         return await self._repo.list_all(
             search=search, offset=offset, limit=page_size
         )
