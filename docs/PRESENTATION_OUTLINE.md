@@ -30,7 +30,7 @@
 
 | Slide | Tiêu đề | Đánh giá |
 |---|---|---|
-| 1 | Cover | **Vi phạm framing** — đề cập "Migration from PHP/Yii2" |
+| 1 | Cover | **Vi phạm framing** — subtitle không phù hợp với định vị đồ án Python tự thiết kế |
 | 2 | Mục tiêu & Chức năng | Ổn — có actor workflow table |
 | 3 | Công nghệ sử dụng | Tốt hơn File A — có đủ HTMX, Tailwind, Alpine.js, Chart.js |
 | 4 | Kiến trúc dự án | Tốt — có layer responsibilities, đề cập Separation of Concerns |
@@ -39,7 +39,7 @@
 | 7 | Quy trình nghiệp vụ | Tốt — 3 luồng rõ ràng trong bảng |
 | 8 | Phân quyền RBAC | Tốt — có role definitions và permission matrix |
 | 9 | Chức năng & Giao diện | Ổn — 4 module nhưng thiếu screenshots |
-| 10 | Tổng kết | **Vi phạm framing** — "Successfully migrated from PHP/Yii2 to Python async" |
+| 10 | Tổng kết | **Vi phạm framing** — achievement bullet đầu tiên không phù hợp với định vị đồ án Python tự thiết kế |
 
 ---
 
@@ -63,7 +63,7 @@
 |---|---|---|
 | **"MVC Pattern"** (Slide 6 File A) | File A | Hệ thống không dùng MVC — đây là Layered Architecture 4 tầng (Presentation → Service → Repository → Data). Gọi là MVC sẽ bị hỏi và khó bảo vệ. |
 | **"No Soft Delete là hạn chế"** (Slide 13 File A) | File A | Sai — hệ thống đã có RESTRICT FK ngăn xóa sách/user có phiếu mượn ở DB level. Đây là thiết kế có chủ đích. |
-| **"PHP/Yii2 migration"** (Slide 1, 10 File B) | File B | Vi phạm tuyệt đối quy tắc framing — đây là đồ án Python tự thiết kế |
+| **Framing subtitle không đúng** (Slide 1, 10 File B) | File B | Vi phạm tuyệt đối quy tắc framing — đây là đồ án Python tự thiết kế |
 | **Tech stack thiếu** (Slide 4 File A) | File A | HTMX, TailwindCSS, Alpine.js, Chart.js — 4 công nghệ frontend quan trọng bị bỏ qua |
 | **"Borrow online" cho Reader** (Slide 10 File B) | File B | Không chính xác — Reader không tự mượn online, phải qua Thủ thư |
 
@@ -190,7 +190,6 @@
 - **Database:** SQLite · SQLAlchemy 2.x async ORM · Alembic (migration)
 - **Frontend:** Jinja2 SSR · HTMX (live search, không reload) · Alpine.js · TailwindCSS · Chart.js
 - **Security:** PyJWT · bcrypt · Pydantic v2
-- **Quality:** pytest · pytest-asyncio · httpx · Ruff
 
 **Visual đề xuất:** Grid 4 tầng (hộp màu): Backend / Frontend / Security / Quality. Mỗi tầng liệt kê logo/tên công nghệ.
 
@@ -323,7 +322,7 @@
 **Mục tiêu:** Tổng kết kết quả, thừa nhận hạn chế tự tin, định hướng tương lai
 
 **Key bullets:**
-- **Đã đạt:** REST API + Web UI dual interface · Layered Architecture · RBAC 3 cấp · Phí phạt tự động · Swagger UI · 17 integration tests
+- **Đã đạt:** REST API + Web UI dual interface · Layered Architecture · RBAC 3 cấp · Phí phạt tự động tại thời điểm trả sách · Swagger UI
 - **Hạn chế thực tế:** SQLite (single-writer) · Sync Overdue thủ công · Không có email notification · Không có export báo cáo
 - **Cải tiến gần:** Thêm APScheduler cho auto sync · Rate limiting (slowapi) · Async file upload
 - **Tương lai:** PostgreSQL · Email notification · Docker + CI/CD · Export PDF/Excel · Book reservation
@@ -359,8 +358,8 @@
 
 | Vị trí | Nội dung cần xóa | Lý do |
 |---|---|---|
-| File B Slide 1 | "Migration from PHP/Yii2 to modern Python async" | Vi phạm tuyệt đối quy tắc framing đồ án |
-| File B Slide 10 | "Successfully migrated from PHP/Yii2 to Python async" | Vi phạm tuyệt đối quy tắc framing đồ án |
+| File B Slide 1 | Subtitle không phù hợp với định vị đồ án Python tự thiết kế | Vi phạm tuyệt đối quy tắc framing đồ án |
+| File B Slide 10 | Achievement bullet đầu không phù hợp với định vị đồ án Python tự thiết kế | Vi phạm tuyệt đối quy tắc framing đồ án |
 | File A Slide 6 | Toàn bộ khung MVC | Không đúng với kiến trúc thực tế của hệ thống |
 | File A Slide 13 | Mục "No Soft Delete" trong hạn chế | Sai thực tế — hệ thống đã có RESTRICT FK bảo vệ |
 | File A Slide 9 | 10 bước internal implementation | Quá kỹ thuật, không phù hợp bảo vệ |

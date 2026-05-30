@@ -87,7 +87,6 @@
 | PyJWT + bcrypt | latest | Authentication — JWT token + password hashing |
 | Jinja2 | 3.x | Template engine — server-side HTML rendering |
 | Alembic | 1.x | Database migration — schema version management |
-| pytest + httpx | latest | Testing — unit & integration tests (async) |
 
 ---
 
@@ -413,7 +412,7 @@ POST /auth/login → validate credentials
   - Book catalog management, borrow/return workflow, reader accounts
   - Role-based access control: Reader → Librarian → Admin
   - Full-stack solution: REST API + Web UI (Server-rendered)
-  - Migration from PHP/Yii2 to modern Python async
+  - Built from the ground up with Python — async, layered architecture
 - Team:
   - Lê Thị Thanh Loan — 24210228
   - Trần Hưng Khoa — 24210220
@@ -451,9 +450,8 @@ POST /auth/login → validate credentials
 | **Backend** | Python 3.12+, FastAPI, Uvicorn, SQLAlchemy 2.x, SQLite + aiosqlite |
 | **Frontend** | Jinja2, HTMX 1.9, TailwindCSS, Alpine.js 3.x, Chart.js 4 |
 | **Security** | PyJWT + bcrypt, Pydantic v2, Alembic |
-| **Quality** | pytest + pytest-asyncio + httpx, Ruff |
 
-> Note: Draft stack adds **HTMX 1.9**, **TailwindCSS**, **Alpine.js**, **Chart.js**, and **Ruff** — not listed in the final slides.
+> Note: Draft stack adds **HTMX 1.9**, **TailwindCSS**, **Alpine.js**, **Chart.js** — not listed in the final slides.
 
 ---
 
@@ -607,7 +605,7 @@ Services → Repositories → ORM → SQLite
 **Content:**
 
 **Achievements (✓):**
-- Successfully migrated from PHP/Yii2 to Python async
+- Full-stack Python system built from the ground up with layered architecture
 - Complete RBAC with a clear permission matrix
 - Automated late fee calculation in borrow/return workflow
 - Full REST API with Swagger/OpenAPI documentation

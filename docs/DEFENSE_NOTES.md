@@ -76,21 +76,6 @@ Chỉ có chức năng đổi mật khẩu khi biết mật khẩu cũ (`change_
 
 ---
 
-### 1.3 Phạm vi test
-
-Có **17 test case** trải qua 3 file:
-- `test_auth.py` — 7 tests: đăng ký, đăng nhập, JWT, phân quyền
-- `test_books.py` — 6 tests: CRUD sách, phân quyền admin
-- `test_borrowings.py` — 4 tests: issue/return, unavailable, RBAC reader, max renewals
-
-**Chưa có test cho:**
-- Web UI routes (chỉ test REST API)
-- Review service
-- Dashboard aggregation
-- Edge cases của phí phạt (fine calculation)
-- Sync overdue batch
-- File upload
-
 ---
 
 ## 2. Potential Improvements
@@ -106,7 +91,6 @@ Các cải tiến có thể thực hiện trong phạm vi đồ án hoặc giai 
 | **APScheduler cho sync overdue** | Thêm `apscheduler` vào lifespan, chạy `sync_overdue_statuses()` mỗi giờ tự động | Thấp |
 | **Rate limiting** | Thêm `slowapi` cho các endpoint auth để giới hạn request | Thấp |
 | **File upload MIME validation** | Dùng `python-magic` để validate MIME type thực thay vì chỉ dựa extension | Thấp |
-| **Mở rộng test coverage** | Thêm test cho review, dashboard, file upload, fine calculation edge cases | Trung bình |
 
 ### 2.2 Tính năng trung hạn
 
@@ -160,7 +144,6 @@ Các điểm nên trình bày ngắn gọn hoặc không chủ động đề c�
 | **Thiếu rate limiting** | Đây là concern của production deployment, không phải đồ án học thuật |
 | **SQLite concurrency limit** | Hệ thống hoạt động hoàn toàn đúng trong bối cảnh thư viện quy mô nhỏ/vừa |
 | **Token không revoke ngay lập tức** | Đây là tradeoff thiết kế JWT stateless được chấp nhận rộng rãi, không phải lỗi |
-| **Test coverage chưa 100%** | 17 test case cover các happy path và business-critical paths — đủ cho đồ án |
 
 ### 4.2 Nếu bị hỏi — trả lời tự tin
 
@@ -172,9 +155,6 @@ Các điểm nên trình bày ngắn gọn hoặc không chủ động đề c�
 
 **Q: "Sách quá hạn có tự động cập nhật không?"**
 > Hiện tại Admin kích hoạt thủ công hoặc gọi API endpoint. Hệ thống đã thiết kế sẵn `sync_overdue_statuses()` — bước tiếp theo là thêm APScheduler để chạy định kỳ tự động, code đã sẵn sàng.
-
-**Q: "Không có test cho Web UI?"**
-> Integration tests cover toàn bộ REST API endpoints qua httpx. Web UI routes dùng cùng Service layer đã được test — không bị duplicate logic. Test UI end-to-end (Selenium/Playwright) là bước cải tiến tiếp theo.
 
 **Q: "Tại sao không có email thông báo?"**
 > Email notification đòi hỏi SMTP server, xử lý async queue — vượt phạm vi đồ án. Kiến trúc hiện tại (Service layer tách biệt) cho phép thêm email service mà không ảnh hưởng business logic hiện có.

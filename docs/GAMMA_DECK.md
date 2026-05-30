@@ -28,7 +28,7 @@ Màu nền: pastel blue nhạt. Tiêu đề Montserrat Bold 40px.
 **Mục Tiêu Hệ Thống**
 
 * Số hoá lưu thông sách — phiếu mượn & tồn kho cập nhật **real-time**
-* Tự động tính phí phạt — `ngày quá hạn × 5.000 VND`, không cần tính tay
+* Tính phí phạt tại thời điểm trả sách — `ngày quá hạn × 5.000 VND`, không cần tính tay
 * Cung cấp **REST API** đầy đủ kèm Swagger UI tự động
 * Dashboard thống kê — KPI · biểu đồ theo tháng · top sách/reader
 * Phân quyền 3 cấp rõ ràng — **Reader ⊂ Librarian ⊂ Admin**
@@ -63,7 +63,7 @@ Không cần logo — text pill đủ rõ ràng cho slide bảo vệ.
 * 1 server **FastAPI** phục vụ cả Web UI (SSR) và REST API (JSON)
 * **Layered Architecture** 4 tầng: Presentation → Service → Repository → Data
 * **Dual Auth:** httponly Cookie (Web UI) · Bearer Token (REST API)
-* RBAC enforce tại **Dependency layer** — không thể bypass
+* RBAC enforce tại **Dependency layer** — toàn bộ endpoint hiện tại đều được kiểm soát tập trung
 
 Visual Suggestion:
 Sơ đồ dọc, từ trên xuống:
@@ -167,7 +167,7 @@ Viền bo góc pastel blue, caption nhỏ dưới mỗi ô.
 
 **Tổng Kết Đề Tài**
 
-* **Đạt được:** REST API + Web UI dual · Layered Architecture · RBAC 3 cấp · phí phạt tự động · Swagger UI · 17 integration tests
+* **Đạt được:** REST API + Web UI dual · Layered Architecture · RBAC 3 cấp · phí phạt tự động tại thời điểm trả sách · Swagger UI
 * **Hạn chế:** SQLite (single-writer) · Sync Overdue thủ công · chưa có email notification · chưa có export báo cáo
 * **Cải tiến gần:** APScheduler (auto sync) · rate limiting · async file upload
 * **Tương lai:** PostgreSQL · email notification · Docker + CI/CD · export PDF/Excel

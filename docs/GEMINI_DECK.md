@@ -11,7 +11,7 @@
 
 * Thư viện truyền thống: ghi sổ tay → sai sót, mất thông tin, không có báo cáo
 * Giải pháp: **Số hoá toàn bộ** quy trình mượn · trả · gia hạn · phạt · thống kê
-* Nâng cấp từ hệ thống cũ (PHP) lên nền tảng Python hiện đại
+* Xây dựng từ đầu bằng Python — kiến trúc phân tầng, bất đồng bộ, sẵn sàng mở rộng
 * Một hệ thống — hai đầu ra: **Giao diện Web** cho nhân viên + **REST API** cho tích hợp
 * Nhóm: Lê Thị Thanh Loan (24210228) · Trần Hưng Khoa (24210220)
 
@@ -39,7 +39,7 @@ Bảng 2 cột màu pastel: *Mục tiêu* | *Giải pháp trong hệ thống* �
 * **Database:** SQLite · SQLAlchemy ORM · Alembic — quản lý schema có kiểm soát
 * **Frontend:** Jinja2 SSR · HTMX · Alpine.js · TailwindCSS · Chart.js
 * **Bảo mật:** JWT Token · Bcrypt · Pydantic v2 validation
-* **Kiểm thử:** pytest · httpx — 18 test cases (auth · sách · phiếu mượn)
+* **Kiểm thử:** pytest · pytest-asyncio · httpx · Ruff
 
 **Visual Suggestion:**
 Layer diagram 4 tầng dọc — mỗi tầng một màu pastel khác nhau (xanh dương · xanh lá · cam nhạt · tím nhạt). Tên công nghệ kèm logo nhỏ. Mũi tên luồng từ trên xuống.
@@ -133,7 +133,7 @@ Screenshot grid 2×3: (1) Admin Dashboard + Chart.js · (2) Form cấp phát liv
 
 ## Slide 10 — Kết luận & Hướng phát triển
 
-* **Đã hoàn thành:** Web App + REST API · RBAC 3 cấp · Quy trình lưu thông đầy đủ · Dashboard · 18 test cases
+* **Đã hoàn thành:** Web App + REST API · RBAC 3 cấp · Quy trình lưu thông đầy đủ · Dashboard · Swagger UI tự động
 * **Hạn chế thực tế:** Cơ sở dữ liệu phù hợp quy mô nhỏ · Đồng bộ quá hạn thủ công · Chưa có thông báo email
 * **Ngắn hạn:** Nâng cấp database production · Tự động đồng bộ theo lịch · Giới hạn tần suất API
 * **Trung hạn:** Hệ thống đặt giữ sách · Độc giả tự đặt yêu cầu mượn · Thông báo email
