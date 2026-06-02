@@ -10,6 +10,7 @@ from app.models.review import Review
 from app.models.user import User, UserRole, UserStatus
 from app.schemas.dashboard import (
     ActiveReader,
+    BookInventoryItem,
     DashboardStats,
     MonthlyBorrowingStat,
     PopularBook,
@@ -21,65 +22,106 @@ class DashboardService:
         self._db = db
 
     async def get_stats(self) -> DashboardStats:
-        """Aggregate KPIs for the admin dashboard."""
-        total_books = (
-            await self._db.execute(select(func.count(Book.id)))
-        ).scalar_one()
+        """Aggregate KPIs for the admin dashboard — 3 focused queries instead of 8."""
+        from sqlalchemy import case
 
-        total_users = (
-            await self._db.execute(
-                select(func.count(User.id)).where(User.role == UserRole.READER)
+        # Query 1: Book inventory
+        book_result = await self._db.execute(
+            select(
+                func.count(Book.id).label("total_books"),
+                func.coalesce(func.sum(Book.quantity), 0).label("total_quantity"),
             )
-        ).scalar_one()
+        )
+        book_row = book_result.one()
 
-        total_borrowings = (
-            await self._db.execute(select(func.count(Borrowing.id)))
-        ).scalar_one()
+        # Query 2: User count
+        user_result = await self._db.execute(
+            select(func.count(User.id)).where(User.role == UserRole.READER)
+        )
+        total_users = user_result.scalar_one()
 
-        active_borrowings = (
-            await self._db.execute(
-                select(func.count(Borrowing.id)).where(
-                    Borrowing.status.in_(
-                        [BorrowingStatus.BORROWED, BorrowingStatus.OVERDUE]
+        # Query 3: All borrowing KPIs in one pass
+        borrow_result = await self._db.execute(
+            select(
+                func.count(Borrowing.id).label("total_borrowings"),
+                func.sum(
+                    case(
+                        (
+                            Borrowing.status.in_(
+                                [BorrowingStatus.BORROWED, BorrowingStatus.OVERDUE]
+                            ),
+                            1,
+                        ),
+                        else_=0,
                     )
-                )
+                ).label("active_borrowings"),
+                func.sum(
+                    case(
+                        (Borrowing.status == BorrowingStatus.OVERDUE, 1),
+                        else_=0,
+                    )
+                ).label("overdue_borrowings"),
+                func.coalesce(
+                    func.sum(
+                        case(
+                            (Borrowing.fine_paid == True, Borrowing.fine_amount),  # noqa: E712
+                            else_=0,
+                        )
+                    ),
+                    0,
+                ).label("fine_collected"),
+                func.coalesce(
+                    func.sum(
+                        case(
+                            (
+                                (Borrowing.fine_paid == False)  # noqa: E712
+                                & (Borrowing.fine_amount > 0),
+                                Borrowing.fine_amount,
+                            ),
+                            else_=0,
+                        )
+                    ),
+                    0,
+                ).label("fine_outstanding"),
             )
-        ).scalar_one()
-
-        overdue_borrowings = (
-            await self._db.execute(
-                select(func.count(Borrowing.id)).where(
-                    Borrowing.status == BorrowingStatus.OVERDUE
-                )
-            )
-        ).scalar_one()
-
-        fine_collected = (
-            await self._db.execute(
-                select(func.coalesce(func.sum(Borrowing.fine_amount), 0)).where(
-                    Borrowing.fine_paid == True  # noqa: E712
-                )
-            )
-        ).scalar_one()
-
-        fine_outstanding = (
-            await self._db.execute(
-                select(func.coalesce(func.sum(Borrowing.fine_amount), 0)).where(
-                    Borrowing.fine_paid == False,  # noqa: E712
-                    Borrowing.fine_amount > 0,
-                )
-            )
-        ).scalar_one()
+        )
+        borrow_row = borrow_result.one()
 
         return DashboardStats(
-            total_books=total_books,
-            total_users=total_users,
-            total_borrowings=total_borrowings,
-            active_borrowings=active_borrowings,
-            overdue_borrowings=overdue_borrowings,
-            total_fine_collected=float(fine_collected),
-            total_fine_outstanding=float(fine_outstanding),
+            total_books=book_row.total_books or 0,
+            total_quantity=int(book_row.total_quantity or 0),
+            total_users=total_users or 0,
+            total_borrowings=borrow_row.total_borrowings or 0,
+            active_borrowings=borrow_row.active_borrowings or 0,
+            overdue_borrowings=borrow_row.overdue_borrowings or 0,
+            total_fine_collected=float(borrow_row.fine_collected or 0),
+            total_fine_outstanding=float(borrow_row.fine_outstanding or 0),
         )
+
+    async def get_book_inventory(self) -> list[BookInventoryItem]:
+        """All books with their total and available quantity, low-stock first."""
+        rows = (
+            await self._db.execute(
+                select(
+                    Book.id,
+                    Book.title,
+                    Book.author,
+                    Book.quantity,
+                    Book.available_quantity,
+                )
+                .order_by(Book.available_quantity.asc(), Book.title.asc())
+            )
+        ).all()
+        return [
+            BookInventoryItem(
+                id=row.id,
+                title=row.title,
+                author=row.author,
+                quantity=row.quantity,
+                available_quantity=row.available_quantity,
+            )
+            for row in rows
+        ]
 
     async def get_popular_books(self, limit: int = 10) -> list[PopularBook]:
         """Top N books by borrow count."""

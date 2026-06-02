@@ -37,7 +37,7 @@ async def profile_update(
             UserUpdate(full_name=full_name, phone=phone or None, address=address or None),
         )
         resp = RedirectResponse(url="/reader/profile", status_code=302)
-        set_flash(resp, "Profile updated.", "success")
+        set_flash(resp, "Cập nhật hồ sơ thành công.", "success")
         return resp
     except Exception as exc:
         return render(
@@ -71,7 +71,7 @@ async def change_password_submit(
             ChangePasswordRequest(old_password=old_password, new_password=new_password),
         )
         resp = RedirectResponse(url="/reader/profile", status_code=302)
-        set_flash(resp, "Password changed successfully.", "success")
+        set_flash(resp, "Đổi mật khẩu thành công.", "success")
         return resp
     except Exception as exc:
         return render(

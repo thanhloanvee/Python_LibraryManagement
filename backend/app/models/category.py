@@ -1,7 +1,9 @@
 """Category ORM model."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
+
+from app.db.base import ICT
 
 from sqlalchemy import DateTime, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -20,7 +22,7 @@ class Category(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(ICT),
         server_default=func.now(),
         nullable=False,
     )

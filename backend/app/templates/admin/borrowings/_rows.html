@@ -23,14 +23,15 @@
       {% elif b.status.value == 'borrowed' %}bg-amber-100 text-amber-700
       {% elif b.status.value == 'returned' %}bg-green-100 text-green-700
       {% else %}bg-gray-100 text-gray-700{% endif %}">
-      {{ b.status.value }}
+      {% set _status_vi = {'borrowed': 'Đang mượn', 'returned': 'Đã trả', 'overdue': 'Quá hạn'} %}
+      {{ _status_vi.get(b.status.value, b.status.value) }}
     </span>
   </td>
   <td class="px-4 py-3">
     {% if b.fine_amount and b.fine_amount > 0 %}
     <span class="text-red-600 font-medium">{{ "{:,.0f}".format(b.fine_amount) }}đ</span>
     {% if b.fine_paid %}
-    <span class="ml-1 text-xs text-green-600 font-medium">PAID</span>
+    <span class="ml-1 text-xs text-green-600 font-medium">ĐÃ THANH TOÁN</span>
     {% endif %}
     {% else %}
     <span class="text-gray-300">—</span>
@@ -40,12 +41,12 @@
     <div class="flex items-center justify-end gap-2">
       <a href="/admin/borrowings/{{ b.id }}"
         class="rounded-md px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
-        View
+        Xem
       </a>
       {% if b.status.value in ('borrowed', 'overdue') %}
       <a href="/admin/borrowings/{{ b.id }}/return"
         class="rounded-md px-2 py-1 text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 transition-colors">
-        Return
+        Trả sách
       </a>
       {% endif %}
     </div>
@@ -53,6 +54,6 @@
 </tr>
 {% else %}
 <tr>
-  <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-400">No borrowings found.</td>
+  <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-400">Không tìm thấy phiếu mượn.</td>
 </tr>
 {% endfor %}

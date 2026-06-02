@@ -147,12 +147,12 @@ async def issue_submit(
         payload = BorrowingCreate(
             user_id=user_id,
             book_id=book_id,
-            due_date=datetime.datetime.combine(due, datetime.time.min),
+            due_date=due,
             librarian_notes=librarian_notes or None,
         )
         borrowing = await BorrowingService(db).issue_book(payload)
         resp = RedirectResponse(url="/admin/borrowings", status_code=302)
-        set_flash(resp, f"Book issued — borrowing #{borrowing.id}.", "success")
+        set_flash(resp, f"Đã cấp phát sách — phiếu mượn #{borrowing.id}.", "success")
         return resp
     except Exception as exc:
         due_default = (
@@ -213,7 +213,7 @@ async def return_submit(
         resp = RedirectResponse(url="/admin/borrowings", status_code=302)
         set_flash(
             resp,
-            f"Book returned — fine: {borrowing.fine_amount:,.0f} VND.",
+            f"Đã trả sách — tiền phạt là: {borrowing.fine_amount:,.0f}đ.",
             "success",
         )
         return resp
@@ -235,8 +235,7 @@ async def mark_fine_paid(
     db: AsyncSession = Depends(get_db),
     _=Depends(require_librarian),
 ):
-    from app.schemas.borrowing import MarkFinePaidRequest
-    await BorrowingService(db).mark_fine_paid(borrowing_id, MarkFinePaidRequest())
+    await BorrowingService(db).mark_fine_paid(borrowing_id)
     resp = RedirectResponse(url=f"/admin/borrowings/{borrowing_id}", status_code=302)
-    set_flash(resp, "Fine marked as paid.", "success")
+    set_flash(resp, "Đã đánh dấu tiền phạt là đã thanh toán.", "success")
     return resp

@@ -5,14 +5,14 @@
 
 <div class="flex items-center justify-between px-1 py-3">
   <p class="text-sm text-gray-600">
-    Showing <span class="font-medium">{{ (page - 1) * page_size + 1 }}</span>–<span class="font-medium">{{ [page * page_size, total] | min }}</span>
-    of <span class="font-medium">{{ total }}</span> results
+    Hiển thị <span class="font-medium">{{ (page - 1) * page_size + 1 }}</span>–<span class="font-medium">{{ [page * page_size, total] | min }}</span>
+    trên <span class="font-medium">{{ total }}</span> kết quả
   </p>
 
   <div class="flex items-center gap-1">
     {# ── First page ── #}
     {% if page > 1 %}
-    <a href="?{{ current_query }}&page=1" title="First page"
+    <a href="?{{ current_query }}&page=1" title="Trang đầu"
       class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M18 19l-7-7 7-7" />
@@ -69,7 +69,7 @@
 
     {# ── Last page ── #}
     {% if page < total_pages %}
-    <a href="?{{ current_query }}&page={{ total_pages }}" title="Last page"
+    <a href="?{{ current_query }}&page={{ total_pages }}" title="Trang cuối"
       class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M6 5l7 7-7 7" />

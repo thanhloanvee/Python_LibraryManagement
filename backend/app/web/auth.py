@@ -101,7 +101,7 @@ async def register_submit(
             )
         )
         resp = RedirectResponse(url="/login", status_code=302)
-        set_flash(resp, "Registration successful! Please log in.", "success")
+        set_flash(resp, "Đăng ký thành công! Vui lòng đăng nhập.", "success")
         return resp
     except Exception as exc:
         errors["general"] = str(exc.detail if hasattr(exc, "detail") else exc)

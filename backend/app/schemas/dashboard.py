@@ -8,6 +8,7 @@ class DashboardStats(BaseModel):
     """Top-level KPIs shown on the admin dashboard."""
 
     total_books: int
+    total_quantity: int
     total_users: int
     total_borrowings: int
     active_borrowings: int
@@ -41,3 +42,13 @@ class ActiveReader(BaseModel):
     username: str
     full_name: str
     borrow_count: int
+
+
+class BookInventoryItem(BaseModel):
+    """A book with its quantity info for the inventory table."""
+
+    id: int
+    title: str
+    author: str
+    quantity: int
+    available_quantity: int

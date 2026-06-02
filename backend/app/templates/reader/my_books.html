@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}My Books{% endblock %}
+{% block title %}Sách đang mượn{% endblock %}
 
 {% block breadcrumb %}
-<h1 class="text-lg font-semibold text-gray-800">My Current Books</h1>
+<h1 class="text-lg font-semibold text-gray-800">Sách đang mượn</h1>
 {% endblock %}
 
 {% block content %}
@@ -14,11 +14,11 @@
       <table class="min-w-full divide-y divide-gray-100 text-sm">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Book</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Borrowed</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Due Date</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Renewals</th>
-            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Sách</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Ngày mượn</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Hạn trả</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Số lần gia hạn</th>
+            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Thao tác</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-50">
@@ -28,7 +28,7 @@
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
                 {% if b.book and b.book.cover_image %}
-                <img src="{{ b.book.cover_image }}" alt="" class="h-10 w-8 rounded object-cover shrink-0" />
+                <img src="/{{ b.book.cover_image }}" alt="" class="h-10 w-8 rounded object-cover shrink-0" />
                 {% endif %}
                 <div class="min-w-0">
                   <a href="/books/{{ b.book_id }}" class="font-medium text-gray-900 hover:text-brand-600 line-clamp-1">
@@ -44,9 +44,9 @@
                 {{ b.due_date.strftime('%d/%m/%Y') if b.due_date else '—' }}
               </span>
               {% if overdue %}
-              <span class="block text-xs text-red-500">{{ b.days_overdue }} day{{ 's' if b.days_overdue != 1 else '' }} overdue</span>
+              <span class="block text-xs text-red-500">{{ b.days_overdue }} ngày quá hạn</span>
               {% elif b.days_until_due is not none and b.days_until_due <= 3 %}
-              <span class="block text-xs text-amber-500">{{ b.days_until_due }} day{{ 's' if b.days_until_due != 1 else '' }} left</span>
+              <span class="block text-xs text-amber-500">{{ b.days_until_due }} ngày còn lại</span>
               {% endif %}
             </td>
             <td class="px-4 py-3 text-gray-600">
@@ -58,11 +58,11 @@
                 <form method="post" action="/reader/borrowings/{{ b.id }}/renew">
                   <button type="submit"
                     class="rounded-md px-2 py-1 text-xs font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors">
-                    Renew
+                    Gia hạn
                   </button>
                 </form>
                 {% elif b.renewed_count >= 2 %}
-                <span class="text-xs text-gray-400 italic">Max renewals</span>
+                <span class="text-xs text-gray-400 italic">Đã đạt tối đa số lần gia hạn</span>
                 {% endif %}
               </div>
             </td>
@@ -83,8 +83,8 @@
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
         d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13..." />
     </svg>
-    <p class="font-medium">You don't have any active borrowings.</p>
-    <a href="/books" class="mt-3 inline-block text-sm text-brand-600 hover:text-brand-700 font-medium">Browse Books →</a>
+    <p class="font-medium">Bạn không có sách đang mượn.</p>
+    <a href="/books" class="mt-3 inline-block text-sm text-brand-600 hover:text-brand-700 font-medium">Duyệt sách →</a>
   </div>
   {% endif %}
 
