@@ -84,6 +84,27 @@ class BookService(BaseService):
                     detail="Danh mục không tồn tại.",
                 )
 
+        # Handle quantity/available_quantity changes
+        borrowed_count = book.quantity - book.available_quantity
+
+        if "available_quantity" in update_data and "quantity" not in update_data:
+            # When available_quantity is edited, update total quantity
+            # New total = new available + borrowed copies (still out on loan)
+            new_avail = update_data["available_quantity"]
+            update_data["quantity"] = new_avail + borrowed_count
+        elif "quantity" in update_data and "available_quantity" not in update_data:
+            # When quantity is edited (create), auto-set available_quantity
+            new_qty = update_data["quantity"]
+            qty_diff = new_qty - book.quantity if book.id else 0
+
+            if qty_diff > 0:
+                # If quantity increased, increase available_quantity by the same amount
+                update_data["available_quantity"] = book.available_quantity + qty_diff
+            elif qty_diff < 0:
+                # If quantity decreased, adjust available proportionally
+                new_avail = max(new_qty - borrowed_count, 0)
+                update_data["available_quantity"] = new_avail
+
         # Cross-field validation: available_quantity <= quantity
         new_qty = update_data.get("quantity", book.quantity)
         new_avail = update_data.get("available_quantity", book.available_quantity)

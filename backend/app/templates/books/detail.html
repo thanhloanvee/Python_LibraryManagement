@@ -112,17 +112,6 @@
           <dt class="text-gray-500 font-medium">Ngôn ngữ</dt>
           <dd class="text-gray-900">{{ 'Tiếng Việt' if book.language == 'vi' else 'Tiếng Anh' }}</dd>
         </div>
-        <div>
-          <dt class="text-gray-500 font-medium">Trạng thái</dt>
-          <dd>
-            <span class="capitalize inline-block rounded-full px-2 py-0.5 text-xs font-medium
-              {% if book.status == 'Có sẵn' %}bg-green-100 text-green-700
-              {% elif book.status == 'Hư hỏng' %}bg-amber-100 text-amber-700
-              {% else %}bg-red-100 text-red-700{% endif %}">
-              {{ book.status.value }}
-            </span>
-          </dd>
-        </div>
         {% if avg_rating %}
         <div>
           <dt class="text-gray-500 font-medium">Đánh giá</dt>

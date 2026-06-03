@@ -22,10 +22,11 @@
   <td class="px-4 py-3 text-gray-600">{{ book.category.name if book.category else '—' }}</td>
   <td class="px-4 py-3">
     <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize
-      {% if book.status.value == 'Có sẵn' %}bg-green-100 text-green-700
-      {% elif book.status.value == 'Hư hỏng' %}bg-amber-100 text-amber-700
+      {% if book.display_status == 'Có sẵn' %}bg-green-100 text-green-700
+      {% elif book.display_status == 'Hư hỏng' %}bg-amber-100 text-amber-700
+      {% elif book.display_status == 'Mất' %}bg-red-100 text-red-700
       {% else %}bg-red-100 text-red-700{% endif %}">
-      {{ book.status.value }}
+      {{ book.display_status }}
     </span>
   </td>
   <td class="px-4 py-3 text-right">

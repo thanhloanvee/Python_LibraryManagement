@@ -88,10 +88,15 @@ class Book(Base):
 
     @property
     def is_available(self) -> bool:
-        """True when the book can be lent."""
-        return (
-            self.status == BookStatus.AVAILABLE and self.available_quantity > 0
-        )
+        """True when the book can be lent (has available quantity)."""
+        return self.available_quantity > 0
+
+    @property
+    def display_status(self) -> str:
+        """Display status: shows actual availability or physical condition."""
+        if self.status != BookStatus.AVAILABLE:
+            return self.status.value
+        return "Có sẵn" if self.available_quantity > 0 else "Không có sẵn"
 
     def __repr__(self) -> str:
         return f"<Book id={self.id} title={self.title!r}>"

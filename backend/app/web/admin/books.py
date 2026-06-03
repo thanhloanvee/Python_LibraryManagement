@@ -26,7 +26,7 @@ UPLOAD_DIR = Path(__file__).resolve().parents[2] / "static" / "uploads"
 async def _form_to_book_dict(
     title: str, author: str, isbn: str, publisher: str,
     publication_year: int, language: str, description: str,
-    quantity: int, status: str, category_id: int | None,
+    available_quantity: int, status: str, category_id: int | None,
     cover_file: UploadFile | None,
     existing_cover: str | None = None,
 ) -> dict:
@@ -49,7 +49,7 @@ async def _form_to_book_dict(
         "publication_year": publication_year,
         "language": BookLanguage(language),
         "description": description or None,
-        "quantity": quantity,
+        "available_quantity": available_quantity,
         "status": BookStatus(status),
         "category_id": category_id or None,
         "cover_image": cover_image,
@@ -117,7 +117,7 @@ async def book_create(
     publication_year: int = Form(...),
     language: str = Form(...),
     description: str = Form(default=""),
-    quantity: int = Form(...),
+    available_quantity: int = Form(...),
     status: str = Form(...),
     category_id: int | None = Form(default=None),
     cover_file: UploadFile | None = File(default=None),
@@ -127,9 +127,8 @@ async def book_create(
     try:
         data = await _form_to_book_dict(
             title, author, isbn, publisher, publication_year,
-            language, description, quantity, status, category_id, cover_file,
+            language, description, available_quantity, status, category_id, cover_file,
         )
-        data["available_quantity"] = quantity  # set only on create
         await BookService(db).create_book(BookCreate(**data))
         resp = RedirectResponse(url="/admin/books", status_code=302)
         set_flash(resp, f"Sách '{title}' đã được tạo thành công.", "success")
@@ -182,7 +181,7 @@ async def book_update(
     publication_year: int = Form(...),
     language: str = Form(...),
     description: str = Form(default=""),
-    quantity: int = Form(...),
+    available_quantity: int = Form(...),
     status: str = Form(...),
     category_id: int | None = Form(default=None),
     cover_file: UploadFile | None = File(default=None),
@@ -194,7 +193,7 @@ async def book_update(
         book = await svc.get_or_404(book_id)
         data = await _form_to_book_dict(
             title, author, isbn, publisher, publication_year,
-            language, description, quantity, status, category_id, cover_file,
+            language, description, available_quantity, status, category_id, cover_file,
             existing_cover=book.cover_image,
         )
         await svc.update_book(book_id, BookUpdate(**data))

@@ -31,6 +31,8 @@ class BookRead(BaseModel):
     category: CategoryRead | None
     created_at: datetime
     updated_at: datetime
+    is_available: bool
+    display_status: str
 
 
 class BookSummary(BaseModel):
@@ -44,6 +46,8 @@ class BookSummary(BaseModel):
     cover_image: str | None
     status: BookStatus
     available_quantity: int
+    is_available: bool
+    display_status: str
 
 
 class BookCreate(BaseModel):
@@ -55,17 +59,22 @@ class BookCreate(BaseModel):
     language: BookLanguage = BookLanguage.VIETNAMESE
     description: Optional[str] = None
     cover_image: Optional[str] = Field(default=None, max_length=255)
-    quantity: int = Field(default=1, ge=0)
+    quantity: Optional[int] = Field(default=None, ge=0)
     available_quantity: int = Field(default=1, ge=0)
     status: BookStatus = BookStatus.AVAILABLE
     category_id: Optional[int] = None
 
     @model_validator(mode="after")
-    def available_cannot_exceed_total(self) -> "BookCreate":
+    def set_quantity_from_available(self) -> "BookCreate":
+        # If quantity not provided, use available_quantity (new books start fully available)
+        if self.quantity is None:
+            self.quantity = self.available_quantity
         if self.available_quantity > self.quantity:
             raise ValueError(
-                "available_quantity cannot exceed total quantity"
+                "Số lượng khả dụng không được vượt quá tổng số lượng"
             )
+        # When creating, always force status to AVAILABLE
+        self.status = BookStatus.AVAILABLE
         return self
 
 
@@ -84,14 +93,14 @@ class BookUpdate(BaseModel):
     category_id: Optional[int] = None
 
     @model_validator(mode="after")
-    def available_cannot_exceed_total(self) -> "BookUpdate":
+    def validate_quantities(self) -> "BookUpdate":
         if (
             self.available_quantity is not None
             and self.quantity is not None
             and self.available_quantity > self.quantity
         ):
             raise ValueError(
-                "available_quantity cannot exceed total quantity"
+                "Số lượng khả dụng không được vượt quá tổng số lượng"
             )
         return self
 
