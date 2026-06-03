@@ -1,6 +1,7 @@
 """Book service — business logic for book management."""
 from __future__ import annotations
 
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.book import Book
