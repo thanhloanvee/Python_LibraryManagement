@@ -6,7 +6,8 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.models.user import UserRole, UserStatus
+from app.models.user import User, UserRole, UserStatus
+from app.repositories.borrowing import BorrowingRepository
 from app.schemas.user import UserAdminUpdate, UserCreate
 from app.services.user import UserService
 from app.web.dependencies import require_admin
@@ -69,7 +70,7 @@ async def user_detail(
 async def toggle_user_status(
     user_id: int,
     db: AsyncSession = Depends(get_db),
-    _=Depends(require_admin),
+    current_user: User = Depends(require_admin),
 ):
     """Activate or deactivate a user account."""
     svc = UserService(db)
@@ -77,6 +78,26 @@ async def toggle_user_status(
     new_status = (
         UserStatus.INACTIVE if user.status == UserStatus.ACTIVE else UserStatus.ACTIVE
     )
+
+    # Check if trying to deactivate self
+    if new_status == UserStatus.INACTIVE and user_id == current_user.id:
+        resp = RedirectResponse(url="/admin/users", status_code=302)
+        set_flash(resp, "Không thể vô hiệu hóa tài khoản của chính mình.", "error")
+        return resp
+
+    # Check if deactivating and user has active borrowings
+    if new_status == UserStatus.INACTIVE:
+        borrow_repo = BorrowingRepository(db)
+        active_count = await borrow_repo.count_active_for_user(user_id)
+        if active_count > 0:
+            resp = RedirectResponse(url="/admin/users", status_code=302)
+            set_flash(
+                resp,
+                f"Không thể vô hiệu hóa tài khoản '{user.username}' vì có {active_count} phiếu mượn chưa hoàn thành.",
+                "error",
+            )
+            return resp
+
     await svc.admin_update_user(user_id, UserAdminUpdate(status=new_status))
     resp = RedirectResponse(url="/admin/users", status_code=302)
     label = "đã kích hoạt" if new_status == UserStatus.ACTIVE else "đã vô hiệu hóa"
