@@ -1,6 +1,7 @@
 """Review service."""
 from __future__ import annotations
 
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.review import Review, ReviewStatus
