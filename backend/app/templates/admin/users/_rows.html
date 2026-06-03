@@ -2,7 +2,7 @@
 {% for user in users %}
 <tr class="hover:bg-gray-50 transition-colors">
   <td class="px-4 py-3">
-    <div class="flex items-center gap-2">
+    <a href="/admin/users/{{ user.id }}" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
       <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700 uppercase shrink-0">
         {{ user.full_name[:2] }}
       </span>
@@ -10,7 +10,7 @@
         <p class="font-medium text-gray-900">{{ user.full_name }}</p>
         <p class="text-xs text-gray-400">@{{ user.username }}</p>
       </div>
-    </div>
+    </a>
   </td>
   <td class="px-4 py-3 text-gray-600">{{ user.email }}</td>
   <td class="px-4 py-3">
@@ -31,11 +31,7 @@
   </td>
   <td class="px-4 py-3 text-gray-400 text-xs">{{ user.created_at.strftime('%d/%m/%Y') }}</td>
   <td class="px-4 py-3">
-    <div class="flex items-center justify-end gap-2">
-      <a href="/admin/users/{{ user.id }}"
-        class="rounded-md px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors">
-        Xem chi tiết
-      </a>
+    <div class="flex items-center justify-end">
       <form method="post" action="/admin/users/{{ user.id }}/toggle-status" class="inline">
         <button type="submit"
           class="rounded-md px-2 py-1 text-xs font-medium transition-colors

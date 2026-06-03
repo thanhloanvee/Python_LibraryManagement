@@ -2,7 +2,9 @@
 {% for b in borrowings %}
 {% set overdue = b.effective_status.value == 'overdue' %}
 <tr class="hover:bg-gray-50 transition-colors {% if overdue %}bg-red-50/50{% endif %}">
-  <td class="px-4 py-3 font-mono text-gray-400 text-xs">#{{ b.id }}</td>
+  <td class="px-4 py-3">
+    <a href="/admin/borrowings/{{ b.id }}" class="font-mono text-blue-600 hover:text-blue-800 hover:underline text-xs">#{{ b.id }}</a>
+  </td>
   <td class="px-4 py-3">
     <p class="font-medium text-gray-900">{{ b.user.full_name if b.user else '—' }}</p>
     <p class="text-xs text-gray-400">{{ b.user.username if b.user else '' }}</p>
@@ -44,11 +46,7 @@
     {% endif %}
   </td>
   <td class="px-4 py-3">
-    <div class="flex items-center justify-end gap-2">
-      <a href="/admin/borrowings/{{ b.id }}"
-        class="rounded-md px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
-        Xem
-      </a>
+    <div class="flex items-center justify-end">
       {% if b.status.value in ('borrowed', 'overdue') %}
       <a href="/admin/borrowings/{{ b.id }}/return"
         class="rounded-md px-2 py-1 text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 transition-colors">
