@@ -26,7 +26,7 @@ async def borrowings_index(
     book_id: int | None = None,
     status: str | None = None,
     overdue_only: bool = False,
-    sort_by: str = "created_at",
+    sort_by: str = "due_date",
     sort_order: str = "desc",
     page: int = 1,
     db: AsyncSession = Depends(get_db),
