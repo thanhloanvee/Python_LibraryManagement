@@ -3,7 +3,11 @@
 
 {% block breadcrumb %}
 <nav class="flex items-center gap-2 text-sm text-gray-500">
+  {% if current_user.role == 'admin' %}
   <a href="/admin/dashboard" class="hover:text-gray-700">Quản trị</a>
+  {% else %}
+  <a href="/" class="hover:text-gray-700">Trang chủ</a>
+  {% endif %}
   <span>/</span>
   <span class="text-gray-900 font-medium">Phiếu mượn</span>
 </nav>

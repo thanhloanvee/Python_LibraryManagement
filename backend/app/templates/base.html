@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Thư viện{% endblock %} — LMS</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'/></svg>" />
 
   <!-- TailwindCSS (CDN Play — JIT in browser) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -68,8 +69,8 @@
 
       {% if current_user %}
 
-        <!-- Reader section -->
-        {% if current_user.role in ['reader', 'librarian', 'admin'] %}
+        <!-- Reader section (only for readers) -->
+        {% if current_user.role == 'reader' %}
         <div class="pt-3">
           <p class="px-3 text-xs font-semibold uppercase tracking-wider text-brand-400">Thư viện của tôi</p>
           <div class="mt-1 space-y-1">
@@ -95,8 +96,8 @@
         </div>
         {% endif %}
 
-        <!-- Librarian / Admin section -->
-        {% if current_user.role in ['librarian', 'admin'] %}
+        <!-- Librarian section (only for librarians) -->
+        {% if current_user.role == 'librarian' %}
         <div class="pt-3">
           <p class="px-3 text-xs font-semibold uppercase tracking-wider text-brand-400">Thủ thư</p>
           <div class="mt-1 space-y-1">
@@ -162,6 +163,24 @@
                   d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
               Người dùng
+            </a>
+            <a href="/admin/borrowings"
+              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+                {% if request.url.path.startswith('/admin/borrowings') and request.url.path != '/admin/borrowings/issue' %}bg-brand-700 text-white{% endif %}">
+              <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+              Phiếu mượn
+            </a>
+            <a href="/admin/borrowings/issue"
+              class="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-100 hover:bg-brand-800 hover:text-white transition-colors
+                {% if request.url.path == '/admin/borrowings/issue' %}bg-brand-700 text-white{% endif %}">
+              <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Cấp phát sách
             </a>
           </div>
         </div>
