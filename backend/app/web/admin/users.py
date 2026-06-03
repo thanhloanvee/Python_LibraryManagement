@@ -53,6 +53,18 @@ async def users_index(
     return render("admin/users/index.html", ctx, request)
 
 
+@router.get("/admin/users/{user_id}")
+async def user_detail(
+    user_id: int,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    _=Depends(require_admin),
+):
+    """View user detail."""
+    user = await UserService(db).get_or_404(user_id)
+    return render("admin/users/detail.html", {"user": user}, request)
+
+
 @router.post("/admin/users/{user_id}/toggle-status")
 async def toggle_user_status(
     user_id: int,

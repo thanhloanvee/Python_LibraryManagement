@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ user.full_name }}{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-2 text-sm text-gray-500">
+  <a href="/admin/users" class="hover:text-gray-700">Người dùng</a>
+  <span>/</span>
+  <span class="text-gray-900 font-medium">{{ user.full_name }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 sm:p-8">
+    <div class="flex items-center gap-3 mb-6">
+      <a href="/admin/users" class="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white p-2 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </a>
+      <div class="flex-1 flex items-start justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700 uppercase">
+            {{ user.full_name[:2] }}
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-gray-900">{{ user.full_name }}</h2>
+            <p class="text-sm text-gray-400">@{{ user.username }}</p>
+          </div>
+        </div>
+        <span class="inline-block rounded-full px-3 py-1 text-xs font-medium
+          {% if user.status == 10 %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+          {{ 'Hoạt động' if user.status == 10 else 'Không hoạt động' }}
+        </span>
+      </div>
+    </div>
+
+    <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 text-sm mb-8">
+      <div>
+        <dt class="text-gray-500 font-medium mb-1">Email</dt>
+        <dd class="text-gray-900 font-semibold">{{ user.email }}</dd>
+      </div>
+      <div>
+        <dt class="text-gray-500 font-medium mb-1">Vai trò</dt>
+        <dd class="text-gray-900 font-semibold capitalize">
+          {% set role_vi = {'reader': 'Độc giả', 'librarian': 'Thủ thư', 'admin': 'Quản trị'} %}
+          {{ role_vi.get(user.role.value if user.role else '', user.role) }}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-500 font-medium mb-1">Số điện thoại</dt>
+        <dd class="text-gray-900 font-semibold">{{ user.phone or '—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-gray-500 font-medium mb-1">Địa chỉ</dt>
+        <dd class="text-gray-900 font-semibold">{{ user.address or '—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-gray-500 font-medium mb-1">Ngày tạo</dt>
+        <dd class="text-gray-900 font-semibold">{{ user.created_at.strftime('%d/%m/%Y %H:%M') }}</dd>
+      </div>
+      <div>
+        <dt class="text-gray-500 font-medium mb-1">Lần cập nhật cuối</dt>
+        <dd class="text-gray-900 font-semibold">{{ user.updated_at.strftime('%d/%m/%Y %H:%M') if user.updated_at else '—' }}</dd>
+      </div>
+    </dl>
+
+    <!-- Actions -->
+    <div class="flex gap-3">
+      <form method="post" action="/admin/users/{{ user.id }}/toggle-status" class="flex-1">
+        <button type="submit" class="w-full rounded-lg px-4 py-2 text-sm font-semibold transition-colors
+          {% if user.status == 10 %}bg-amber-100 text-amber-700 hover:bg-amber-200
+          {% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}">
+          {{ 'Vô hiệu hóa' if user.status == 10 else 'Kích hoạt' }}
+        </button>
+      </form>
+      <form method="post" action="/admin/users/{{ user.id }}/change-role" class="flex-1">
+        <select name="role" onchange="this.form.submit()"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-brand-500 focus:outline-none">
+          <option value="reader"     {% if user.role.value == 'reader'     %}selected{% endif %}>Độc giả</option>
+          <option value="librarian"  {% if user.role.value == 'librarian'  %}selected{% endif %}>Thủ thư</option>
+          <option value="admin"      {% if user.role.value == 'admin'      %}selected{% endif %}>Quản trị</option>
+        </select>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
