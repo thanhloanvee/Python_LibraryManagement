@@ -91,9 +91,15 @@ async def change_user_role(
     db: AsyncSession = Depends(get_db),
     _=Depends(require_admin),
 ):
-    svc = UserService(db)
-    user = await svc.get_or_404(user_id)
-    await svc.admin_update_user(user_id, UserAdminUpdate(role=UserRole(role)))
-    resp = RedirectResponse(url="/admin/users", status_code=302)
-    set_flash(resp, f"Vai trò của '{user.username}' đã được cập nhật.", "success")
-    return resp
+    try:
+        svc = UserService(db)
+        user = await svc.get_or_404(user_id)
+        role_enum = UserRole(role)
+        await svc.admin_update_user(user_id, UserAdminUpdate(role=role_enum))
+        resp = RedirectResponse(url="/admin/users", status_code=302)
+        set_flash(resp, f"Vai trò của '{user.username}' đã được cập nhật.", "success")
+        return resp
+    except ValueError:
+        resp = RedirectResponse(url="/admin/users", status_code=302)
+        set_flash(resp, f"Vai trò không hợp lệ: {role}.", "error")
+        return resp
