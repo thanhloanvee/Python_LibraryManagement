@@ -63,6 +63,8 @@ class BorrowingRepository:
         status: Optional[BorrowingStatus] = None,
         overdue_only: bool = False,
         active_only: bool = False,
+        sort_by: str = "created_at",
+        sort_order: str = "desc",
         offset: int = 0,
         limit: int = 20,
     ) -> Tuple[List[Borrowing], int]:
@@ -100,10 +102,20 @@ class BorrowingRepository:
             query = query.where(*filters)
             count_query = count_query.where(*filters)
 
+        # Apply sorting
+        sort_column = {
+            "created_at": Borrowing.created_at,
+            "due_date": Borrowing.due_date,
+            "borrow_date": Borrowing.borrow_date,
+            "fine_amount": Borrowing.fine_amount,
+        }.get(sort_by, Borrowing.created_at)
+
+        sort_func = sort_column.desc() if sort_order == "desc" else sort_column.asc()
+
         total = (await self._db.execute(count_query)).scalar_one()
         items = (
             await self._db.execute(
-                query.order_by(Borrowing.created_at.desc())
+                query.order_by(sort_func)
                 .offset(offset)
                 .limit(limit)
             )

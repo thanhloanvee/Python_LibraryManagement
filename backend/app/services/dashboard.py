@@ -1,9 +1,12 @@
 """Dashboard statistics service."""
 from __future__ import annotations
 
-from sqlalchemy import extract, func, select
+from datetime import date
+
+from sqlalchemy import Float, Integer, and_, extract, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.models.book import Book
 from app.models.borrowing import Borrowing, BorrowingStatus
 from app.models.review import Review
@@ -15,6 +18,8 @@ from app.schemas.dashboard import (
     MonthlyBorrowingStat,
     PopularBook,
 )
+
+settings = get_settings()
 
 
 class DashboardService:
@@ -29,7 +34,7 @@ class DashboardService:
         book_result = await self._db.execute(
             select(
                 func.count(Book.id).label("total_books"),
-                func.coalesce(func.sum(Book.quantity), 0).label("total_quantity"),
+                func.coalesce(func.sum(Book.available_quantity), 0).label("total_quantity"),
             )
         )
         book_row = book_result.one()
@@ -41,6 +46,16 @@ class DashboardService:
         total_users = user_result.scalar_one()
 
         # Query 3: All borrowing KPIs in one pass
+        # Note: overdue includes (BORROWED with due_date < today) OR (OVERDUE)
+        today = date.today()
+        overdue_condition = or_(
+            and_(
+                Borrowing.status == BorrowingStatus.BORROWED,
+                Borrowing.due_date < today,
+            ),
+            Borrowing.status == BorrowingStatus.OVERDUE,
+        )
+
         borrow_result = await self._db.execute(
             select(
                 func.count(Borrowing.id).label("total_borrowings"),
@@ -57,7 +72,7 @@ class DashboardService:
                 ).label("active_borrowings"),
                 func.sum(
                     case(
-                        (Borrowing.status == BorrowingStatus.OVERDUE, 1),
+                        (overdue_condition, 1),
                         else_=0,
                     )
                 ).label("overdue_borrowings"),
@@ -72,16 +87,26 @@ class DashboardService:
                 ).label("fine_collected"),
                 func.coalesce(
                     func.sum(
-                        case(
-                            (
-                                (Borrowing.fine_paid == False)  # noqa: E712
-                                & (Borrowing.fine_amount > 0),
-                                Borrowing.fine_amount,
+                        func.cast(
+                            case(
+                                # For overdue unreturned (BORROWED past due or OVERDUE): calculate dynamically
+                                (
+                                    overdue_condition
+                                    & (Borrowing.fine_paid == False),  # noqa: E712
+                                    func.cast(
+                                        func.cast(
+                                            func.julianday(func.date("now")) - func.julianday(Borrowing.due_date),
+                                            Integer
+                                        ) * settings.fine_per_day,
+                                        Float
+                                    ),
+                                ),
+                                else_=0.0,
                             ),
-                            else_=0,
+                            Float
                         )
                     ),
-                    0,
+                    0.0,
                 ).label("fine_outstanding"),
             )
         )
@@ -98,8 +123,19 @@ class DashboardService:
             total_fine_outstanding=float(borrow_row.fine_outstanding or 0),
         )
 
-    async def get_book_inventory(self) -> list[BookInventoryItem]:
+    async def get_book_inventory(
+        self, page: int = 1, page_size: int = 10
+    ) -> tuple[list[BookInventoryItem], int]:
         """All books with their total and available quantity, low-stock first."""
+        offset = (page - 1) * page_size
+
+        # Get total count
+        count_result = await self._db.execute(
+            select(func.count(Book.id))
+        )
+        total = count_result.scalar_one() or 0
+
+        # Get paginated results
         rows = (
             await self._db.execute(
                 select(
@@ -110,9 +146,12 @@ class DashboardService:
                     Book.available_quantity,
                 )
                 .order_by(Book.available_quantity.asc(), Book.title.asc())
+                .offset(offset)
+                .limit(page_size)
             )
         ).all()
-        return [
+
+        items = [
             BookInventoryItem(
                 id=row.id,
                 title=row.title,
@@ -122,6 +161,7 @@ class DashboardService:
             )
             for row in rows
         ]
+        return items, total
 
     async def get_popular_books(self, limit: int = 10) -> list[PopularBook]:
         """Top N books by borrow count."""

@@ -29,6 +29,7 @@
       <option value="{{ s.value }}" {% if filters.status == s.value %}selected{% endif %}>{{ _status_vi.get(s.value, s.value|capitalize) }}</option>
       {% endfor %}
     </select>
+
     <label class="inline-flex items-center gap-2 cursor-pointer">
       <input type="checkbox" name="overdue_only" value="true" onchange="this.form.submit()"
         {% if filters.overdue_only %}checked{% endif %}
@@ -55,9 +56,31 @@
             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">STT</th>
             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Độc giả</th>
             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Sách</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Hạn trả</th>
+            <th class="px-4 py-3 text-left">
+              <a href="?{% for key, val in request.query_params.items() %}{% if key != 'sort_by' and key != 'sort_order' %}{{ key }}={{ val }}&{% endif %}{% endfor %}sort_by=due_date&sort_order={% if sort_by == 'due_date' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+                class="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-gray-500 hover:text-gray-700">
+                Hạn trả
+                {% if sort_by == 'due_date' %}
+                  <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    {% if sort_order == 'asc' %}<path d="M3 10l7-7 7 7M3 16l7-7 7 7" />
+                    {% else %}<path d="M17 10l-7 7-7-7M17 4l-7 7-7-7" />{% endif %}
+                  </svg>
+                {% endif %}
+              </a>
+            </th>
             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Trạng thái</th>
-            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Tiền phạt</th>
+            <th class="px-4 py-3 text-left">
+              <a href="?{% for key, val in request.query_params.items() %}{% if key != 'sort_by' and key != 'sort_order' %}{{ key }}={{ val }}&{% endif %}{% endfor %}sort_by=fine_amount&sort_order={% if sort_by == 'fine_amount' and sort_order == 'asc' %}desc{% else %}asc{% endif %}"
+                class="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-gray-500 hover:text-gray-700">
+                Tiền phạt
+                {% if sort_by == 'fine_amount' %}
+                  <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    {% if sort_order == 'asc' %}<path d="M3 10l7-7 7 7M3 16l7-7 7 7" />
+                    {% else %}<path d="M17 10l-7 7-7-7M17 4l-7 7-7-7" />{% endif %}
+                  </svg>
+                {% endif %}
+              </a>
+            </th>
             <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Thao tác</th>
           </tr>
         </thead>

@@ -33,15 +33,18 @@
           </td>
           <td class="px-4 py-3">
             <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize
-              {% if b.status == 'returned' %}bg-green-100 text-green-700
-              {% elif b.status == 'borrowed' %}bg-amber-100 text-amber-700
+              {% if b.effective_status.value == 'returned' %}bg-green-100 text-green-700
+              {% elif b.effective_status.value == 'borrowed' %}bg-amber-100 text-amber-700
               {% else %}bg-red-100 text-red-700{% endif %}">
               {% set _status_vi = {'borrowed': 'Đang mượn', 'returned': 'Đã trả', 'overdue': 'Quá hạn'} %}
-              {{ _status_vi.get(b.status, b.status) }}
+              {{ _status_vi.get(b.effective_status.value, b.effective_status.value) }}
             </span>
           </td>
           <td class="px-4 py-3 text-right">
-            {% if b.fine_amount and b.fine_amount > 0 %}
+            {% if b.status in ('borrowed', 'overdue') and b.is_overdue %}
+              {% set dynamic_fine = b.days_overdue * 5000 %}
+              <span class="text-red-600 font-medium">{{ "{:,.0f}".format(dynamic_fine) }}đ</span>
+            {% elif b.fine_amount and b.fine_amount > 0 %}
             <span class="{% if b.fine_paid %}text-gray-400 line-through{% else %}text-red-600 font-medium{% endif %}">
               {{ "{:,.0f}".format(b.fine_amount) }}đ
             </span>

@@ -22,11 +22,11 @@
       <div>
         <h2 class="text-xl font-bold text-gray-900">Phiếu mượn #{{ borrowing.id }}</h2>
         <span class="inline-block mt-1 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize
-          {% if borrowing.status.value == 'borrowed' %}bg-amber-100 text-amber-700
-          {% elif borrowing.status.value == 'returned' %}bg-green-100 text-green-700
+          {% if borrowing.effective_status.value == 'borrowed' %}bg-amber-100 text-amber-700
+          {% elif borrowing.effective_status.value == 'returned' %}bg-green-100 text-green-700
           {% else %}bg-red-100 text-red-700{% endif %}">
           {% set _status_vi = {'borrowed': 'Đang mượn', 'returned': 'Đã trả', 'overdue': 'Quá hạn'} %}
-          {{ _status_vi.get(borrowing.status.value, borrowing.status.value) }}
+          {{ _status_vi.get(borrowing.effective_status.value, borrowing.effective_status.value) }}
         </span>
       </div>
       {% if borrowing.status.value in ('borrowed', 'overdue') %}
@@ -72,11 +72,17 @@
         <dt class="text-gray-500 font-medium">Số lần gia hạn</dt>
         <dd class="text-gray-900">{{ borrowing.renewed_count }} / 2</dd>
       </div>
-      {% if borrowing.fine_amount %}
+      {% if borrowing.status.value in ('borrowed', 'overdue') or borrowing.fine_amount > 0 %}
       <div>
         <dt class="text-gray-500 font-medium">Tiền phạt</dt>
         <dd class="flex items-center gap-2">
-          <span class="text-red-600 font-semibold">{{ "{:,.0f}".format(borrowing.fine_amount) }}đ</span>
+          {% if borrowing.status.value in ('borrowed', 'overdue') and borrowing.is_overdue %}
+            {% set dynamic_fine = borrowing.days_overdue * 5000 %}
+            <span class="text-red-600 font-semibold">{{ "{:,.0f}".format(dynamic_fine) }}đ</span>
+            {% if borrowing.status.value == 'overdue' %}<span class="text-xs text-gray-400">({{ borrowing.days_overdue }} ngày × 5,000đ/ngày)</span>{% endif %}
+          {% else %}
+            <span class="text-red-600 font-semibold">{{ "{:,.0f}".format(borrowing.fine_amount) }}đ</span>
+          {% endif %}
           {% if borrowing.fine_paid or borrowing.status.value == 'returned' %}
           <span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">ĐÃ THANH TOÁN</span>
           {% else %}

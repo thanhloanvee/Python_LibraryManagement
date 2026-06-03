@@ -204,7 +204,7 @@
       <tbody class="divide-y divide-gray-50">
         {% for book in book_inventory %}
         <tr class="transition-colors {% if book.available_quantity <= 3 %}bg-red-50 hover:bg-red-100{% else %}hover:bg-gray-50{% endif %}">
-          <td class="py-2 pl-2 text-gray-400 text-xs">{{ loop.index }}</td>
+          <td class="py-2 pl-2 text-gray-400 text-xs">{{ loop.index + (inventory_page - 1) * inventory_page_size }}</td>
           <td class="py-2 font-medium {% if book.available_quantity <= 3 %}text-red-800{% else %}text-gray-800{% endif %}">
             <a href="/admin/books/{{ book.id }}/edit" class="hover:underline">{{ book.title }}</a>
           </td>
@@ -223,6 +223,29 @@
       </tbody>
     </table>
   </div>
+  <!-- Pagination -->
+  {% if inventory_total > inventory_page_size %}
+  <div class="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
+    <span class="text-xs text-gray-500">
+      Hiển thị {{ (inventory_page - 1) * inventory_page_size + 1 }}-{{ [inventory_page * inventory_page_size, inventory_total] | min }} của {{ inventory_total }} sách
+    </span>
+    <div class="flex gap-1">
+      {% if inventory_page > 1 %}
+      <a href="/admin/dashboard?year={{ current_year }}&inventory_page=1"
+        class="rounded px-2 py-1 text-xs border border-gray-200 hover:bg-gray-50">«</a>
+      <a href="/admin/dashboard?year={{ current_year }}&inventory_page={{ inventory_page - 1 }}"
+        class="rounded px-2 py-1 text-xs border border-gray-200 hover:bg-gray-50">‹</a>
+      {% endif %}
+      <span class="px-2 py-1 text-xs text-gray-600">{{ inventory_page }}</span>
+      {% if inventory_page * inventory_page_size < inventory_total %}
+      <a href="/admin/dashboard?year={{ current_year }}&inventory_page={{ inventory_page + 1 }}"
+        class="rounded px-2 py-1 text-xs border border-gray-200 hover:bg-gray-50">›</a>
+      <a href="/admin/dashboard?year={{ current_year }}&inventory_page={{ (inventory_total - 1) // inventory_page_size + 1 }}"
+        class="rounded px-2 py-1 text-xs border border-gray-200 hover:bg-gray-50">»</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
 </div>
 <script>
 (function() {

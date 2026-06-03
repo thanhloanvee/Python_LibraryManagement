@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -38,6 +39,8 @@ class BorrowingService(BaseService):
         *,
         page: int = 1,
         page_size: int = 20,
+        sort_by: str = "created_at",
+        sort_order: str = "desc",
     ):
         offset = self.calculate_offset(page, page_size)
         return await self._repo.list_borrowings(
@@ -46,6 +49,8 @@ class BorrowingService(BaseService):
             status=filters.status,
             overdue_only=filters.overdue_only,
             active_only=filters.active_only,
+            sort_by=sort_by,
+            sort_order=sort_order,
             offset=offset,
             limit=page_size,
         )

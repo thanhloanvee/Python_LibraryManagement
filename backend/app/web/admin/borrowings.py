@@ -26,10 +26,19 @@ async def borrowings_index(
     book_id: int | None = None,
     status: str | None = None,
     overdue_only: bool = False,
+    sort_by: str = "created_at",
+    sort_order: str = "desc",
     page: int = 1,
     db: AsyncSession = Depends(get_db),
     _=Depends(require_librarian),
 ):
+    # Validate sort parameters
+    valid_sorts = ["created_at", "due_date", "borrow_date", "fine_amount"]
+    if sort_by not in valid_sorts:
+        sort_by = "created_at"
+    if sort_order not in ["asc", "desc"]:
+        sort_order = "desc"
+
     filters = BorrowingFilter(
         user_id=user_id,
         book_id=book_id,
@@ -37,7 +46,7 @@ async def borrowings_index(
         overdue_only=overdue_only,
     )
     borrowings, total = await BorrowingService(db).list_borrowings(
-        filters, page=page, page_size=20
+        filters, page=page, page_size=20, sort_by=sort_by, sort_order=sort_order
     )
     ctx = {
         "borrowings": borrowings,
@@ -50,6 +59,9 @@ async def borrowings_index(
             "status": status,
             "overdue_only": overdue_only,
         },
+        "sort_by": sort_by,
+        "sort_order": sort_order,
+        "valid_sorts": valid_sorts,
         "statuses": list(BorrowingStatus),
     }
     if request.headers.get("HX-Request"):

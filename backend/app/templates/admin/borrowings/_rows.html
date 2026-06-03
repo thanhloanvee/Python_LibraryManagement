@@ -1,6 +1,6 @@
 <!-- HTMX partial: borrowing table rows -->
 {% for b in borrowings %}
-{% set overdue = b.status.value == 'overdue' or (b.status.value == 'borrowed' and b.due_date and b.due_date < now) %}
+{% set overdue = b.effective_status.value == 'overdue' %}
 <tr class="hover:bg-gray-50 transition-colors {% if overdue %}bg-red-50/50{% endif %}">
   <td class="px-4 py-3 font-mono text-gray-400 text-xs">#{{ b.id }}</td>
   <td class="px-4 py-3">
@@ -19,16 +19,22 @@
   </td>
   <td class="px-4 py-3">
     <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium capitalize
-      {% if b.status.value == 'overdue' %}bg-red-100 text-red-700
-      {% elif b.status.value == 'borrowed' %}bg-amber-100 text-amber-700
-      {% elif b.status.value == 'returned' %}bg-green-100 text-green-700
+      {% if b.effective_status.value == 'overdue' %}bg-red-100 text-red-700
+      {% elif b.effective_status.value == 'borrowed' %}bg-amber-100 text-amber-700
+      {% elif b.effective_status.value == 'returned' %}bg-green-100 text-green-700
       {% else %}bg-gray-100 text-gray-700{% endif %}">
       {% set _status_vi = {'borrowed': 'Đang mượn', 'returned': 'Đã trả', 'overdue': 'Quá hạn'} %}
-      {{ _status_vi.get(b.status.value, b.status.value) }}
+      {{ _status_vi.get(b.effective_status.value, b.effective_status.value) }}
     </span>
   </td>
   <td class="px-4 py-3">
-    {% if b.fine_amount and b.fine_amount > 0 %}
+    {% if overdue and b.is_overdue %}
+      {% set dynamic_fine = b.days_overdue * 5000 %}
+      <span class="text-red-600 font-medium">{{ "{:,.0f}".format(dynamic_fine) }}đ</span>
+      {% if b.fine_paid %}
+      <span class="ml-1 text-xs text-green-600 font-medium">ĐÃ THANH TOÁN</span>
+      {% endif %}
+    {% elif b.fine_amount and b.fine_amount > 0 %}
     <span class="text-red-600 font-medium">{{ "{:,.0f}".format(b.fine_amount) }}đ</span>
     {% if b.fine_paid %}
     <span class="ml-1 text-xs text-green-600 font-medium">ĐÃ THANH TOÁN</span>

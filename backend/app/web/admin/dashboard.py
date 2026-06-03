@@ -16,6 +16,7 @@ router = APIRouter()
 async def dashboard(
     request: Request,
     year: int | None = None,
+    inventory_page: int = 1,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(require_admin),
 ):
@@ -26,7 +27,9 @@ async def dashboard(
     popular = await svc.get_popular_books(limit=5)
     active_readers = await svc.get_active_readers(limit=5)
     monthly = await svc.get_monthly_stats(year=current_year)
-    book_inventory = await svc.get_book_inventory()
+    book_inventory, inventory_total = await svc.get_book_inventory(
+        page=inventory_page, page_size=10
+    )
 
     return render(
         "admin/dashboard.html",
@@ -38,6 +41,9 @@ async def dashboard(
             "current_year": current_year,
             "today_year": datetime.date.today().year,
             "book_inventory": book_inventory,
+            "inventory_page": inventory_page,
+            "inventory_total": inventory_total,
+            "inventory_page_size": 10,
         },
         request,
     )

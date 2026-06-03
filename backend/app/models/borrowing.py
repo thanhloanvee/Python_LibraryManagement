@@ -97,6 +97,13 @@ class Borrowing(Base):
         return self.due_date < date.today()
 
     @property
+    def effective_status(self) -> BorrowingStatus:
+        """Return effective status: if BORROWED but past due, return OVERDUE."""
+        if self.status == BorrowingStatus.BORROWED and self.is_overdue:
+            return BorrowingStatus.OVERDUE
+        return self.status
+
+    @property
     def days_overdue(self) -> int:
         """Number of days past due_date."""
         if not self.is_overdue:
