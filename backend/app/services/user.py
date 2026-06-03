@@ -29,12 +29,12 @@ class UserService(BaseService):
         if await self._repo.get_by_username(data.username):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="This username has already been taken.",
+                detail="Tên đăng nhập này đã được sử dụng.",
             )
         if await self._repo.get_by_email(data.email):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="This email address has already been taken.",
+                detail="Địa chỉ email này đã được sử dụng.",
             )
         user = User(
             username=data.username,
@@ -61,7 +61,7 @@ class UserService(BaseService):
             if existing:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail="This email address has already been taken.",
+                    detail="Địa chỉ email này đã được sử dụng.",
                 )
             user.email = data.email
         return await self._repo.save(user)

@@ -66,7 +66,7 @@ class BorrowingService(BaseService):
         if not user or not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Reader not found or inactive.",
+                detail="Độc giả không tồn tại hoặc đã bị vô hiệu hóa.",
             )
 
         # 2. Validate book exists
@@ -74,7 +74,7 @@ class BorrowingService(BaseService):
         if not book:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Book not found.",
+                detail="Sách không tồn tại.",
             )
 
         # 3. Check availability (snapshot — final atomic check happens at step 7)
@@ -82,9 +82,9 @@ class BorrowingService(BaseService):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=(
-                    "Book is not available for borrowing "
-                    f"(status={book.status.value}, "
-                    f"available_quantity={book.available_quantity})."
+                    "Sách không khả dụng để mượn "
+                    f"(trạng thái={book.status.value}, "
+                    f"số lượng khả dụng={book.available_quantity})."
                 ),
             )
 
@@ -94,8 +94,8 @@ class BorrowingService(BaseService):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=(
-                    f"Reader already has {active_count} active borrowings "
-                    f"(maximum is {settings.max_active_borrowings})."
+                    f"Độc giả đã có {active_count} phiếu mượn đang hoạt động "
+                    f"(tối đa là {settings.max_active_borrowings})."
                 ),
             )
 
@@ -106,7 +106,7 @@ class BorrowingService(BaseService):
         if existing:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Reader already has an active borrowing for this book.",
+                detail="Độc giả đã có phiếu mượn đang hoạt động cho sách này.",
             )
 
         # 6. Compute dates
@@ -118,7 +118,7 @@ class BorrowingService(BaseService):
         if due_date <= borrow_date:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="due_date must be after borrow_date.",
+                detail="Hạn trả phải sau ngày mượn.",
             )
 
         # 7. Atomic decrement — prevents concurrent over-issue
@@ -126,7 +126,7 @@ class BorrowingService(BaseService):
         if not decremented:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Book is no longer available (just taken by another request).",
+                detail="Sách không còn khả dụng (vừa được mượn bởi yêu cầu khác).",
             )
 
         # 8. Create borrowing record
@@ -154,7 +154,7 @@ class BorrowingService(BaseService):
         if borrowing.status == BorrowingStatus.RETURNED:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="This book has already been returned.",
+                detail="Sách này đã được trả rồi.",
             )
 
         # Calculate fine before updating status
@@ -189,21 +189,21 @@ class BorrowingService(BaseService):
             if borrowing.user_id != requesting_user_id:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="You can only renew your own borrowings.",
+                    detail="Bạn chỉ có thể gia hạn phiếu mượn của chính mình.",
                 )
 
         if borrowing.status not in (BorrowingStatus.BORROWED, BorrowingStatus.OVERDUE):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Only active borrowings can be renewed.",
+                detail="Chỉ phiếu mượn đang hoạt động mới có thể gia hạn.",
             )
 
         if borrowing.renewed_count >= settings.max_renewals:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=(
-                    f"Maximum renewals ({settings.max_renewals}) reached "
-                    "for this borrowing."
+                    f"Đã đạt giới hạn gia hạn ({settings.max_renewals}) "
+                    "cho phiếu mượn này."
                 ),
             )
 

@@ -47,7 +47,7 @@ class BookService(BaseService):
             if existing:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail="This ISBN already exists.",
+                    detail="ISBN này đã tồn tại.",
                 )
         # Validate category exists
         if data.category_id is not None:
@@ -55,7 +55,7 @@ class BookService(BaseService):
             if not cat:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail="Category not found.",
+                    detail="Danh mục không tồn tại.",
                 )
         book = Book(**data.model_dump())
         return await self._repo.create(book)
@@ -72,7 +72,7 @@ class BookService(BaseService):
                 if existing and existing.id != book.id:
                     raise HTTPException(
                         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                        detail="This ISBN already exists.",
+                        detail="ISBN này đã tồn tại.",
                     )
 
         # Validate category if being updated
@@ -81,7 +81,7 @@ class BookService(BaseService):
             if not cat:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail="Category not found.",
+                    detail="Danh mục không tồn tại.",
                 )
 
         # Cross-field validation: available_quantity <= quantity
@@ -90,7 +90,7 @@ class BookService(BaseService):
         if new_avail > new_qty:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="available_quantity cannot exceed total quantity.",
+                detail="Số lượng khả dụng không được vượt quá tổng số lượng.",
             )
 
         for key, value in update_data.items():
@@ -104,6 +104,6 @@ class BookService(BaseService):
         if await self._repo.has_active_borrowings(book_id):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Cannot delete this book because it has active borrowings.",
+                detail="Không thể xóa sách này vì còn phiếu mượn chưa hoàn thành.",
             )
         await self._repo.delete(book)
