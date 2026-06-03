@@ -33,7 +33,7 @@ async def profile_update(
 ):
     try:
         await UserService(db).update_profile(
-            user.id,
+            user,
             UserUpdate(full_name=full_name, phone=phone or None, address=address or None),
         )
         resp = RedirectResponse(url="/reader/profile", status_code=302)
