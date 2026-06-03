@@ -56,11 +56,11 @@
             </svg>
             Mượn sách
           </a>
-          {% elif has_active_borrow %}
+          {% elif active_borrowing %}
           <div class="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-500 cursor-not-allowed">
             Đã được mượn
           </div>
-          <form method="post" action="/reader/borrowings/{{ has_active_borrow }}/renew">
+          <form method="post" action="/reader/borrowings/{{ active_borrowing.id }}/renew">
             <button type="submit"
               class="flex w-full items-center justify-center gap-2 rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-semibold text-brand-600 hover:bg-brand-50 transition-colors">
               Gia hạn mượn

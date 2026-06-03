@@ -135,7 +135,7 @@ async def book_detail(
     # Check if current user can review / has active borrowing
     can_review = False
     already_reviewed = False
-    has_active_borrow = False
+    active_borrowing = None
     if user:
         from app.repositories.review import ReviewRepository
         from app.repositories.borrowing import BorrowingRepository
@@ -143,9 +143,7 @@ async def book_detail(
         already_reviewed = (
             await ReviewRepository(db).get_by_user_and_book(user.id, book_id)
         ) is not None
-        from app.models.borrowing import BorrowingStatus
-        active = await BorrowingRepository(db).get_active_for_user_book(user.id, book_id)
-        has_active_borrow = active is not None
+        active_borrowing = await BorrowingRepository(db).get_active_for_user_book(user.id, book_id)
 
     return render(
         "books/detail.html",
@@ -155,7 +153,7 @@ async def book_detail(
             "avg_rating": avg_rating,
             "can_review": can_review,
             "already_reviewed": already_reviewed,
-            "has_active_borrow": has_active_borrow,
+            "active_borrowing": active_borrowing,
         },
         request,
     )
